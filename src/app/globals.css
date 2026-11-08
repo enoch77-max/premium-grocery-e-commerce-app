@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --color-cream: #faf7f0;
+  --color-cream-deep: #f2ecdd;
+  --color-ink: #13261d;
+  --color-ink-soft: #53645a;
+  --color-line: #e7e0d0;
+  --color-brand: #0f7a4d;
+  --color-brand-deep: #0a5637;
+  --color-brand-soft: #e6f3ea;
+  --color-lime: #d9f08c;
+  --color-amber: #f5ae1b;
+  --color-amber-soft: #fdf1d6;
+  --color-clay: #bf5a36;
+  --color-rose-soft: #fde9e4;
+
+  --shadow-soft: 0 18px 40px -28px rgba(19, 38, 29, 0.45);
+  --shadow-card: 0 1px 2px rgba(19, 38, 29, 0.04), 0 14px 30px -24px rgba(19, 38, 29, 0.35);
+  --shadow-lift: 0 24px 50px -26px rgba(19, 38, 29, 0.35);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .balance {
+    text-wrap: balance;
+  }
+  .animate-fade-up {
+    animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-scale-in {
+    animation: scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-slide-in {
+    animation: slide-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-pop {
+    animation: pop 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-marquee {
+    animation: marquee 26s linear infinite;
+  }
+  .shimmer {
+    background: linear-gradient(100deg, #f2ecdd 20%, #faf7f0 40%, #f2ecdd 60%);
+    background-size: 220% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+  .press {
+    transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease,
+      border-color 0.16s ease;
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
