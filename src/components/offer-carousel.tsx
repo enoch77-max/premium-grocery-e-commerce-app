@@ -28,34 +28,36 @@ export function OfferHero({ offers }: { offers: Offer[] }) {
       onMouseLeave={() => setPaused(false)}
       aria-label="Featured offers"
     >
-      <div className="relative flex min-h-[286px] flex-col justify-between p-5 sm:min-h-[330px] sm:p-7">
+      <div className="relative flex min-h-[236px] flex-col justify-between p-4 sm:min-h-[330px] sm:p-7">
         <div
           className={`pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gradient-to-br ${style.glow} blur-2xl`}
         />
         {active.imageUrl ? (
-          <div className="pointer-events-none absolute -bottom-8 -right-6 h-[210px] w-[210px] overflow-hidden rounded-full border-[6px] border-white/15 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] sm:h-[250px] sm:w-[250px]">
+          <div className="pointer-events-none absolute -bottom-8 -right-6 h-[150px] w-[150px] overflow-hidden rounded-full border-[6px] border-white/15 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] sm:h-[250px] sm:w-[250px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={active.imageUrl} alt="" className="h-full w-full object-cover" />
           </div>
         ) : null}
 
-        <div className="relative z-[15] max-w-[62%] sm:max-w-[58%]">
+        <div className="relative z-[15] w-full">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] ${style.badge}`}
+            className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.09em] sm:text-[10px] sm:tracking-[0.12em] ${style.badge}`}
           >
             <span className="text-[12px]">{active.emoji}</span> {active.eyebrow}
           </span>
-          <h2 className="mt-3 font-display text-[28px] font-semibold leading-[1.03] tracking-[-0.02em] sm:text-[40px]">
-            {active.title}
-          </h2>
-          <p className="mt-2 hidden max-w-[300px] text-[12.5px] leading-relaxed opacity-85 sm:block">
-            {active.subtitle}
-          </p>
+          <div className="max-w-[66%] sm:max-w-[58%]">
+            <h2 className="mt-2.5 font-display text-[24px] font-semibold leading-[1.05] tracking-[-0.02em] sm:mt-3 sm:text-[40px] sm:leading-[1.03]">
+              {active.title}
+            </h2>
+            <p className="mt-2 hidden max-w-[300px] text-[12.5px] leading-relaxed opacity-85 sm:block">
+              {active.subtitle}
+            </p>
+          </div>
           <span
-            className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[12px] font-bold shadow-sm ${style.cta}`}
+            className={`mt-3 inline-flex max-w-full items-center gap-1.5 rounded-2xl px-4 py-2.5 text-center text-[11.5px] font-bold leading-snug text-balance shadow-sm sm:mt-4 sm:rounded-full sm:text-[12px] ${style.cta}`}
           >
             {active.ctaLabel}
-            <ArrowRightIcon className="h-3.5 w-3.5" />
+            <ArrowRightIcon className="h-3.5 w-3.5 shrink-0" />
           </span>
         </div>
 
@@ -73,7 +75,7 @@ export function OfferHero({ offers }: { offers: Offer[] }) {
               />
             ))}
           </div>
-          <span className="ml-auto rounded-full border border-current/20 px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] opacity-70">
+          <span className="ml-auto hidden min-w-0 truncate rounded-lg border border-current/20 px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] opacity-70 sm:block">
             {active.badge}
           </span>
           <div className="flex items-center gap-1">
@@ -114,7 +116,9 @@ export function MiniOfferCard({ offer }: { offer: Offer }) {
       className={`press group relative flex flex-1 items-center overflow-hidden rounded-[22px] ${style.panel} p-4 shadow-[0_16px_40px_-32px_rgba(19,38,29,0.8)] hover:shadow-lift`}
     >
       <div className="relative z-10 max-w-[68%]">
-        <span className={`text-[9.5px] font-extrabold uppercase tracking-[0.13em] ${style.eyebrow}`}>
+        <span
+          className={`inline-block max-w-full whitespace-nowrap text-[9px] font-extrabold uppercase tracking-[0.1em] sm:text-[9.5px] sm:tracking-[0.13em] ${style.eyebrow}`}
+        >
           {offer.badge}
         </span>
         <h3 className="mt-1 font-display text-[19px] font-semibold leading-[1.08]">{offer.title}</h3>

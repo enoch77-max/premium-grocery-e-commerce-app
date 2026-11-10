@@ -1,6 +1,6 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
-import { and, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, sessions, users } from "@/db/schema";
 
@@ -13,6 +13,8 @@ export type AccountUser = {
   name: string;
   phone: string;
   marketingOptIn: boolean;
+  orderUpdatesEmail: boolean;
+  orderUpdatesSms: boolean;
   createdAt: string;
 };
 
@@ -29,6 +31,15 @@ export function verifyPassword(password: string, stored: string) {
   const expected = Buffer.from(hash, "hex");
   if (candidate.length !== expected.length) return false;
   return timingSafeEqual(candidate, expected);
+}
+
+/**
+ * Session tokens are stored as SHA-256 digests. A stolen database dump therefore
+ * cannot be replayed as a live session — the raw token only ever exists in the
+ * shopper's httpOnly cookie.
+ */
+export function hashSessionToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 export function normaliseEmail(email: string) {
@@ -62,7 +73,12 @@ async function readTokenFrom(request?: Request) {
 export async function createSession(userId: number, userAgent = "") {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await db.insert(sessions).values({ token, userId, userAgent: userAgent.slice(0, 200), expiresAt });
+  await db.insert(sessions).values({
+    token: hashSessionToken(token),
+    userId,
+    userAgent: userAgent.slice(0, 200),
+    expiresAt,
+  });
   try {
     const store = await cookies();
     store.set(SESSION_COOKIE, token, {
@@ -79,17 +95,13 @@ export async function createSession(userId: number, userAgent = "") {
 }
 
 export async function destroySession(token: string | null) {
-  if (token) await db.delete(sessions).where(eq(sessions.token, token));
+  if (token) await db.delete(sessions).where(eq(sessions.token, hashSessionToken(token)));
   try {
     const store = await cookies();
     store.delete(SESSION_COOKIE);
   } catch {
     // ignore
   }
-}
-
-export async function getSessionToken(request?: Request) {
-  return readTokenFrom(request);
 }
 
 export async function getCurrentUser(request?: Request): Promise<AccountUser | null> {
@@ -103,11 +115,13 @@ export async function getCurrentUser(request?: Request): Promise<AccountUser | n
         name: users.name,
         phone: users.phone,
         marketingOptIn: users.marketingOptIn,
+        orderUpdatesEmail: users.orderUpdatesEmail,
+        orderUpdatesSms: users.orderUpdatesSms,
         createdAt: users.createdAt,
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
-      .where(and(eq(sessions.token, token), gt(sessions.expiresAt, new Date())))
+      .where(and(eq(sessions.token, hashSessionToken(token)), gt(sessions.expiresAt, new Date())))
       .limit(1);
     const row = rows[0];
     if (!row) return null;
@@ -117,6 +131,8 @@ export async function getCurrentUser(request?: Request): Promise<AccountUser | n
       name: row.name,
       phone: row.phone,
       marketingOptIn: row.marketingOptIn,
+      orderUpdatesEmail: row.orderUpdatesEmail,
+      orderUpdatesSms: row.orderUpdatesSms,
       createdAt: row.createdAt.toISOString(),
     };
   } catch (error) {
@@ -143,6 +159,17 @@ export async function claimGuestOrders(userId: number, email: string) {
 /** Simple in-memory throttle to keep auth endpoints honest. */
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
+/** Stable per-client key: forwarded IP when present, else a UA hash. */
+export function clientKey(request: Request, scope: string) {
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const real = request.headers.get("x-real-ip")?.trim();
+  const ua = request.headers.get("user-agent") ?? "";
+  const seed = forwarded || real || ua || "anonymous";
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  return `${scope}:${Math.abs(hash).toString(36)}`;
+}
+
 export function rateLimit(key: string, limit = 8, windowMs = 60_000) {
   const now = Date.now();
   const entry = attempts.get(key);
@@ -153,4 +180,21 @@ export function rateLimit(key: string, limit = 8, windowMs = 60_000) {
   if (entry.count >= limit) return false;
   entry.count += 1;
   return true;
+}
+
+/** Raw bearer token for the current request (cookie or header) — never logged. */
+export async function getSessionToken(request?: Request): Promise<string | null> {
+  return readTokenFrom(request);
+}
+
+/**
+ * Invalidates every session for a user, optionally keeping the current device
+ * signed in. Used after a password change so a compromised token cannot linger.
+ */
+export async function revokeUserSessions(userId: number, keepToken?: string | null) {
+  if (keepToken) {
+    await db.delete(sessions).where(and(eq(sessions.userId, userId), ne(sessions.token, hashSessionToken(keepToken))));
+    return;
+  }
+  await db.delete(sessions).where(eq(sessions.userId, userId));
 }

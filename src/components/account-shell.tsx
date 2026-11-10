@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useSession } from "@/components/session-provider";
 import { useCart } from "@/components/cart-provider";
 import { ArrowRightIcon, CartIcon, CheckIcon, ShieldIcon } from "@/components/icons";
@@ -25,17 +25,35 @@ export function initials(name: string) {
 }
 
 export function AccountGate({ children }: { children: ReactNode }) {
-  const { user, loading } = useSession();
+  const { user, loading, token, refresh } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const retried = useRef(false);
+
+  /**
+   * A token can exist before the profile has been fetched (fresh sign-in, or a
+   * refresh that is still in flight). Treating that as "signed out" is what sent
+   * shoppers back to /login a second after signing in, so re-check once instead.
+   */
+  useEffect(() => {
+    if (loading || user || retried.current) return;
+    if (!token) return;
+    retried.current = true;
+    void refresh();
+  }, [loading, refresh, token, user]);
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Never redirect while a session may still be resolving.
+    if (loading || user) return;
+    if (token && !retried.current) return;
+    const timer = window.setTimeout(() => {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-    }
-  }, [loading, pathname, router, user]);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [loading, pathname, router, token, user]);
 
-  if (loading) {
+  // `token && !user` means "still verifying", not "signed out".
+  if (loading || (token && !user)) {
     return (
       <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6">
         <div className="shimmer h-8 w-48 rounded-lg" />
@@ -76,24 +94,30 @@ export function AccountShell({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-[1180px] px-4 pb-8 pt-5 sm:px-6 sm:py-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">Your account</p>
-          <h1 className="mt-1 font-display text-[30px] font-semibold leading-none tracking-[-0.02em] sm:text-[36px]">
-            {pathname === "/account" ? `Hello, ${user?.name.split(" ")[0] ?? "shopper"}` : navTitle(pathname)}
+          <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">
+            {pathname === "/account" ? "My Fresco" : "Your account"}
+          </p>
+          <h1 className="mt-1 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[34px]">
+            {pathname === "/account" ? `Hi ${user?.name.split(" ")[0] ?? "there"}` : navTitle(pathname)}
           </h1>
           <p className="mt-1.5 text-[12px] text-ink-soft">
-            {cart?.itemCount
-              ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} waiting in your basket`
-              : "Your basket is empty — start with this week's produce"}
+            {pathname === "/account"
+              ? cart?.itemCount
+                ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} in your basket, ready to checkout`
+                : "Track a delivery, reorder your regulars, or start a fresh basket."
+              : cart?.itemCount
+                ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} waiting in your basket`
+                : "Your basket is empty — start with this week's produce"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <button
             type="button"
             onClick={openCart}
-            className="press inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3 text-[11.5px] font-bold text-ink hover:border-brand hover:text-brand"
+            className="press inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-[12px] font-bold text-ink hover:border-brand hover:text-brand sm:h-9 sm:flex-none sm:text-[11.5px]"
           >
             <CartIcon className="h-4 w-4" /> Basket{cart?.itemCount ? ` (${cart.itemCount})` : ""}
           </button>
@@ -103,15 +127,41 @@ export function AccountShell({ children }: { children: ReactNode }) {
               await logout();
               router.push("/");
             }}
-            className="press inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-3 text-[11.5px] font-bold text-cream hover:bg-brand-deep"
+            className="press inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-ink px-3.5 text-[12px] font-bold text-cream hover:bg-brand-deep sm:h-9 sm:flex-none sm:text-[11.5px]"
           >
             Sign out
           </button>
         </div>
       </div>
 
+      {/* Phones: the account sidebar becomes a swipeable pill rail that sticks
+          under the header, so switching section is always one thumb-flick away. */}
+      <nav
+        aria-label="Account sections"
+        className="no-scrollbar under-header sticky z-30 -mx-4 mt-4 flex gap-1.5 overflow-x-auto border-y border-line/80 bg-cream/95 px-4 py-2 backdrop-blur-md lg:hidden"
+      >
+        {NAV.map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={`press flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-bold transition ${
+                active ? "bg-brand text-white" : "border border-line bg-white text-ink-soft"
+              }`}
+            >
+              <span aria-hidden className="text-[13px]">
+                {item.icon}
+              </span>
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
       <div className="mt-5 grid gap-4 lg:grid-cols-[240px_1fr]">
-        <aside className="lg:sticky lg:top-[126px] lg:self-start">
+        <aside className="hidden lg:sticky lg:top-[126px] lg:block lg:self-start">
           <div className="rounded-2xl border border-line/80 bg-white p-3">
             <div className="flex items-center gap-2.5 border-b border-line/70 pb-3">
               <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-soft text-[13px] font-extrabold text-brand-deep">

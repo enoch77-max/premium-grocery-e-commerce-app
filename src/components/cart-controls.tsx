@@ -21,7 +21,8 @@ export function CartControls({
   const maxQuantity = Math.max(1, Math.min(20, product.stock ?? 20));
   const atLimit = quantity >= maxQuantity;
 
-  const height = size === "lg" ? "h-12" : size === "sm" ? "h-8" : "h-9";
+  // Phones get a taller control: 44px is the smallest reliable thumb target.
+  const height = size === "lg" ? "h-13 sm:h-12" : size === "sm" ? "h-10 sm:h-8" : "h-11 sm:h-9";
   const radius = size === "lg" ? "rounded-full" : "rounded-xl";
 
   if (quantity === 0) {
@@ -63,11 +64,11 @@ export function CartControls({
         }}
         disabled={pending}
         aria-label="Decrease quantity"
-        className="press grid h-7 w-7 place-items-center rounded-full bg-white text-brand-deep hover:bg-cream-deep disabled:opacity-50"
+        className="press grid h-9 w-9 place-items-center rounded-full bg-white text-brand-deep hover:bg-cream-deep disabled:opacity-50 sm:h-7 sm:w-7"
       >
         <MinusIcon className="h-3.5 w-3.5" strokeWidth={2.4} />
       </button>
-      <span className={`flex items-center gap-1 text-[12px] font-extrabold text-brand-deep ${pending ? "opacity-60" : ""}`}>
+      <span className={`flex items-center gap-1 text-[12.5px] font-extrabold text-brand-deep sm:text-[12px] ${pending ? "opacity-60" : ""}`}>
         {pending ? <CheckIcon className="h-3.5 w-3.5" /> : null}
         {quantity} in basket
       </span>
@@ -81,7 +82,7 @@ export function CartControls({
         disabled={pending || atLimit}
         aria-label={atLimit ? `Maximum available quantity of ${product.name} reached` : "Increase quantity"}
         title={atLimit ? `Only ${maxQuantity} available today` : undefined}
-        className="press grid h-7 w-7 place-items-center rounded-full bg-white text-brand-deep hover:bg-cream-deep disabled:opacity-40"
+        className="press grid h-9 w-9 place-items-center rounded-full bg-white text-brand-deep hover:bg-cream-deep disabled:opacity-40 sm:h-7 sm:w-7"
       >
         <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.4} />
       </button>

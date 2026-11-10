@@ -70,7 +70,7 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
           disabled={savedBusy}
           aria-label={saved ? `Remove ${product.name} from saved items` : `Save ${product.name} for later`}
           aria-pressed={saved}
-          className={`press absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-soft backdrop-blur transition hover:text-clay disabled:opacity-60 ${
+          className={`press absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/95 shadow-soft backdrop-blur transition hover:text-clay disabled:opacity-60 sm:right-2.5 sm:top-2.5 sm:h-8 sm:w-8 ${
             saved ? "text-clay" : "text-ink-soft"
           }`}
         >
@@ -86,7 +86,9 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
           }}
           disabled={pending}
           aria-label={`Quick add ${product.name}`}
-          className="press absolute bottom-2.5 right-2.5 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-brand-deep opacity-0 shadow-soft backdrop-blur transition duration-200 group-hover:opacity-100 hover:bg-brand hover:text-white disabled:opacity-60"
+          // Hover-only affordances are invisible to a thumb, so on touch screens
+          // the quick-add button is always on.
+          className="press absolute bottom-2.5 right-2.5 grid h-10 w-10 place-items-center rounded-full bg-white/95 text-brand-deep opacity-100 shadow-soft backdrop-blur transition duration-200 hover:bg-brand hover:text-white disabled:opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 sm:h-9 sm:w-9"
         >
           <PlusIcon className="h-4 w-4" strokeWidth={2.4} />
         </button>

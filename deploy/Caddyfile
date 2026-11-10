@@ -1,0 +1,24 @@
+# Automatic HTTPS + compression + security headers.
+# Replace {$DOMAIN} via the DOMAIN env var in docker-compose.
+{$DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
+		-Server
+	}
+	# Never cache API responses or the health probe at the edge
+	@api path /api/*
+	header @api Cache-Control "no-store"
+	reverse_proxy app:3000 {
+		health_uri /api/health
+		health_interval 30s
+	}
+	log {
+		output stdout
+		format console
+	}
+}

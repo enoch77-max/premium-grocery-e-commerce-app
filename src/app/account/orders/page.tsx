@@ -157,7 +157,7 @@ function OrdersList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold ${
                         order.status === "cancelled"
                           ? "bg-rose-soft text-clay"
                           : order.status === "delivered"

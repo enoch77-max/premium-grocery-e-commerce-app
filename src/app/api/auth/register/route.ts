@@ -18,12 +18,14 @@ export async function POST(request: Request) {
     name?: string;
     email?: string;
     password?: string;
+    phone?: string;
     marketingOptIn?: boolean;
   };
 
   const name = (body.name ?? "").trim();
   const email = normaliseEmail(body.email ?? "");
   const password = body.password ?? "";
+  const phone = (body.phone ?? "").trim().slice(0, 32);
 
   if (!rateLimit(`register:${email || "anon"}`, 6, 60_000)) {
     return Response.json({ error: "Too many attempts — please wait a minute." }, { status: 429 });
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
       .values({
         name,
         email,
+        phone,
         passwordHash: hashPassword(password),
         marketingOptIn: body.marketingOptIn ?? true,
       })
@@ -58,6 +61,7 @@ export async function POST(request: Request) {
         name: users.name,
         email: users.email,
         phone: users.phone,
+        role: users.role,
         marketingOptIn: users.marketingOptIn,
         createdAt: users.createdAt,
       });

@@ -142,30 +142,40 @@ function DeliveryPicker({
   const [postcode, setPostcode] = useState(current.postcode);
 
   return (
-    <div className="fixed inset-0 z-[92] flex items-start justify-center px-4 pt-[10vh]" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[92] flex items-end justify-center sm:items-start sm:px-4 sm:pt-[10vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Choose your delivery area"
+    >
       <button
         type="button"
         aria-label="Close delivery area picker"
         className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <div className="animate-scale-in relative w-full max-w-md overflow-hidden rounded-[24px] border border-line bg-cream shadow-lift">
-        <div className="flex items-start justify-between gap-3 border-b border-line/70 bg-white px-5 py-4">
-          <div>
-            <h2 className="font-display text-[22px] font-semibold leading-none tracking-tight">Choose your delivery area</h2>
+      {/* Rises from the bottom edge on phones so the postcode field and the
+          neighbourhood list both sit inside thumb reach. */}
+      <div className="animate-sheet-up relative max-h-[92dvh] w-full overflow-hidden rounded-t-[26px] border border-line bg-cream shadow-lift sm:animate-scale-in sm:max-h-none sm:max-w-md sm:rounded-[24px]">
+        <div className="flex items-start justify-between gap-3 border-b border-line/70 bg-white px-4 pb-3 pt-2.5 sm:px-5 sm:pt-4">
+          <span className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-line sm:hidden" aria-hidden />
+          <div className="min-w-0 pt-1.5 sm:pt-0">
+            <h2 className="font-display text-[19px] font-semibold leading-tight tracking-tight sm:text-[22px] sm:leading-none">
+              Choose your delivery area
+            </h2>
             <p className="mt-1 text-[11px] text-ink-soft">Availability and slots update with your postcode.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="press grid h-8 w-8 place-items-center rounded-full bg-cream text-ink hover:bg-cream-deep"
+            className="press tap-xl -mr-1.5 grid shrink-0 place-items-center rounded-full bg-cream text-ink hover:bg-cream-deep"
             aria-label="Close"
           >
             <CloseIcon className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="px-5 py-4">
+        <div className="sheet-scroll max-h-[calc(92dvh-72px)] overflow-y-auto px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:max-h-none sm:px-5 sm:pb-4">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -183,13 +193,14 @@ function DeliveryPicker({
               autoFocus
               placeholder="Enter postcode"
               aria-label="Delivery postcode"
-              className={`h-10 min-w-0 flex-1 rounded-xl border bg-white px-3 text-[13px] font-semibold outline-none transition ${
+              enterKeyHint="search"
+              className={`h-11 min-w-0 flex-1 rounded-xl border bg-white px-3 text-[14px] font-semibold outline-none transition sm:h-10 sm:text-[13px] ${
                 error ? "border-clay/60" : "border-line focus:border-brand"
               }`}
             />
             <button
               type="submit"
-              className="press h-10 shrink-0 rounded-xl bg-ink px-4 text-[12px] font-bold text-cream hover:bg-brand-deep"
+              className="press h-11 shrink-0 rounded-xl bg-ink px-5 text-[13px] font-bold text-cream hover:bg-brand-deep sm:h-10 sm:px-4 sm:text-[12px]"
             >
               Check
             </button>
@@ -199,7 +210,7 @@ function DeliveryPicker({
           <p className="mt-4 mb-2 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
             <PinIcon className="h-3.5 w-3.5 text-brand" /> We deliver to {SERVICE_AREAS.length} neighbourhoods
           </p>
-          <div className="max-h-[46vh] space-y-1.5 overflow-y-auto pr-1">
+          <div className="space-y-1.5 pr-0 sm:max-h-[46vh] sm:overflow-y-auto sm:pr-1">
             {SERVICE_AREAS.map((area) => {
               const active = area.postcode === current.postcode;
               return (
@@ -207,7 +218,7 @@ function DeliveryPicker({
                   key={area.postcode}
                   type="button"
                   onClick={() => onSelect(area.postcode)}
-                  className={`press flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+                  className={`press flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition sm:min-h-0 ${
                     active ? "border-brand bg-brand-soft/60" : "border-line bg-white hover:border-brand/40"
                   }`}
                 >

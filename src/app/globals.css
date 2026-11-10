@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Mobile layout tokens. Every sticky offset, sheet height and bottom
+   bar in the app reads from these so nothing has to guess a pixel
+   value per breakpoint.
+   --header-h : height of the sticky header (announcement bar scrolls away)
+   --tabbar-h : height of the mobile bottom navigation (0 on desktop)
+   ------------------------------------------------------------------ */
+:root {
+  --header-h: 104px;
+  --tabbar-h: 60px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-h: 112px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --tabbar-h: 0px;
+  }
+}
+
+/* Landscape phones are only ~375px tall: collapse the header footprint so the
+   viewport is still usable for content. Plain classes (not variants) keep this
+   deterministic against Tailwind's own display utilities. */
+@media (max-width: 900px) and (max-height: 480px) {
+  :root {
+    --header-h: 58px;
+  }
+  .hide-in-landscape {
+    display: none !important;
+  }
+  .show-in-landscape {
+    display: grid !important;
+  }
+}
+
 @theme {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
@@ -26,12 +69,67 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Anchor jumps (e.g. /offers#bundles) land below the sticky header. */
+    scroll-padding-top: calc(var(--header-h) + 8px);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html,
+  body {
+    /* A single stray wide element must never make the page swipe sideways. */
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  /* Never leave a single stranded word on the last line. */
+  h1,
+  h2,
+  h3,
+  h4,
+  blockquote,
+  legend {
+    text-wrap: balance;
+  }
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
   }
   body {
     background-color: var(--color-cream);
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Thumb-first tapping: no double-tap zoom delay, no blue flash. */
+  a,
+  button,
+  summary,
+  [role="button"],
+  label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Touch screens get no hover-only affordances and no stuck hover transforms. */
+  @media (hover: none) {
+    .hover-lift:hover {
+      transform: none;
+    }
+    .press:hover {
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
   ::selection {
     background: var(--color-lime);
@@ -99,6 +197,122 @@
   .press:active {
     transform: scale(0.97);
   }
+
+  /* ---- Mobile-first layout helpers -------------------------------- */
+
+  /* Room for the fixed bottom navigation + the phone's home indicator.
+     Resolves to zero on desktop, where the tab bar does not exist. */
+  .pb-tabbar {
+    padding-bottom: calc(var(--tabbar-h) + var(--safe-b));
+  }
+  /* Anything that has to sit directly on top of the bottom navigation. */
+  .above-tabbar {
+    bottom: calc(var(--tabbar-h) + var(--safe-b));
+  }
+  .safe-b {
+    padding-bottom: var(--safe-b);
+  }
+  .safe-t {
+    padding-top: var(--safe-t);
+  }
+  /* Sticky bars that must never slide under the site header. */
+  .under-header {
+    top: var(--header-h);
+  }
+  /* Real viewport height: 100vh overflows behind the iOS/Android toolbars. */
+  .dvh {
+    height: 100dvh;
+  }
+  .max-dvh-92 {
+    max-height: min(92dvh, 780px);
+  }
+  /* Scrolling panes inside sheets should not rubber-band the page behind. */
+  .sheet-scroll {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Horizontal snap rail used by every product carousel on touch. */
+  .rail {
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .rail > * {
+    scroll-snap-align: start;
+  }
+  /* Soft edge fade that tells a thumb there is more to scroll. */
+  .rail-mask {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%);
+  }
+  /* Minimum comfortable tap size for icon-only controls on phones. */
+  .tap-xl {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  /* Card lift that only happens where a real pointer exists. */
+  .hover-lift {
+    transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  }
+  /* Sheet entrance: slides up on phones, in from the right on larger screens. */
+  .animate-sheet-up {
+    animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* The basket rises from the bottom on phones and slides in from the right
+     once there is room for a side drawer. */
+  .animate-drawer {
+    animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @media (min-width: 640px) {
+    .animate-drawer {
+      animation: slide-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+  .animate-fade {
+    animation: fade 0.24s ease both;
+  }
+  /* Short phone screens (e.g. 360×640) cannot fit photo + thumbs + title +
+     price + buttons above the fold. On those the hero is capped harder and the
+     filmstrip steps aside so the buy buttons are visible without scrolling. */
+  @media (max-width: 639px) and (max-height: 720px) {
+    .gallery-frame {
+      max-height: 30dvh;
+    }
+    .gallery-strip {
+      display: none;
+    }
+  }
+  /* Very short screens (320×568 class): tighten the photo further so the buy
+     buttons still clear the fold. */
+  @media (max-width: 639px) and (max-height: 600px) {
+    .gallery-frame {
+      max-height: 24dvh;
+    }
+  }
+
+  /* Opt out of the 16px/44px mobile field growth where a tiny field is meant. */
+  .field-compact {
+    font-size: inherit;
+    min-height: 0;
+  }
+
+  /* iOS Safari zooms the whole page whenever a focused field is under 16px, so
+     on phone widths every text field is grown to 16px and to a 44px touch
+     height. This lives in the utilities layer (with a specificity above any
+     single text-* class) so it cannot be silently overridden. */
+  @media (max-width: 639px) {
+    input:not(.field-compact):not([type="checkbox"]):not([type="radio"]),
+    select:not(.field-compact),
+    textarea:not(.field-compact) {
+      font-size: 16px;
+      min-height: 44px;
+    }
+    input:not(.field-compact)::placeholder,
+    textarea:not(.field-compact)::placeholder {
+      font-size: 15px;
+    }
+  }
 }
 
 @keyframes fade-up {
@@ -156,5 +370,23 @@
   }
   to {
     background-position: -80% 0;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(14%);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

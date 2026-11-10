@@ -6,9 +6,9 @@ export async function SiteFooter() {
   const categories = await getCategories();
 
   return (
-    <footer id="help" className="mt-16 border-t border-line/80 bg-brand-deep text-cream">
-      <div className="mx-auto max-w-[1340px] px-4 py-12 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+    <footer id="help" className="mt-12 border-t border-line/80 bg-brand-deep text-cream sm:mt-16">
+      <div className="safe-b mx-auto max-w-[1340px] px-4 pt-10 pb-8 sm:px-6 sm:py-12">
+        <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           <div>
             <div className="flex items-center gap-2">
               <span className="grid h-9 w-9 place-items-center rounded-[13px] bg-lime text-brand-deep">
@@ -40,9 +40,12 @@ export async function SiteFooter() {
             </div>
           </div>
 
+          {/* Two-up link columns on a phone; `lg:contents` dissolves the wrapper
+              so the desktop four-column grid still owns these children. */}
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-8 lg:contents">
           <div>
             <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Shop aisles</h3>
-            <ul className="mt-3 space-y-2 text-[12.5px] text-cream/80">
+            <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
               {categories.slice(0, 6).map((category) => (
                 <li key={category.slug}>
                   <Link href={`/category/${category.slug}`} className="transition hover:text-lime">
@@ -60,7 +63,7 @@ export async function SiteFooter() {
 
           <div>
             <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Helpful</h3>
-            <ul className="mt-3 space-y-2 text-[12.5px] text-cream/80">
+            <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
               <li>
                 <Link href="/track" className="font-semibold text-cream transition hover:text-lime">
                   Track your order
@@ -103,6 +106,7 @@ export async function SiteFooter() {
               </li>
             </ul>
           </div>
+          </div>
 
           <div className="rounded-2xl border border-cream/15 bg-white/5 p-5">
             <h3 className="font-display text-xl font-semibold text-cream">First order? Take $10 off.</h3>
@@ -123,9 +127,9 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-cream/10 pt-5 text-[11px] text-cream/55 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-4 border-t border-cream/10 pt-5 text-[11.5px] text-cream/55 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:text-[11px]">
           <p>© {new Date().getFullYear()} Fresco Green Grocer. Thoughtfully sourced, quickly delivered.</p>
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 [&_a]:inline-flex [&_a]:min-h-[36px] [&_a]:items-center sm:flex sm:flex-wrap sm:gap-4 sm:[&_a]:min-h-0">
             <Link href="/info/privacy" className="transition hover:text-lime">
               Privacy
             </Link>

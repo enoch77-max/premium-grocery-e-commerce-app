@@ -45,6 +45,7 @@ export const products = pgTable(
     ratingBp: integer("rating_bp").notNull().default(480),
     reviewCount: integer("review_count").notNull().default(0),
     stock: integer("stock").notNull().default(50),
+    isActive: boolean("is_active").notNull().default(true),
     badge: text("badge"),
     isOrganic: boolean("is_organic").notNull().default(false),
     isVegan: boolean("is_vegan").notNull().default(false),
@@ -129,7 +130,11 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   phone: text("phone").notNull().default(""),
   passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("customer"),
+  isActive: boolean("is_active").notNull().default(true),
   marketingOptIn: boolean("marketing_opt_in").notNull().default(true),
+  orderUpdatesEmail: boolean("order_updates_email").notNull().default(true),
+  orderUpdatesSms: boolean("order_updates_sms").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -220,4 +225,53 @@ export const orderItems = pgTable(
     quantity: integer("quantity").notNull(),
   },
   (table) => [index("order_items_order_idx").on(table.orderId)],
+);
+
+/**
+ * Admin/staff audit trail. Every mutation through /api/admin writes one row so the
+ * owner can see who changed a price, refunded an order or paused the store.
+ */
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: serial("id").primaryKey(),
+    actorId: integer("actor_id"),
+    actorEmail: text("actor_email").notNull().default(""),
+    action: text("action").notNull(),
+    entity: text("entity").notNull(),
+    entityId: text("entity_id").notNull().default(""),
+    detail: text("detail").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("audit_created_idx").on(table.createdAt)],
+);
+
+/** Single-row store configuration managed from /admin/settings. */
+export const storeSettings = pgTable("store_settings", {
+  id: integer("id").primaryKey().default(1),
+  storeOpen: boolean("store_open").notNull().default(true),
+  announcement: text("announcement").notNull().default("Free delivery over $35"),
+  supportEmail: text("support_email").notNull().default("hello@fresco.demo"),
+  deliveryFeeCents: integer("delivery_fee_cents").notNull().default(399),
+  freeDeliveryThresholdCents: integer("free_delivery_threshold_cents").notNull().default(3500),
+  demoEmail: text("demo_email").notNull().default(""),
+  demoName: text("demo_name").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Single-use password reset tokens. Only the SHA-256 digest is stored, so a
+ * database leak cannot be used to take over accounts. Rows expire after an hour.
+ */
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("password_resets_user_idx").on(table.userId)],
 );

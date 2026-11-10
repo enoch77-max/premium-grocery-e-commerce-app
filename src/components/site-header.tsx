@@ -1,7 +1,14 @@
 import { getCategories } from "@/lib/store";
+import { getStoreSettings } from "@/lib/admin";
 import { HeaderClient } from "@/components/header-client";
 
 export async function SiteHeader() {
-  const categories = await getCategories();
-  return <HeaderClient categories={categories} />;
+  const [categories, settings] = await Promise.all([getCategories(), getStoreSettings()]);
+  return (
+    <HeaderClient
+      categories={categories}
+      announcement={settings.announcement}
+      storeOpen={settings.storeOpen}
+    />
+  );
 }

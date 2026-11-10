@@ -24,7 +24,7 @@ export function DealCountdown() {
   }, []);
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-clay/10 px-2.5 py-1 text-[11px] font-bold text-clay">
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-clay/10 px-2.5 py-1 text-[11px] font-bold text-clay">
       <ClockIcon className="h-3.5 w-3.5" />
       {time ? (
         <span className="tabular-nums">

@@ -18,12 +18,14 @@ export function SectionHeading({
   trailing?: ReactNode;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-      <div>
+    <div className="mb-3 flex flex-wrap items-end justify-between gap-2 sm:mb-4 sm:gap-3">
+      <div className="min-w-0">
         {eyebrow ? (
-          <p className="mb-1 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">{eyebrow}</p>
+          <p className="mb-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand sm:mb-1 sm:text-[10.5px]">
+            {eyebrow}
+          </p>
         ) : null}
-        <h2 className="font-display text-[24px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[28px]">
+        <h2 className="font-display text-[21px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[28px]">
           {title}
         </h2>
         {subtitle ? <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-ink-soft">{subtitle}</p> : null}

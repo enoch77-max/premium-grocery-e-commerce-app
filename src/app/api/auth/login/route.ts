@@ -9,6 +9,10 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { getOrCreateCartToken, linkCartToUser } from "@/lib/cart-server";
+import { ensureConfiguredAccounts } from "@/lib/configured-accounts";
+import { ensureDemoAccount } from "@/lib/demo-account";
+import { resolveDemoAccount } from "@/lib/demo";
+import { demoDataEnabled } from "@/lib/seed";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +29,31 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Creates/refreshes the owner + demo accounts from env on first use, so the
+    // credentials configured in the hosting dashboard always sign in.
+    await ensureConfiguredAccounts();
+
+    // Signing into the demo shopper also guarantees its sample addresses, saved
+    // items and orders exist, so the account never opens empty.
+    const demo = await resolveDemoAccount();
+    if (email === demo.email && demoDataEnabled()) {
+      await ensureDemoAccount();
+    }
+
     const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
     const user = rows[0];
     if (!user || !verifyPassword(password, user.passwordHash)) {
       return Response.json({ error: "That email and password don't match our records." }, { status: 401 });
+    }
+    if (!user.isActive) {
+      return Response.json(
+        {
+          error:
+            "This account has been closed. Reply to any receipt email and we can reopen it for you.",
+          code: "ACCOUNT_CLOSED",
+        },
+        { status: 403 },
+      );
     }
 
     await claimGuestOrders(user.id, user.email);
@@ -43,6 +68,7 @@ export async function POST(request: Request) {
         email: user.email,
         phone: user.phone,
         marketingOptIn: user.marketingOptIn,
+        role: user.role,
         createdAt: user.createdAt.toISOString(),
       },
       token,

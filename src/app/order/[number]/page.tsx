@@ -57,14 +57,14 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
                 door.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1">
                   <ClockIcon className="h-3.5 w-3.5 text-lime" />
                   {slot ? `${slot.label} · ${slot.detail}` : formatDeliverySlot(order.deliverySlot)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1">
                   <TruckIcon className="h-3.5 w-3.5 text-lime" /> {plural(order.itemCount, "item")}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1">
                   <ShieldId /> {order.status === "cancelled" ? "Cancelled" : order.paymentMethod === "cash" ? "Cash on delivery" : "Paid by card"}
                 </span>
               </div>

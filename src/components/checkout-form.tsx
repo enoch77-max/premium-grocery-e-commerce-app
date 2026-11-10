@@ -54,7 +54,15 @@ const initialForm: FormState = {
   notes: "",
 };
 
-export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
+export function CheckoutForm({
+  coupons,
+  storeOpen = true,
+  supportEmail = "hello@fresco.demo",
+}: {
+  coupons: Coupon[];
+  storeOpen?: boolean;
+  supportEmail?: string;
+}) {
   const router = useRouter();
   const { cart, loading, add, applyCoupon, removeCoupon, isPending, quantityOf, refresh, cartToken, restoreCount, restoreBasket } = useCart();
   const { user, token: sessionToken } = useSession();
@@ -284,7 +292,7 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
   const bumpItems = cart.upsells.filter(({ product }) => quantityOf(product.id) === 0).slice(0, 2);
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 pb-10 pt-4 sm:px-6 sm:pt-5">
+    <div className="mx-auto max-w-[1180px] px-3.5 pb-28 pt-4 sm:px-6 sm:pt-5 lg:pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/category/fresh-produce" className="text-[11.5px] font-semibold text-ink-soft hover:text-brand">
           ← Continue shopping
@@ -328,6 +336,19 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
           <ShieldIcon className="h-3.5 w-3.5" /> Secure demo checkout
         </span>
       </div>
+
+      {!storeOpen ? (
+        <div className="mt-3 rounded-[22px] border border-clay/30 bg-rose-soft p-4">
+          <p className="text-[12.5px] font-bold text-clay">Ordering is paused</p>
+          <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-soft">
+            We are restocking right now. Your basket is saved — try again shortly, or email{" "}
+            <a href={`mailto:${supportEmail}`} className="font-semibold underline">
+              {supportEmail}
+            </a>{" "}
+            for a bulk order.
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1.32fr_1fr]">
         <form id="checkout-form" onSubmit={submit} className="space-y-3" noValidate>
@@ -552,7 +573,8 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
                   key={method.id}
                   type="button"
                   onClick={() => setPayment(method.id)}
-                  className={`press flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${
+                  aria-pressed={payment === method.id}
+                  className={`press flex min-h-[56px] w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition sm:min-h-0 ${
                     payment === method.id ? "border-brand bg-brand-soft/50" : "border-line bg-white hover:border-brand/40"
                   }`}
                 >
@@ -581,7 +603,7 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
             <button
               type="submit"
               disabled={submitting}
-              className="press mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-[14px] font-bold text-white shadow-[0_14px_28px_-16px_rgba(15,122,77,0.9)] hover:bg-brand-deep disabled:opacity-70 lg:hidden"
+              className="press mt-3 hidden h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-[14px] font-bold text-white shadow-[0_14px_28px_-16px_rgba(15,122,77,0.9)] hover:bg-brand-deep disabled:opacity-70"
             >
               {submitting ? (
                 <>
@@ -749,7 +771,7 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
             <button
               type="submit"
               form="checkout-form"
-              disabled={submitting}
+              disabled={submitting || !storeOpen}
               className="press mt-2.5 hidden h-11 w-full items-center justify-center gap-2 rounded-full bg-brand text-[13px] font-bold text-white hover:bg-brand-deep disabled:opacity-70 lg:flex"
             >
               {submitting ? "Placing your order…" : `Place order · ${formatMoney(cart.totalCents)}`}
@@ -791,6 +813,38 @@ export function CheckoutForm({ coupons }: { coupons: Coupon[] }) {
             </p>
           </div>
         </aside>
+      </div>
+
+      {/* On a phone the totals live in a bar pinned above the bottom navigation
+          so the price and the submit action are never a screenful away. */}
+      <div className="fixed inset-x-0 bottom-[calc(var(--tabbar-h)+var(--safe-b))] z-40 border-t border-line bg-white/95 px-3 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] backdrop-blur-lg lg:hidden">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[10px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+              {plural(cart.itemCount, "item")} · total
+            </p>
+            <p className="font-display text-[22px] font-semibold leading-none tracking-tight text-ink">
+              {formatMoney(cart.totalCents)}
+            </p>
+          </div>
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={submitting}
+            className="press flex h-12 shrink-0 items-center gap-2 rounded-full bg-brand px-6 text-[14px] font-bold text-white shadow-[0_14px_28px_-16px_rgba(15,122,77,0.9)] hover:bg-brand-deep disabled:opacity-70"
+          >
+            {submitting ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Placing…
+              </>
+            ) : (
+              <>
+                Place order <ArrowRightIcon className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

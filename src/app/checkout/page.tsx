@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getCoupons } from "@/lib/store";
+import { getStoreSettings } from "@/lib/admin";
 import { CheckoutForm } from "@/components/checkout-form";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const coupons = await getCoupons();
-  return <CheckoutForm coupons={coupons} />;
+  const [coupons, settings] = await Promise.all([getCoupons(), getStoreSettings()]);
+  return <CheckoutForm coupons={coupons} storeOpen={settings.storeOpen} supportEmail={settings.supportEmail} />;
 }

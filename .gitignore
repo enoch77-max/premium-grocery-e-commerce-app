@@ -1,1 +1,39 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js build output
+.next/
+out/
+build/
+dist/
+
+# env + secrets — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# logs & local artifacts
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+.shots/
+public/_shots/
+
+# editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# drizzle generated
+drizzle/
+
+# leave the agent notes local
 AGENTS.md
+
+*.zip

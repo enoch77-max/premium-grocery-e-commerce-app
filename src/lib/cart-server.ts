@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { cartItems, carts } from "@/db/schema";
 import { getCategories, getCoupons, getProducts } from "@/lib/store";
 import { DELIVERY_FEE_CENTS, FREE_DELIVERY_THRESHOLD_CENTS, formatMoney } from "@/lib/format";
+import { getStoreSettings } from "@/lib/admin";
 import type { CartLine, CartState, CartUpsell, Coupon, Product } from "@/lib/types";
 
 export const CART_COOKIE = "fresco_cart";
@@ -78,7 +79,11 @@ async function ensureCart(token: string) {
   return created;
 }
 
-function emptyState(products: Product[], couponError: string | null = null): CartState {
+function emptyState(
+  products: Product[],
+  couponError: string | null = null,
+  freeThreshold = FREE_DELIVERY_THRESHOLD_CENTS,
+): CartState {
   return {
     lines: [],
     itemCount: 0,
@@ -91,8 +96,8 @@ function emptyState(products: Product[], couponError: string | null = null): Car
     compareTotalCents: 0,
     coupon: null,
     couponError,
-    freeDeliveryThresholdCents: FREE_DELIVERY_THRESHOLD_CENTS,
-    freeDeliveryRemainingCents: FREE_DELIVERY_THRESHOLD_CENTS,
+    freeDeliveryThresholdCents: freeThreshold,
+    freeDeliveryRemainingCents: freeThreshold,
     upsells: products
       .filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents)
       .sort((a, b) => b.popularity - a.popularity)
@@ -188,11 +193,13 @@ export async function resolveCartForRequest(request?: Request, couponError: stri
 export async function resolveCart(token: string | null, couponError: string | null = null): Promise<CartState> {
   const products = await getProducts();
 
-  if (!token) return emptyState(products, couponError);
+  const pricing = await getStoreSettings();
+  const freeThreshold = pricing.freeDeliveryThresholdCents ?? FREE_DELIVERY_THRESHOLD_CENTS;
+  if (!token) return emptyState(products, couponError, freeThreshold);
 
   try {
     const cart = await findCart(token);
-    if (!cart) return emptyState(products, couponError);
+    if (!cart) return emptyState(products, couponError, freeThreshold);
 
     const [categories, itemRows] = await Promise.all([
       getCategories(),
@@ -232,7 +239,9 @@ export async function resolveCart(token: string | null, couponError: string | nu
       (sum, line) => sum + (line.compareAtCents ?? line.priceCents) * line.quantity,
       0,
     );
-    const baseDelivery = subtotalCents >= FREE_DELIVERY_THRESHOLD_CENTS || subtotalCents === 0 ? 0 : DELIVERY_FEE_CENTS;
+    // Delivery pricing is owner-controlled (see /admin/settings).
+    const deliveryFee = pricing.deliveryFeeCents ?? DELIVERY_FEE_CENTS;
+    const baseDelivery = subtotalCents >= freeThreshold || subtotalCents === 0 ? 0 : deliveryFee;
 
     let coupon: Coupon | null = null;
     let effectiveCouponError = couponError;
@@ -280,13 +289,13 @@ export async function resolveCart(token: string | null, couponError: string | nu
       compareTotalCents,
       coupon: coupon ? { code: coupon.code, description: coupon.description, discountCents, label: discountLabel } : null,
       couponError: effectiveCouponError,
-      freeDeliveryThresholdCents: FREE_DELIVERY_THRESHOLD_CENTS,
-      freeDeliveryRemainingCents: Math.max(0, FREE_DELIVERY_THRESHOLD_CENTS - subtotalCents),
+      freeDeliveryThresholdCents: freeThreshold,
+      freeDeliveryRemainingCents: Math.max(0, freeThreshold - subtotalCents),
       upsells: buildUpsells(lines, products, categoryNames),
     };
   } catch (error) {
     console.error("resolveCart failed", error);
-    return emptyState(products, couponError);
+    return emptyState(products, couponError, freeThreshold);
   }
 }
 

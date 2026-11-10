@@ -40,3 +40,37 @@ can drift apart when storage is blocked or cleared. Every cart endpoint resolves
 all candidate tokens, picks the basket that actually has items, and re-issues the
 winning token to both places — so "empty basket" cannot appear while a basket
 exists. Orders are idempotent via `checkoutId`, so double submits never duplicate.
+
+---
+
+## Production deployment (single VPS)
+
+Everything needed to run this as a real shop is in the repo root:
+
+```bash
+git clone <repo> /srv/fresco && cd /srv/fresco
+cp .env.example .env      # set DOMAIN, POSTGRES_PASSWORD, ADMIN_*, BACKUP_PASSPHRASE
+./deploy/deploy.sh        # backup → build → start → migrate → healthcheck
+node scripts/seed-admin.mjs
+```
+
+- `deploy/` — Docker Compose (app + Postgres + Caddy TLS + nightly encrypted backups),
+  Nginx and systemd alternatives, backup/restore scripts.
+- `docs/DEPLOYMENT.md` — step-by-step runbook, firewall, DNS, rollback.
+- `docs/RUNBOOK.md` — incidents, compromise response, daily owner loop.
+- `docs/GO-LIVE.md` — business readiness checklist (payments, email, tax, consent).
+- `PHASES.md` — what was built in each phase and what is deliberately deferred.
+
+### Owner dashboard
+
+`/admin` (staff sign-in at `/admin/login`): revenue and order KPIs, fulfilment
+transitions, catalogue create/edit/publish, stock, customers, store pause switch,
+announcement bar and delivery pricing. Every change is written to `audit_logs`.
+
+### Verification
+
+```bash
+BASE_URL=https://shop.example node scripts/smoke.mjs
+BASE_URL=https://shop.example ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/verify-admin.mjs
+BASE_URL=https://shop.example node scripts/healthcheck.mjs
+```

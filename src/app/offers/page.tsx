@@ -47,13 +47,13 @@ export default async function OffersPage() {
   return (
     <div className="mx-auto max-w-[1340px] px-4 pt-4 sm:px-6 sm:pt-5">
       <section className="overflow-hidden rounded-[26px] border border-line/70 bg-[#13261d] text-cream">
-        <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative grid gap-5 p-4 sm:p-7 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-brand/40 blur-3xl" />
           <div className="relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-lime px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
+            <span className="inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full bg-lime px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
               <BoltIcon className="h-3 w-3" /> Live today
             </span>
-            <h1 className="mt-3 font-display text-[30px] font-semibold leading-[1.03] tracking-[-0.03em] sm:text-[40px]">
+            <h1 className="mt-2.5 font-display text-[24px] font-semibold leading-[1.05] tracking-[-0.03em] sm:mt-3 sm:text-[40px] sm:leading-[1.03]">
               Offers that actually
               <br /> change your total.
             </h1>
@@ -169,9 +169,9 @@ export default async function OffersPage() {
       </section>
 
       <section id="delivery" className="mt-9 scroll-mt-32 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
-        <div className="rounded-3xl border border-line/80 bg-white p-5 sm:p-6">
+        <div className="rounded-3xl border border-line/80 bg-white p-4 sm:p-6">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand">Delivery & fees</p>
-          <h2 className="mt-1.5 font-display text-[25px] font-semibold leading-tight tracking-tight sm:text-[30px]">
+          <h2 className="mt-1.5 font-display text-[21px] font-semibold leading-tight tracking-tight sm:text-[30px]">
             Pick the slot that fits your day.
           </h2>
           <p className="mt-1.5 max-w-lg text-[12.5px] leading-relaxed text-ink-soft">

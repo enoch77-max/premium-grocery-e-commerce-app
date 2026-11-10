@@ -1,4 +1,4 @@
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   bundles as bundlesTable,
@@ -98,7 +98,12 @@ export async function getCategories(): Promise<Category[]> {
 export async function getProducts(): Promise<Product[]> {
   try {
     await ensureSeeded();
-    const rows = await db.select().from(productsTable).orderBy(asc(productsTable.sortOrder));
+    // `is_active` is the owner's publish switch (see /admin/products).
+    const rows = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.isActive, true))
+      .orderBy(asc(productsTable.sortOrder));
     if (rows.length) return rows.map(mapProduct);
   } catch (error) {
     console.error("getProducts fallback", error);

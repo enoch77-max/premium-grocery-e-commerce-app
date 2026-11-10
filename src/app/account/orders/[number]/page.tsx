@@ -138,7 +138,7 @@ function OrderDetail() {
             </p>
           </div>
           <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+            className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold ${
               order.status === "cancelled"
                 ? "bg-rose-soft text-clay"
                 : order.status === "delivered"

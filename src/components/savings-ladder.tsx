@@ -18,15 +18,15 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
   const pending = bundle?.products?.some((product) => isPending(product.id)) ?? false;
 
   return (
-    <section className="relative overflow-hidden rounded-[26px] bg-[#13261d] p-5 text-cream sm:p-7">
+    <section className="relative overflow-hidden rounded-[26px] bg-[#13261d] p-4 text-cream sm:p-7">
       <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-brand/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-20 right-24 h-48 w-48 rounded-full bg-lime/20 blur-3xl" />
-      <div className="relative grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-lime">
+      <div className="relative grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="min-w-0">
+          <span className="inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-lime">
             <SparkleIcon className="h-3 w-3" /> Basket rewards
           </span>
-          <h2 className="mt-3 font-display text-[26px] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[34px]">
+          <h2 className="mt-2.5 font-display text-[22px] font-semibold leading-[1.08] tracking-[-0.02em] sm:mt-3 sm:text-[34px] sm:leading-[1.05]">
             The fuller your basket,
             <br className="hidden sm:block" /> the better the deal.
           </h2>
@@ -35,7 +35,7 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
             basket.
           </p>
 
-          <div className="mt-5 space-y-2">
+          <div className="mt-4 space-y-1.5 sm:mt-5 sm:space-y-2">
             {tiers.map((tier) => {
               const unlocked = subtotal >= tier.at;
               const progress = Math.min(100, Math.round((subtotal / tier.at) * 100));
@@ -55,8 +55,8 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-[12px] font-bold ${unlocked ? "text-lime" : "text-cream"}`}>{tier.label}</p>
-                      <p className="text-[10px] font-medium text-cream/55">
+                      <p className={`min-w-0 text-[12px] font-bold ${unlocked ? "text-lime" : "text-cream"}`}>{tier.label}</p>
+                      <p className="shrink-0 whitespace-nowrap text-[10px] font-medium text-cream/55">
                         {unlocked ? "Unlocked" : `${formatMoney(tier.at - subtotal)} to go`}
                       </p>
                     </div>
@@ -71,7 +71,7 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
           </div>
         </div>
 
-        <div className="relative rounded-2xl border border-white/12 bg-white/[0.06] p-4 backdrop-blur">
+        <div className="relative min-w-0 rounded-2xl border border-white/12 bg-white/[0.06] p-4 backdrop-blur">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-cream/60">Best-seller bundle</p>
           {bundle ? (
             <>
@@ -80,9 +80,11 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={bundle.imageUrl} alt={bundle.title} className="h-full w-full object-cover" />
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate font-display text-[17px] font-semibold leading-tight">{bundle.title}</p>
-                  <p className="text-[10.5px] text-cream/60">
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 break-words font-display text-[16px] font-semibold leading-tight sm:text-[17px]">
+                    {bundle.title}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] leading-snug text-cream/60">
                     {bundle.products?.length ?? 0} items · save {formatMoney(bundle.compareAtCents - bundle.priceCents)}
                   </p>
                 </div>
@@ -100,7 +102,7 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
                   )
                 }
                 disabled={pending}
-                className="press mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-lime text-[12.5px] font-bold text-brand-deep hover:bg-white disabled:opacity-60"
+                className="press mt-3 flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full bg-lime px-3 py-2 text-center text-[12.5px] font-bold leading-snug text-brand-deep hover:bg-white disabled:opacity-60"
               >
                 {pending ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-deep border-t-transparent" />
@@ -111,7 +113,7 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
               </button>
               <Link
                 href="/offers#bundles"
-                className="mt-2 flex items-center justify-center gap-1 text-[11px] font-semibold text-cream/70 hover:text-lime"
+                className="mt-2 flex items-center justify-center gap-1 text-center text-[11px] font-semibold leading-snug text-cream/70 hover:text-lime"
               >
                 Browse all bundles <ArrowRightIcon className="h-3 w-3" />
               </Link>

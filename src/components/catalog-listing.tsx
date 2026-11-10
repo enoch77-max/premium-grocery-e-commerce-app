@@ -77,13 +77,15 @@ export function CatalogListing({
 
   return (
     <div>
-      <div className="sticky top-[114px] z-30 -mx-1 mb-4 rounded-2xl border border-line/80 bg-cream/95 px-2.5 py-2 backdrop-blur-md sm:top-[118px]">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="no-scrollbar flex flex-1 items-center gap-1.5 overflow-x-auto">
+      {/* Sticky filter rail: swipes horizontally on a phone and parks itself
+          directly beneath the sticky header at every breakpoint. */}
+      <div className="under-header sticky z-30 -mx-4 mb-3 border-y border-line/80 bg-cream/95 px-4 py-2 backdrop-blur-md sm:-mx-1 sm:mb-4 sm:rounded-2xl sm:border sm:px-2.5">
+        <div className="flex items-center gap-2">
+          <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5">
             <button
               type="button"
               onClick={() => setActive([])}
-              className={`press shrink-0 rounded-full px-3 py-1.5 text-[11.5px] font-bold transition ${
+              className={`press flex h-9 shrink-0 items-center rounded-full px-3.5 text-[12.5px] font-bold transition sm:h-8 sm:px-3 sm:text-[11.5px] ${
                 active.length === 0
                   ? "bg-ink text-cream"
                   : "border border-line bg-white text-ink-soft hover:border-brand hover:text-brand"
@@ -98,7 +100,8 @@ export function CatalogListing({
                   key={diet.id}
                   type="button"
                   onClick={() => toggle(diet.id)}
-                  className={`press shrink-0 rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition ${
+                  aria-pressed={isActive}
+                  className={`press flex h-9 shrink-0 items-center rounded-full px-3.5 text-[12.5px] font-semibold transition sm:h-8 sm:px-3 sm:text-[11.5px] ${
                     isActive
                       ? "bg-brand text-white"
                       : "border border-line bg-white text-ink-soft hover:border-brand hover:text-brand"
@@ -110,7 +113,7 @@ export function CatalogListing({
             })}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <span className="hidden text-[11px] font-medium text-ink-soft sm:inline">
               {filtered.length} item{filtered.length === 1 ? "" : "s"}
             </span>
@@ -119,7 +122,7 @@ export function CatalogListing({
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortId)}
                 aria-label="Sort products"
-                className="h-8 appearance-none rounded-full border border-line bg-white pl-3 pr-7 text-[11.5px] font-semibold text-ink outline-none hover:border-brand"
+                className="field-compact h-9 w-[104px] appearance-none rounded-full border border-line bg-white pl-3 pr-7 text-[12px] font-semibold text-ink outline-none hover:border-brand sm:h-8 sm:w-auto sm:text-[11.5px]"
               >
                 {SORTS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -134,14 +137,15 @@ export function CatalogListing({
           </div>
         </div>
         {active.length ? (
-          <div className="mt-1.5 flex items-center gap-2 px-1">
+          <div className="mt-1.5 flex items-center gap-2 px-0.5">
             <span className="text-[10.5px] font-semibold text-ink-soft">
-              {active.length} filter{active.length === 1 ? "" : "s"} on
+              {active.length} filter{active.length === 1 ? "" : "s"} on · {filtered.length} item
+              {filtered.length === 1 ? "" : "s"}
             </span>
             <button
               type="button"
               onClick={() => setActive([])}
-              className="press inline-flex items-center gap-1 rounded-full bg-cream-deep px-2 py-0.5 text-[10.5px] font-bold text-ink hover:bg-rose-soft hover:text-clay"
+              className="press inline-flex h-7 items-center gap-1 rounded-full bg-cream-deep px-2.5 text-[10.5px] font-bold text-ink hover:bg-rose-soft hover:text-clay"
             >
               <CloseIcon className="h-2.5 w-2.5" /> Clear
             </button>
@@ -150,7 +154,7 @@ export function CatalogListing({
       </div>
 
       {filtered.length ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 min-[420px]:gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

@@ -122,7 +122,7 @@ export function TrackOrder() {
               </p>
             </div>
             <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+              className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold ${
                 order.status === "cancelled"
                   ? "bg-rose-soft text-clay"
                   : order.status === "delivered"
@@ -201,10 +201,10 @@ export function TrackOrder() {
               >
                 Full receipt & actions <ArrowRightIcon className="h-3 w-3" />
               </Link>
-              <span className="inline-flex h-8 items-center gap-1 rounded-full bg-cream px-2.5 text-[10.5px] font-semibold text-ink">
+              <span className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 text-[10.5px] font-semibold text-ink">
                 <ClockIcon className="h-3 w-3 text-brand" /> {formatDeliverySlot(order.deliverySlot)}
               </span>
-              <span className="inline-flex h-8 items-center gap-1 rounded-full bg-cream px-2.5 text-[10.5px] font-semibold text-ink">
+              <span className="inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 text-[10.5px] font-semibold text-ink">
                 <ShieldIcon className="h-3 w-3 text-brand" />
                 {order.paymentMethod === "cash" ? "Pay on delivery" : "Paid by card"}
               </span>

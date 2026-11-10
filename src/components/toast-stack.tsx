@@ -11,7 +11,7 @@ export function ToastStack() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-4 bottom-4 z-[95] flex justify-end sm:inset-x-auto sm:right-6 sm:bottom-6"
+      className="pointer-events-none fixed inset-x-3 bottom-[calc(var(--tabbar-h)+var(--safe-b)+8px)] z-[95] flex justify-center lg:inset-x-auto lg:right-6 lg:bottom-6 lg:justify-end"
     >
       <div
         key={toast.id}

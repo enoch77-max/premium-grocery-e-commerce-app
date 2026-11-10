@@ -43,7 +43,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           {result.intent.corrected ? (
             <Link
               href={`/search?q=${encodeURIComponent(result.intent.corrected)}`}
-              className="rounded-full bg-amber-soft px-2.5 py-1 text-[11px] font-bold text-ink hover:bg-amber"
+              className="rounded-lg bg-amber-soft px-2.5 py-1 text-left text-[11px] font-bold leading-snug text-balance text-ink hover:bg-amber"
             >
               Did you mean “{result.intent.corrected}”?
             </Link>
@@ -56,7 +56,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               <Link
                 key={`${suggestion.type}-${suggestion.label}`}
                 href={suggestion.href}
-                className="press inline-flex items-center gap-1.5 rounded-full border border-line bg-cream/70 px-3 py-1.5 text-[11.5px] font-semibold text-ink hover:border-brand hover:text-brand"
+                className="press inline-flex items-start gap-1.5 rounded-xl border border-line bg-cream/70 px-3 py-1.5 text-left text-[11.5px] font-semibold leading-snug text-balance text-ink hover:border-brand hover:text-brand"
               >
                 {suggestion.type === "category" ? suggestion.emoji : <SearchIcon className="h-3 w-3" />}
                 {suggestion.label}
@@ -84,7 +84,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                 <Link
                   key={term}
                   href={`/search?q=${encodeURIComponent(term)}`}
-                  className="press rounded-full border border-line bg-white px-3 py-1.5 text-[11.5px] font-semibold text-ink hover:border-brand hover:text-brand"
+                  className="press rounded-xl border border-line bg-white px-3 py-1.5 text-left text-[11.5px] font-semibold leading-snug text-balance text-ink hover:border-brand hover:text-brand"
                 >
                   {term}
                 </Link>

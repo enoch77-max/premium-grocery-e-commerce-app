@@ -43,11 +43,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
       <section className="mt-3 overflow-hidden rounded-[26px] border border-line/70 bg-white">
         <div className="grid gap-0 lg:grid-cols-[1.55fr_1fr]">
-          <div className="p-5 sm:p-7">
+          <div className="p-4 sm:p-7">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
               <span className="text-[12px]">{category.emoji}</span> Aisle
             </span>
-            <h1 className="mt-2.5 font-display text-[30px] font-semibold leading-[1.02] tracking-[-0.03em] sm:text-[38px]">
+            <h1 className="mt-2 font-display text-[26px] font-semibold leading-[1.04] tracking-[-0.03em] sm:mt-2.5 sm:text-[38px] sm:leading-[1.02]">
               {category.name}
             </h1>
             <p className="mt-1.5 max-w-md text-[12.5px] leading-relaxed text-ink-soft">
@@ -55,20 +55,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {deals.length ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-rose-soft px-2.5 py-1 text-[11px] font-bold text-clay">
+                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-rose-soft px-2.5 py-1 text-[11px] font-bold text-clay">
                   <SparkleIcon className="h-3 w-3" /> {deals.length} on offer today
                 </span>
               ) : null}
-              <span className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
+              <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
                 <TruckIcon className="h-3.5 w-3.5 text-brand" /> Free delivery over $35
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
+              <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
                 <BoltIcon className="h-3 w-3 text-amber" /> 30-min slots
               </span>
             </div>
           </div>
-          <div className="relative flex items-center gap-3 border-t border-line/70 bg-cream/60 p-4 lg:border-l lg:border-t-0">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-line bg-white sm:h-24 sm:w-24">
+          <div className="relative flex items-center gap-3 border-t border-line/70 bg-cream/60 p-3 sm:p-4 lg:border-l lg:border-t-0">
+            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line bg-white sm:h-24 sm:w-24">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={category.imageUrl} alt={category.name} className="h-full w-full object-cover" />
             </div>
@@ -96,7 +96,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </div>
       </section>
 
-      <div className="mt-4 grid gap-5 lg:grid-cols-[220px_1fr]">
+      <div className="mt-3 grid gap-5 sm:mt-4 lg:grid-cols-[220px_1fr]">
         <aside className="hidden lg:block">
           <div className="sticky top-[152px] space-y-3">
             <nav className="overflow-hidden rounded-2xl border border-line/80 bg-white">

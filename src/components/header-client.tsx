@@ -8,14 +8,15 @@ import { formatMoney } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
 import { useDelivery } from "@/components/delivery-provider";
 import { useSession } from "@/components/session-provider";
+import { useMobileUi } from "@/components/mobile-ui-provider";
 import { initials } from "@/components/account-shell";
 import { SearchOverlay } from "@/components/search-overlay";
+import { BottomSheet } from "@/components/bottom-sheet";
 import {
   ArrowRightIcon,
   BoltIcon,
   CartIcon,
   ChevronDownIcon,
-  CloseIcon,
   LeafIcon,
   MenuIcon,
   PinIcon,
@@ -25,40 +26,46 @@ import {
   UserIcon,
 } from "@/components/icons";
 
-export function HeaderClient({ categories }: { categories: Category[] }) {
+export function HeaderClient({
+  categories,
+  announcement = "Free delivery over $35",
+  storeOpen = true,
+}: {
+  categories: Category[];
+  announcement?: string;
+  storeOpen?: boolean;
+}) {
   const { cart, openCart, pulse } = useCart();
   const { area, openPicker } = useDelivery();
   const { user, logout } = useSession();
+  const { searchOpen, openSearch, closeSearch, menuOpen, openMenu, closeMenu } = useMobileUi();
   const pathname = usePathname();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setSearchOpen(true);
+        openSearch();
       }
       if (event.key === "/" && !["INPUT", "TEXTAREA"].includes((event.target as HTMLElement)?.tagName)) {
         event.preventDefault();
-        setSearchOpen(true);
+        openSearch();
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [openSearch]);
 
   const count = cart?.itemCount ?? 0;
   const subtotal = cart?.subtotalCents ?? 0;
 
   return (
     <>
-      <div className="bg-brand-deep text-cream">
-        <div className="mx-auto flex max-w-[1340px] items-center justify-between gap-3 px-4 py-2 text-[11px] font-medium sm:px-6">
-          <div className="flex items-center gap-2">
-            <BoltIcon className="h-3.5 w-3.5 text-lime" />
-            <span className="font-semibold">Free delivery over $35</span>
+      <div className="hide-in-landscape bg-brand-deep text-cream">
+        <div className="mx-auto flex max-w-[1340px] items-center justify-between gap-3 px-3 py-2 text-[11px] font-medium sm:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <BoltIcon className="h-3.5 w-3.5 shrink-0 text-lime" />
+            <span className="truncate font-semibold">{announcement}</span>
             <span className="hidden text-cream/50 sm:inline">·</span>
             <span className="hidden text-cream/80 sm:inline">30-minute slots, 7 days a week</span>
           </div>
@@ -72,7 +79,7 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
           </div>
           <Link
             href="/offers"
-            className="group inline-flex items-center gap-1.5 font-semibold text-cream hover:text-lime"
+            className="group inline-flex shrink-0 items-center gap-1.5 font-semibold text-cream hover:text-lime"
           >
             Today&apos;s offers
             <ArrowRightIcon className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
@@ -80,24 +87,33 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
+      {!storeOpen ? (
+        <div className="bg-rose-soft px-4 py-2 text-center text-[11.5px] font-bold text-clay">
+          We are paused for a short restock — ordering reopens very soon.
+        </div>
+      ) : null}
+
       <header className="sticky top-0 z-50 border-b border-line/70 bg-cream/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-[1340px] px-4 sm:px-6">
-          <div className="flex h-16 items-center gap-3 sm:h-[74px] sm:gap-4">
+        <div className="mx-auto max-w-[1340px] px-3 sm:px-6">
+          <div className="flex h-14 items-center gap-2 sm:h-[74px] sm:gap-4">
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
-              className="press -ml-1 grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-cream-deep lg:hidden"
+              onClick={openMenu}
+              className="press tap-xl -ml-1 grid shrink-0 place-items-center rounded-full text-ink hover:bg-cream-deep lg:hidden"
               aria-label="Open menu"
+              aria-expanded={menuOpen}
             >
               <MenuIcon className="h-5 w-5" />
             </button>
 
-            <Link href="/" className="group flex shrink-0 items-center gap-2">
-              <span className="relative grid h-9 w-9 place-items-center rounded-[13px] bg-brand text-lime shadow-[0_6px_16px_-8px_rgba(15,122,77,0.9)] transition group-hover:rotate-3">
+            <Link href="/" className="group flex min-w-0 shrink-0 items-center gap-2">
+              <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-[13px] bg-brand text-lime shadow-[0_6px_16px_-8px_rgba(15,122,77,0.9)] transition group-hover:rotate-3">
                 <LeafIcon className="h-5 w-5" strokeWidth={2} />
               </span>
               <span className="flex flex-col leading-none">
-                <span className="font-display text-[26px] font-semibold tracking-[-0.03em] text-ink">fresco</span>
+                <span className="font-display text-[22px] font-semibold tracking-[-0.03em] text-ink sm:text-[26px]">
+                  fresco
+                </span>
                 <span className="mt-0.5 hidden text-[9px] font-bold uppercase tracking-[0.22em] text-ink-soft sm:block">
                   green grocer
                 </span>
@@ -123,7 +139,7 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
             <button
               type="button"
               onClick={openPicker}
-              className="press hidden items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-1.5 text-[11px] font-bold text-ink hover:border-brand xl:hidden md:flex"
+              className="press hidden items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-1.5 text-[11px] font-bold text-ink hover:border-brand md:flex xl:hidden"
               aria-label="Change delivery area"
             >
               <PinIcon className="h-3.5 w-3.5 text-brand" />
@@ -131,9 +147,20 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
               <ChevronDownIcon className="h-3 w-3 text-ink-soft" />
             </button>
 
+            {/* Nearest-neighbourhood chip: only when a phone is wide enough for it. */}
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
+              onClick={openPicker}
+              className="press hidden h-8 shrink-0 items-center gap-1 rounded-full border border-line bg-white px-2 text-[10.5px] font-bold text-ink hover:border-brand min-[380px]:flex md:hidden"
+              aria-label={`Deliver to ${area.neighbourhood} ${area.postcode}. Change`}
+            >
+              <PinIcon className="h-3 w-3 text-brand" />
+              <span className="max-w-[74px] truncate">{area.postcode}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={openSearch}
               className="press group hidden h-11 flex-1 items-center gap-2.5 rounded-full border border-line bg-white px-4 text-left shadow-[0_1px_0_rgba(19,38,29,0.03)] hover:border-brand/50 hover:shadow-soft sm:flex"
             >
               <SearchIcon className="h-4.5 w-4.5 text-brand" />
@@ -145,115 +172,26 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
               </span>
             </button>
 
-            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
+              {/* Only appears when the landscape header drops the search row. */}
               <button
                 type="button"
-                onClick={() => setSearchOpen(true)}
-                className="press grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-cream-deep sm:hidden"
+                onClick={openSearch}
+                className="press tap-xl hidden place-items-center rounded-full text-ink hover:bg-cream-deep show-in-landscape"
                 aria-label="Search"
               >
                 <SearchIcon className="h-5 w-5" />
               </button>
 
               <div className="relative hidden sm:block">
-                <button
-                  type="button"
-                  onClick={() => setAccountOpen((value) => !value)}
-                  className="press flex h-10 items-center gap-2 rounded-full px-2.5 text-[12.5px] font-semibold text-ink hover:bg-cream-deep"
-                  aria-label={user ? `Account menu for ${user.name}` : "Account menu"}
-                >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-cream-deep text-[11px] font-bold text-brand-deep">
-                    {user ? initials(user.name) : <UserIcon className="h-3.5 w-3.5" />}
-                  </span>
-                  <span className="hidden lg:block">{user ? user.name.split(" ")[0] : "Account"}</span>
-                  <ChevronDownIcon className="hidden h-3.5 w-3.5 text-ink-soft lg:block" />
-                </button>
-                {accountOpen ? (
-                  <>
-                    <button
-                      type="button"
-                      className="fixed inset-0 z-10 cursor-default"
-                      aria-label="Close account menu"
-                      onClick={() => setAccountOpen(false)}
-                    />
-                    <div className="animate-scale-in absolute right-0 top-12 z-20 w-64 rounded-2xl border border-line bg-white p-2 shadow-lift">
-                      {user ? (
-                        <>
-                          <div className="px-2 py-1.5">
-                            <p className="truncate text-[12.5px] font-bold text-ink">{user.name}</p>
-                            <p className="truncate text-[10.5px] text-ink-soft">{user.email}</p>
-                          </div>
-                          <div className="my-1 h-px bg-line/70" />
-                          <Link href="/account" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            🏠 Account overview
-                          </Link>
-                          <Link href="/account/orders" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            📦 Orders & reordering
-                          </Link>
-                          <Link href="/account/saved" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            ❤️ Saved items
-                          </Link>
-                          <Link href="/account/addresses" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            📍 Addresses
-                          </Link>
-                          <Link href="/account/settings" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            ⚙️ Profile & security
-                          </Link>
-                          <div className="my-1 h-px bg-line/70" />
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              setAccountOpen(false);
-                              await logout();
-                            }}
-                            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-[12.5px] font-semibold text-ink-soft hover:bg-rose-soft hover:text-clay"
-                          >
-                            Sign out
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="px-2 py-1.5">
-                            <p className="text-[12.5px] font-bold text-ink">Guest shopper</p>
-                            <p className="text-[10.5px] leading-relaxed text-ink-soft">
-                              Your basket saves automatically — no sign-in required to check out.
-                            </p>
-                          </div>
-                          <div className="my-1 h-px bg-line/70" />
-                          <Link
-                            href="/login"
-                            className="press mt-1 flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand text-[12px] font-bold text-white hover:bg-brand-deep"
-                          >
-                            Sign in <ArrowRightIcon className="h-3.5 w-3.5" />
-                          </Link>
-                          <Link
-                            href="/login?mode=create"
-                            className="press mt-1.5 flex h-9 items-center justify-center rounded-lg border border-line text-[12px] font-bold text-ink hover:border-brand hover:text-brand"
-                          >
-                            Create account
-                          </Link>
-                          <div className="my-1.5 h-px bg-line/70" />
-                          <Link href="/track" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            🚚 Track an order
-                          </Link>
-                          <Link href="/offers" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            🎁 Offers & coupons
-                          </Link>
-                          <Link href="/info/contact" onClick={() => setAccountOpen(false)} className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream">
-                            💬 Help & contact
-                          </Link>
-                        </>
-                      )}
-                    </div>
-                  </>
-                ) : null}
+                <AccountMenu user={user} onLogout={logout} />
               </div>
 
-                            <button
+              <button
                 type="button"
                 onClick={openCart}
-                className="press flex h-11 items-center gap-2.5 rounded-full bg-ink pr-4 pl-3 text-cream hover:bg-brand-deep"
-                aria-label="Open basket"
+                className="press grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-cream hover:bg-brand-deep sm:flex sm:h-11 sm:w-auto sm:items-center sm:gap-2.5 sm:py-0 sm:pr-4 sm:pl-3"
+                aria-label={count > 0 ? `Open basket, ${count} items, ${formatMoney(subtotal)}` : "Open basket"}
               >
                 <span className="relative">
                   <CartIcon className="h-5 w-5" />
@@ -262,7 +200,7 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
                       key={`${pulse}-${count}`}
                       className="animate-pop absolute -right-2 -top-2 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-lime px-1 text-[10px] font-extrabold text-ink"
                     >
-                      {count}
+                      {count > 99 ? "99+" : count}
                     </span>
                   ) : null}
                 </span>
@@ -274,14 +212,14 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
             </div>
           </div>
 
-          <div className="pb-2.5 sm:hidden">
+          <div className="hide-in-landscape pb-2 sm:hidden">
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
+              onClick={openSearch}
               className="press flex h-10 w-full items-center gap-2 rounded-full border border-line bg-white px-3.5 text-left shadow-[0_1px_0_rgba(19,38,29,0.03)]"
             >
-              <SearchIcon className="h-4 w-4 text-brand" />
-              <span className="truncate text-[12.5px] text-ink-soft/80">Search groceries — try &ldquo;vegan snacks&rdquo;</span>
+              <SearchIcon className="h-4 w-4 shrink-0 text-brand" />
+              <span className="truncate text-[13px] text-ink-soft/80">Search groceries — try &ldquo;vegan snacks&rdquo;</span>
             </button>
           </div>
 
@@ -325,95 +263,271 @@ export function HeaderClient({ categories }: { categories: Category[] }) {
         </div>
       </header>
 
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} categories={categories} />
+      <SearchOverlay open={searchOpen} onClose={closeSearch} categories={categories} />
 
-      {menuOpen ? (
-        <div className="fixed inset-0 z-[75] lg:hidden">
-          <button
-            type="button"
-            aria-label="Close menu"
-            className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
-            onClick={() => setMenuOpen(false)}
-          />
-          <div className="animate-scale-in absolute inset-y-0 left-0 flex w-[86%] max-w-xs flex-col bg-cream p-5 shadow-lift">
-            <div className="flex items-center justify-between">
-              <span className="font-display text-2xl font-semibold">fresco</span>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                className="press grid h-9 w-9 place-items-center rounded-full bg-white"
-                aria-label="Close menu"
-              >
-                <CloseIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                openPicker();
-              }}
-              className="press mt-3 flex w-full items-center gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-left"
-            >
-              <PinIcon className="h-4 w-4 text-brand" />
-              <span className="min-w-0 flex-1">
-                <span className="block text-[9.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Delivering to</span>
-                <span className="block truncate text-[12px] font-bold text-ink">
-                  {area.neighbourhood}, {area.postcode}
-                </span>
-              </span>
-              <span className="text-[10px] font-bold text-brand">Change</span>
-            </button>
-            <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft">Shop by aisle</p>
-            <div className="mt-2 flex-1 space-y-1 overflow-y-auto">
-              {categories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-semibold hover:bg-white"
-                >
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-white text-base">{category.emoji}</span>
-                  <span className="flex-1">{category.name}</span>
-                  <span className="text-[11px] font-medium text-ink-soft">{category.tagline}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="mt-3 rounded-2xl border border-line bg-white p-2">
-              {user ? (
-                <>
-                  <p className="px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-soft">
-                    Signed in as {user.name.split(" ")[0]}
-                  </p>
-                  <Link href="/account" onClick={() => setMenuOpen(false)} className="mt-1 flex items-center gap-2 rounded-lg px-1.5 py-2 text-[12.5px] font-semibold hover:bg-cream">
-                    🏠 Account overview
-                  </Link>
-                  <Link href="/account/orders" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 rounded-lg px-1.5 py-2 text-[12.5px] font-semibold hover:bg-cream">
-                    📦 Orders
-                  </Link>
-                  <Link href="/account/saved" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 rounded-lg px-1.5 py-2 text-[12.5px] font-semibold hover:bg-cream">
-                    ❤️ Saved items
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between rounded-lg px-1.5 py-2 text-[12.5px] font-bold text-brand"
-                >
-                  Sign in or create account <ArrowRightIcon className="h-3.5 w-3.5" />
-                </Link>
-              )}
-            </div>
+      <BottomSheet
+        open={menuOpen}
+        onClose={closeMenu}
+        title="Shop by aisle"
+        subtitle={`${categories.length} aisles · delivered in ${area.eta}`}
+        zIndex="z-[75]"
+        footer={
+          <div className="flex items-center gap-2">
             <Link
               href="/offers"
-              className="press mt-2 flex items-center justify-between rounded-2xl bg-brand px-4 py-3 text-sm font-bold text-white"
+              onClick={closeMenu}
+              className="press flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-brand text-[13px] font-bold text-white"
             >
               This week&apos;s offers <ArrowRightIcon className="h-4 w-4" />
             </Link>
-            <p className="mt-3 text-center text-[11px] text-ink-soft">Free delivery over $35 · 30-min slots</p>
+            <Link
+              href="/track"
+              onClick={closeMenu}
+              className="press flex h-11 items-center justify-center rounded-full border border-line px-4 text-[13px] font-bold text-ink"
+            >
+              Track
+            </Link>
           </div>
+        }
+      >
+        <button
+          type="button"
+          onClick={() => {
+            closeMenu();
+            openPicker();
+          }}
+          className="press flex w-full items-center gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3 text-left"
+        >
+          <PinIcon className="h-4 w-4 shrink-0 text-brand" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[9.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Delivering to</span>
+            <span className="block truncate text-[13px] font-bold text-ink">
+              {area.neighbourhood}, {area.postcode}
+            </span>
+          </span>
+          <span className="shrink-0 text-[11px] font-bold text-brand">Change</span>
+        </button>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {categories.map((category) => {
+            const active = pathname === `/category/${category.slug}`;
+            return (
+              <Link
+                key={category.slug}
+                href={`/category/${category.slug}`}
+                onClick={closeMenu}
+                className={`press flex min-h-[64px] flex-col justify-between rounded-2xl border p-2.5 ${
+                  active ? "border-brand bg-brand-soft/60" : "border-line/80 bg-white"
+                }`}
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-cream text-[18px]">
+                  {category.emoji}
+                </span>
+                <span className="mt-1.5 min-w-0">
+                  <span className="block truncate text-[12.5px] font-bold text-ink">{category.name}</span>
+                  <span className="block truncate text-[10px] text-ink-soft">{category.tagline}</span>
+                </span>
+              </Link>
+            );
+          })}
         </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link
+            href="/offers#bundles"
+            onClick={closeMenu}
+            className="press flex min-h-[48px] items-center gap-2 rounded-2xl border border-line bg-white px-3 text-[12.5px] font-bold text-ink"
+          >
+            🧺 Bundles
+          </Link>
+          <Link
+            href="/search?q=organic"
+            onClick={closeMenu}
+            className="press flex min-h-[48px] items-center gap-2 rounded-2xl border border-line bg-white px-3 text-[12.5px] font-bold text-ink"
+          >
+            🌱 Organic shop
+          </Link>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-line bg-white p-2">
+          {user ? (
+            <>
+              <p className="px-1.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-soft">
+                Signed in as {user.name.split(" ")[0]}
+              </p>
+              {[
+                { href: "/account", label: "Account overview", icon: "🏠" },
+                { href: "/account/orders", label: "Orders", icon: "📦" },
+                { href: "/account/saved", label: "Saved items", icon: "❤️" },
+                { href: "/account/addresses", label: "Addresses", icon: "📍" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className="flex min-h-[44px] items-center gap-2.5 rounded-xl px-1.5 text-[13px] font-semibold hover:bg-cream"
+                >
+                  <span aria-hidden>{item.icon}</span> {item.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                onClick={async () => {
+                  closeMenu();
+                  await logout();
+                }}
+                className="flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-1.5 text-left text-[13px] font-semibold text-ink-soft hover:bg-rose-soft hover:text-clay"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <div className="p-1.5">
+              <p className="text-[12.5px] font-bold text-ink">Guest shopper</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-ink-soft">
+                Your basket saves automatically — no sign-in needed to check out.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <Link
+                  href="/login"
+                  onClick={closeMenu}
+                  className="press flex h-10 flex-1 items-center justify-center rounded-full bg-brand text-[12.5px] font-bold text-white"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/login?mode=create"
+                  onClick={closeMenu}
+                  className="press flex h-10 flex-1 items-center justify-center rounded-full border border-line text-[12.5px] font-bold text-ink"
+                >
+                  Create account
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <p className="mt-3 text-center text-[11px] text-ink-soft">Free delivery over $35 · 30-min slots</p>
+      </BottomSheet>
+    </>
+  );
+}
+
+function AccountMenu({
+  user,
+  onLogout,
+}: {
+  user: ReturnType<typeof useSession>["user"];
+  onLogout: () => Promise<void>;
+}) {
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setAccountOpen((value) => !value)}
+        className="press flex h-10 items-center gap-2 rounded-full px-2.5 text-[12.5px] font-semibold text-ink hover:bg-cream-deep"
+        aria-label={user ? `Account menu for ${user.name}` : "Account menu"}
+        aria-expanded={accountOpen}
+      >
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-cream-deep text-[11px] font-bold text-brand-deep">
+          {user ? initials(user.name) : <UserIcon className="h-3.5 w-3.5" />}
+        </span>
+        <span className="hidden lg:block">{user ? user.name.split(" ")[0] : "Account"}</span>
+        <ChevronDownIcon className="hidden h-3.5 w-3.5 text-ink-soft lg:block" />
+      </button>
+      {accountOpen ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-10 cursor-default"
+            aria-label="Close account menu"
+            onClick={() => setAccountOpen(false)}
+          />
+          <div className="animate-scale-in absolute right-0 top-12 z-20 w-64 rounded-2xl border border-line bg-white p-2 shadow-lift">
+            {user ? (
+              <>
+                <div className="px-2 py-1.5">
+                  <p className="truncate text-[12.5px] font-bold text-ink">{user.name}</p>
+                  <p className="truncate text-[10.5px] text-ink-soft">{user.email}</p>
+                </div>
+                <div className="my-1 h-px bg-line/70" />
+                {ACCOUNT_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream"
+                  >
+                    {item.icon} {item.label}
+                  </Link>
+                ))}
+                <div className="my-1 h-px bg-line/70" />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setAccountOpen(false);
+                    await onLogout();
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-[12.5px] font-semibold text-ink-soft hover:bg-rose-soft hover:text-clay"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="px-2 py-1.5">
+                  <p className="text-[12.5px] font-bold text-ink">Guest shopper</p>
+                  <p className="text-[10.5px] leading-relaxed text-ink-soft">
+                    Your basket saves automatically — no sign-in required to check out.
+                  </p>
+                </div>
+                <div className="my-1 h-px bg-line/70" />
+                <Link
+                  href="/login"
+                  onClick={() => setAccountOpen(false)}
+                  className="press mt-1 flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand text-[12px] font-bold text-white hover:bg-brand-deep"
+                >
+                  Sign in <ArrowRightIcon className="h-3.5 w-3.5" />
+                </Link>
+                <Link
+                  href="/login?mode=create"
+                  onClick={() => setAccountOpen(false)}
+                  className="press mt-1.5 flex h-9 items-center justify-center rounded-lg border border-line text-[12px] font-bold text-ink hover:border-brand hover:text-brand"
+                >
+                  Create account
+                </Link>
+                <div className="my-1.5 h-px bg-line/70" />
+                {GUEST_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-2 py-2 text-[12.5px] font-semibold text-ink hover:bg-cream"
+                  >
+                    {item.icon} {item.label}
+                  </Link>
+                ))}
+              </>
+            )}
+          </div>
+        </>
       ) : null}
     </>
   );
 }
+
+const ACCOUNT_LINKS = [
+  { href: "/account", label: "Account overview", icon: "🏠" },
+  { href: "/account/orders", label: "Orders & reordering", icon: "📦" },
+  { href: "/account/saved", label: "Saved items", icon: "❤️" },
+  { href: "/account/addresses", label: "Addresses", icon: "📍" },
+  { href: "/account/settings", label: "Profile & security", icon: "⚙️" },
+];
+
+const GUEST_LINKS = [
+  { href: "/track", label: "Track an order", icon: "🚚" },
+  { href: "/offers", label: "Offers & coupons", icon: "🎁" },
+  { href: "/info/contact", label: "Help & contact", icon: "💬" },
+];

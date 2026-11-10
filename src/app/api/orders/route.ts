@@ -1,6 +1,7 @@
+import { getStoreSettings } from "@/lib/admin";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { orderItems, orders } from "@/db/schema";
+import { addresses, orderItems, orders } from "@/db/schema";
 import { clearCart, resolveCartForRequest } from "@/lib/cart-server";
 import { orderNumber } from "@/lib/format";
 import { isServiceable } from "@/lib/delivery";
@@ -22,6 +23,14 @@ type OrderPayload = {
 };
 
 export async function POST(request: Request) {
+  // Owner-controlled kill switch: no orders while the shop is paused.
+  const settings = await getStoreSettings();
+  if (!settings.storeOpen) {
+    return Response.json(
+      { error: "The store is paused right now — please try again shortly." },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
   const body = (await request.json().catch(() => ({}))) as OrderPayload;
   const checkoutId = typeof body.checkoutId === "string" && body.checkoutId.length >= 8 ? body.checkoutId : null;
 
@@ -123,6 +132,33 @@ export async function POST(request: Request) {
     });
 
     await clearCart(token);
+
+    // Signed-in shoppers get this address saved automatically, but only if their
+    // address book is still empty — repeat customers keep their own labels.
+    const shopper = await getCurrentUser(request);
+    if (shopper && postcode && isServiceable(postcode)) {
+      try {
+        const existing = await db.select({ id: addresses.id }).from(addresses).where(eq(addresses.userId, shopper.id)).limit(1);
+        if (!existing.length) {
+          await db.insert(addresses).values({
+            userId: shopper.id,
+            label: "Home",
+            recipient: customerName,
+            line1: address,
+            line2: "",
+            city,
+            postcode,
+            phone: (body.phone ?? "").trim().slice(0, 32),
+            instructions: (body.notes ?? "").trim().slice(0, 300),
+            isDefault: true,
+          });
+        }
+      } catch (addressError) {
+        // Never fail an order because the address book write failed.
+        console.error("address autosave failed", addressError);
+      }
+    }
+
     return Response.json({ orderNumber: number, totalCents });
   } catch (error) {
     // A concurrent duplicate submit may race the unique index — return the

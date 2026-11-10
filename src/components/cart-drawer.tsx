@@ -51,26 +51,40 @@ export function CartDrawer() {
         className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]"
         onClick={closeCart}
       />
-      <aside className="animate-slide-in absolute inset-y-0 right-0 flex w-full max-w-[430px] flex-col bg-cream shadow-[0_0_120px_-20px_rgba(19,38,29,0.6)]">
-        <div className="flex items-center justify-between border-b border-line/80 bg-cream/95 px-5 py-4 backdrop-blur">
-          <div>
-            <h2 className="font-display text-[22px] font-semibold leading-none tracking-tight">Your basket</h2>
-            <p className="mt-1 text-[11px] font-medium text-ink-soft">
-              {cart?.itemCount ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} · saved for 60 days` : "Nothing in here yet"}
-            </p>
+      {/* Phones: a bottom sheet that rises to the thumb. Tablets/desktop: the
+          original right-hand drawer. Same markup, different anchoring. */}
+      <aside
+        className="animate-drawer absolute inset-x-0 bottom-0 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[26px] bg-cream shadow-[0_-24px_60px_-30px_rgba(19,38,29,0.65)] sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:max-h-none sm:w-full sm:max-w-[430px] sm:rounded-none sm:shadow-[0_0_120px_-20px_rgba(19,38,29,0.6)]"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your basket"
+      >
+        <div className="shrink-0 border-b border-line/80 bg-cream/95 px-4 pb-3 pt-2 backdrop-blur sm:px-5 sm:pt-4">
+          <span className="mx-auto mb-2 block h-1 w-10 rounded-full bg-line sm:hidden" aria-hidden />
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-display text-[20px] font-semibold leading-none tracking-tight sm:text-[22px]">
+                Your basket
+              </h2>
+              <p className="mt-1 text-[11px] font-medium text-ink-soft">
+                {cart?.itemCount
+                  ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} · saved for 60 days`
+                  : "Nothing in here yet"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={closeCart}
+              className="press tap-xl -mr-1 grid shrink-0 place-items-center rounded-full bg-white text-ink hover:bg-cream-deep"
+              aria-label="Close basket"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={closeCart}
-            className="press grid h-9 w-9 place-items-center rounded-full bg-white text-ink hover:bg-cream-deep"
-            aria-label="Close basket"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
         </div>
 
         {cart && lines.length > 0 ? (
-          <div className="border-b border-line/70 bg-white px-5 py-3">
+          <div className="shrink-0 border-b border-line/70 bg-white px-4 py-3 sm:px-5">
             <div className="flex items-center justify-between gap-2 text-[11.5px] font-semibold">
               {remaining > 0 ? (
                 <span className="inline-flex items-center gap-1.5 text-ink">
@@ -93,7 +107,7 @@ export function CartDrawer() {
           </div>
         ) : null}
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
+        <div className="sheet-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-3.5 py-3.5 sm:px-5 sm:py-4">
           {loading && !cart ? (
             <div className="space-y-3">
               {[0, 1, 2].map((row) => (
@@ -192,7 +206,8 @@ export function CartDrawer() {
                     <button
                       type="button"
                       onClick={() => setCouponOpen((value) => !value)}
-                      className="flex w-full items-center justify-between text-[12px] font-semibold text-ink"
+                      className="flex min-h-[44px] w-full items-center justify-between text-[12.5px] font-semibold text-ink sm:min-h-0 sm:text-[12px]"
+                      aria-expanded={couponOpen}
                     >
                       <span className="inline-flex items-center gap-1.5">
                         <SparkleIcon className="h-3.5 w-3.5 text-amber" /> Have a promo code?
@@ -205,7 +220,9 @@ export function CartDrawer() {
                           value={code}
                           onChange={(event) => setCode(event.target.value.toUpperCase())}
                           placeholder="FRESH10"
-                          className="h-9 min-w-0 flex-1 rounded-lg border border-line bg-cream/60 px-3 text-[12px] font-bold tracking-wide uppercase outline-none focus:border-brand"
+                          autoCapitalize="characters"
+                          enterKeyHint="done"
+                          className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-cream/60 px-3 text-[13px] font-bold tracking-wide uppercase outline-none focus:border-brand sm:h-9 sm:text-[12px]"
                         />
                         <button
                           type="button"
@@ -214,7 +231,7 @@ export function CartDrawer() {
                             setCouponMessage({ ok: result.ok, text: result.message });
                             if (result.ok) setCode("");
                           }}
-                          className="press h-9 rounded-lg bg-ink px-3 text-[11.5px] font-bold text-cream"
+                          className="press h-11 shrink-0 rounded-lg bg-ink px-4 text-[12.5px] font-bold text-cream sm:h-9 sm:px-3 sm:text-[11.5px]"
                         >
                           Apply
                         </button>
@@ -274,7 +291,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => add(product)}
                           disabled={isPending(product.id)}
-                          className="press mt-1.5 flex h-6 w-full items-center justify-center gap-1 rounded-md bg-ink text-[10px] font-bold text-cream hover:bg-brand-deep disabled:opacity-60"
+                          className="press mt-1.5 flex h-9 w-full items-center justify-center gap-1 rounded-md bg-ink text-[11px] font-bold text-cream hover:bg-brand-deep disabled:opacity-60 sm:h-6 sm:text-[10px]"
                         >
                           <PlusIcon className="h-3 w-3" /> Add
                         </button>
@@ -288,7 +305,7 @@ export function CartDrawer() {
         </div>
 
         {cart && lines.length > 0 ? (
-          <div className="border-t border-line bg-white px-5 pb-5 pt-4">
+          <div className="safe-b shrink-0 border-t border-line bg-white px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
             <div className="space-y-1.5 text-[12px]">
               <div className="flex justify-between text-ink-soft">
                 <span>Subtotal</span>
@@ -385,7 +402,7 @@ function CartRow({
               type="button"
               onClick={onRemove}
               disabled={pending}
-              className="press -mr-1 -mt-1 grid h-6 w-6 place-items-center rounded-full text-ink-soft hover:bg-cream-deep hover:text-clay disabled:opacity-50"
+              className="press -mr-2 -mt-2 grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-cream-deep hover:text-clay disabled:opacity-50 sm:-mr-1 sm:-mt-1 sm:h-6 sm:w-6"
               aria-label={`Remove ${line.name}`}
             >
               <CloseIcon className="h-3.5 w-3.5" />
@@ -397,18 +414,20 @@ function CartRow({
                 type="button"
                 onClick={onDecrease}
                 disabled={pending}
-                className="press grid h-7 w-7 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50"
+                className="press grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50 sm:h-7 sm:w-7"
                 aria-label="Decrease quantity"
               >
                 <MinusIcon className="h-3.5 w-3.5" />
               </button>
-              <span className="w-5 text-center text-[12px] font-bold">{line.quantity}</span>
+              <span className="w-6 text-center text-[13px] font-bold tabular-nums sm:w-5 sm:text-[12px]">
+                {line.quantity}
+              </span>
               <button
                 type="button"
                 onClick={onIncrease}
                 disabled={pending || line.quantity >= Math.max(1, Math.min(20, line.stock))}
                 title={line.quantity >= line.stock ? `Only ${line.stock} available today` : undefined}
-                className="press grid h-7 w-7 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50"
+                className="press grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50 sm:h-7 sm:w-7"
                 aria-label="Increase quantity"
               >
                 <PlusIcon className="h-3.5 w-3.5" />

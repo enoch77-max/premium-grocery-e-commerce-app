@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { getCurrentUser, getSessionToken, hashPassword, revokeUserSessions, verifyPassword } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,9 @@ export async function POST(request: Request) {
       return Response.json({ error: "Your current password doesn't match", field: "currentPassword" }, { status: 401 });
     }
     await db.update(users).set({ passwordHash: hashPassword(newPassword) }).where(eq(users.id, user.id));
-    return Response.json({ ok: true });
+    // Sign out every other device; keep this one signed in.
+    await revokeUserSessions(user.id, await getSessionToken(request));
+    return Response.json({ ok: true, message: "Password updated — other devices have been signed out." });
   } catch (error) {
     console.error("password change failed", error);
     return Response.json({ error: "We couldn't update your password." }, { status: 500 });

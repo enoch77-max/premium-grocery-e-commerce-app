@@ -10,7 +10,15 @@ import { ProductRail } from "@/components/product-rail";
 import { ProductCard } from "@/components/product-card";
 import { BundleCard } from "@/components/bundle-card";
 import { SectionHeading } from "@/components/section-heading";
-import { ArrowRightIcon, CheckIcon, LeafIcon, ShieldIcon, SparkleIcon, TruckIcon } from "@/components/icons";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  ChevronRightIcon,
+  LeafIcon,
+  ShieldIcon,
+  SparkleIcon,
+  TruckIcon,
+} from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -101,10 +109,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pb-24 pt-4 sm:px-6 sm:pt-5 lg:pb-6">
+    <div className="mx-auto max-w-[1340px] px-4 pb-24 pt-2 sm:px-6 sm:pt-5 lg:pb-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+      {/* Phone order: a compact breadcrumb, then the photo, then the name and
+          price. Previously the image filled the whole first screen, so opening
+          a product looked like nothing had happened. */}
+      <nav className="mb-2 flex items-center gap-1 text-[11px] font-medium text-ink-soft lg:hidden" aria-label="Breadcrumb">
+        <Link href="/" className="hover:text-brand">
+          Home
+        </Link>
+        <ChevronRightIcon className="h-3 w-3 shrink-0" />
+        <Link href={`/category/${product.categorySlug}`} className="truncate hover:text-brand">
+          {category?.name ?? "Shop"}
+        </Link>
+        <ChevronRightIcon className="h-3 w-3 shrink-0" />
+        <span className="truncate font-semibold text-ink">{product.name}</span>
+      </nav>
+
+      <div className="grid gap-3 sm:gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
         <div className="lg:sticky lg:top-[122px]">
           <ProductGallery product={product} categoryName={category?.name ?? "Fresco"} />
         </div>
@@ -133,13 +156,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   items and their live multi-buy savings — what you see is what the basket charges.
                 </p>
                 <div className="mt-2.5 flex flex-wrap gap-2 text-[11px] font-semibold text-ink">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1">
                     <TruckIcon className="h-3.5 w-3.5 text-brand" /> Free delivery over $35
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1">
                     <LeafIcon className="h-3.5 w-3.5 text-brand" /> Freshness guaranteed
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1">
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1">
                     <CheckIcon className="h-3.5 w-3.5 text-brand" /> Save {formatMoney(matchingBundle.compareAtCents - matchingBundle.priceCents)}
                   </span>
                 </div>

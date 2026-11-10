@@ -14,6 +14,8 @@ export async function PATCH(request: Request) {
     email?: string;
     phone?: string;
     marketingOptIn?: boolean;
+    orderUpdatesEmail?: boolean;
+    orderUpdatesSms?: boolean;
   };
 
   const name = (body.name ?? user.name).trim();
@@ -38,7 +40,14 @@ export async function PATCH(request: Request) {
 
     const updated = await db
       .update(users)
-      .set({ name, email, phone, marketingOptIn: body.marketingOptIn ?? user.marketingOptIn })
+      .set({
+        name,
+        email,
+        phone,
+        marketingOptIn: body.marketingOptIn ?? user.marketingOptIn,
+        orderUpdatesEmail: body.orderUpdatesEmail ?? user.orderUpdatesEmail,
+        orderUpdatesSms: body.orderUpdatesSms ?? user.orderUpdatesSms,
+      })
       .where(eq(users.id, user.id))
       .returning({
         id: users.id,
@@ -46,6 +55,8 @@ export async function PATCH(request: Request) {
         email: users.email,
         phone: users.phone,
         marketingOptIn: users.marketingOptIn,
+        orderUpdatesEmail: users.orderUpdatesEmail,
+        orderUpdatesSms: users.orderUpdatesSms,
         createdAt: users.createdAt,
       });
 

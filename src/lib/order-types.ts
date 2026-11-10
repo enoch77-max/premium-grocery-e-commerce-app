@@ -47,7 +47,27 @@ export const ORDER_STATUS_LABELS: Record<string, { label: string; tone: string; 
   on_the_way: { label: "On the way", tone: "amber", note: "Your driver has left the store" },
   delivered: { label: "Delivered", tone: "brand", note: "Left in a safe place as requested" },
   cancelled: { label: "Cancelled", tone: "clay", note: "Refunded to your original payment method" },
+  // Legacy values written by the first version of the admin dashboard.
+  packed: { label: "Packing", tone: "amber", note: "Our team is picking your items by hand" },
+  "out-for-delivery": { label: "On the way", tone: "amber", note: "Your driver has left the store" },
 };
+
+/**
+ * Normalises an order status to the customer-facing vocabulary. Older admin
+ * builds wrote `packed` / `out-for-delivery`; those rows still exist, so we map
+ * them rather than showing an "unknown status" badge or a broken tracker.
+ */
+export function normaliseOrderStatus(status: string) {
+  if (status === "packed") return "packing";
+  if (status === "out-for-delivery") return "on_the_way";
+  return status;
+}
+
+/** True while the order is still being fulfilled. */
+export function isActiveOrder(status: string) {
+  const normalised = normaliseOrderStatus(status);
+  return normalised !== "delivered" && normalised !== "cancelled";
+}
 
 export function orderStatusIndex(status: string) {
   const index = ORDER_STATUS_FLOW.indexOf(status as (typeof ORDER_STATUS_FLOW)[number]);

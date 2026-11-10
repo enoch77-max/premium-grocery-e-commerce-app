@@ -49,15 +49,15 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
   const discount = discountPercent(product.priceCents, product.compareAtCents);
 
   useEffect(() => {
-    const onScroll = () => setShowSticky(window.scrollY > 620);
+    const onScroll = () => setShowSticky(window.scrollY > 420);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <div>
-      <nav className="flex flex-wrap items-center gap-1 text-[11px] font-medium text-ink-soft">
+    <div className="flex flex-col">
+      <nav className="hidden flex-wrap items-center gap-1 text-[11px] font-medium text-ink-soft lg:flex">
         <Link href="/" className="hover:text-brand">
           Home
         </Link>
@@ -69,29 +69,29 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         <span className="truncate font-semibold text-ink">{product.name}</span>
       </nav>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className="order-1 flex flex-wrap items-center gap-2">
         <span className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-brand">{product.brand}</span>
         <span className="h-1 w-1 rounded-full bg-line" />
-        <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-bold text-brand-deep">
+        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-bold text-brand-deep">
           <CheckIcon className="h-2.5 w-2.5" /> In stock
         </span>
         {product.isOrganic ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-cream-deep px-2 py-0.5 text-[10px] font-bold text-ink">
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream-deep px-2 py-0.5 text-[10px] font-bold text-ink">
             <LeafIcon className="h-2.5 w-2.5 text-brand" /> Organic
           </span>
         ) : null}
         {product.isBestseller ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-soft px-2 py-0.5 text-[10px] font-bold text-ink">
+          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-soft px-2 py-0.5 text-[10px] font-bold text-ink">
             <SparkleIcon className="h-2.5 w-2.5 text-amber" /> Bestseller
           </span>
         ) : null}
       </div>
 
-      <h1 className="mt-1.5 font-display text-[28px] font-semibold leading-[1.04] tracking-[-0.03em] sm:text-[36px]">
+      <h1 className="order-2 mt-1.5 font-display text-[23px] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-[36px] sm:leading-[1.04]">
         {product.name}
       </h1>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2.5">
+      <div className="order-3 mt-1.5 flex flex-wrap items-center gap-2.5 sm:mt-2">
         <div className="flex items-center gap-1">
           <div className="flex items-center gap-0.5 text-amber">
             {[0, 1, 2, 3, 4].map((star) => (
@@ -110,9 +110,9 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         <span className="text-[11px] text-ink-soft">· {product.unit}</span>
       </div>
 
-      <p className="mt-3 text-[12.5px] leading-relaxed text-ink-soft">{product.description}</p>
+      <p className="order-6 mt-3 text-[12.5px] leading-relaxed text-ink-soft lg:order-3">{product.description}</p>
 
-      <div className="mt-3 rounded-2xl border border-line/80 bg-white p-3.5">
+      <div className="order-4 mt-2.5 rounded-2xl border border-line/80 bg-white p-3 sm:mt-3 sm:p-3.5">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             <span className="font-display text-[30px] font-semibold leading-none tracking-tight text-ink">
@@ -129,15 +129,15 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
               </span>
             ) : null}
           </div>
-          <span className="text-[10.5px] font-medium text-ink-soft">
+          <span className="hidden text-[10.5px] font-medium text-ink-soft sm:inline">
             {formatMoney(product.priceCents)} / {product.unit.split("·")[0].trim()} · tax included
           </span>
         </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="mt-2 hidden flex-wrap gap-1.5 sm:flex">
           {product.highlights.slice(0, 3).map((highlight) => (
             <span
               key={highlight}
-              className="inline-flex items-center gap-1 rounded-full bg-cream px-2 py-1 text-[10.5px] font-semibold text-ink"
+              className="inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2 py-1 text-[10.5px] font-semibold text-ink"
             >
               <CheckIcon className="h-3 w-3 text-brand" /> {highlight}
             </span>
@@ -145,7 +145,7 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         </div>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-line/80 bg-cream/60 p-3">
+      <div className="order-7 mt-3 rounded-2xl border border-line/80 bg-cream/60 p-3 lg:order-6">
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
@@ -183,22 +183,25 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         </p>
       </div>
 
-      <div className="mt-3 space-y-2">
-        <CartControls product={product} size="lg" label={`Add to basket · ${formatMoney(product.priceCents)}`} />
+      {/* Two full-width stacked CTAs eat ~110px of a phone screen, so below sm
+          they share one row; desktop keeps the stacked pair. */}
+      <div className="order-5 mt-2.5 grid grid-cols-2 gap-2 sm:mt-3 sm:grid-cols-1">
+        <CartControls product={product} size="lg" label="Add to basket" />
         <button
           type="button"
           onClick={() => {
             if (quantity === 0) void add(product);
             openCart();
           }}
-          className="press flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink text-[14px] font-bold text-cream hover:bg-brand-deep"
+          className="press flex h-13 w-full items-center justify-center gap-2 rounded-full bg-ink text-[13px] font-bold text-cream hover:bg-brand-deep sm:h-12 sm:text-[14px]"
         >
-          Buy now · checkout in 30 seconds
+          <span className="sm:hidden">Buy now</span>
+          <span className="hidden sm:inline">Buy now · checkout in 30 seconds</span>
           <ArrowRightIcon className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-soft/50 px-3 py-2 text-[10.5px]">
+      <div className="order-8 mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-soft/50 px-3 py-2 text-[10.5px]">
         <span className="inline-flex items-center gap-1 font-semibold text-brand-deep">
           <ShieldIcon className="h-3.5 w-3.5" /> Secure checkout · Freshness guarantee
         </span>
@@ -211,7 +214,7 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
 
       <a
         href="#frequently-bought"
-        className="press mt-3 flex items-center justify-between rounded-2xl border border-dashed border-brand/35 bg-white px-3.5 py-2.5 text-left hover:border-brand"
+        className="press order-9 mt-3 flex items-center justify-between rounded-2xl border border-dashed border-brand/35 bg-white px-3.5 py-2.5 text-left hover:border-brand"
       >
         <span>
           <span className="flex items-center gap-1 text-[11.5px] font-bold text-brand-deep">
@@ -222,24 +225,25 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         <ArrowRightIcon className="h-4 w-4 shrink-0 text-brand" />
       </a>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line/80 bg-white">
+      <div className="order-10 mt-4 overflow-hidden rounded-2xl border border-line/80 bg-white">
         <div className="flex border-b border-line/70">
           {(
             [
-              { id: "details", label: "Details" },
-              { id: "storage", label: "Storage & origin" },
-              { id: "reviews", label: `Reviews (${product.reviewCount})` },
+              { id: "details", short: "Details", label: "Details" },
+              { id: "storage", short: "Storage", label: "Storage & origin" },
+              { id: "reviews", short: "Reviews", label: `Reviews (${product.reviewCount})` },
             ] as const
           ).map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => setTab(item.id)}
-              className={`relative flex-1 px-2 py-2.5 text-[11.5px] font-bold transition ${
+              className={`relative flex-1 whitespace-nowrap px-2 py-2.5 text-[11px] font-bold transition sm:text-[11.5px] ${
                 tab === item.id ? "text-brand-deep" : "text-ink-soft hover:text-ink"
               }`}
             >
-              {item.label}
+              <span className="sm:hidden">{item.short}</span>
+              <span className="hidden sm:inline">{item.label}</span>
               {tab === item.id ? <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-brand" /> : null}
             </button>
           ))}
@@ -262,7 +266,7 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
               </ul>
               <div className="flex flex-wrap gap-1 pt-1">
                 {product.tags.slice(0, 6).map((tag) => (
-                  <span key={tag} className="rounded-full bg-cream px-2 py-0.5 text-[9.5px] font-semibold text-ink-soft">
+                  <span key={tag} className="whitespace-nowrap rounded-full bg-cream px-2 py-0.5 text-[9.5px] font-semibold text-ink-soft">
                     {tag}
                   </span>
                 ))}
@@ -306,9 +310,10 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         </div>
       </div>
 
+      {/* Parked on top of the bottom navigation, never behind it. */}
       {showSticky ? (
-        <div className="animate-fade-up fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-3 py-2.5 backdrop-blur lg:hidden">
-          <div className="flex items-center gap-3">
+        <div className="above-tabbar animate-fade-up fixed inset-x-0 z-40 border-t border-line bg-white/95 px-3 py-2 backdrop-blur sm:py-2.5 lg:hidden">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <span className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-cream">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={product.imageUrl} alt="" className="h-full w-full object-cover" />
@@ -324,8 +329,8 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
                 ) : null}
               </p>
             </div>
-            <div className="w-[180px] shrink-0">
-              <CartControls product={product} label="Add to basket" />
+            <div className="w-[124px] shrink-0 min-[380px]:w-[150px] sm:w-[180px]">
+              <CartControls product={product} label="Add" size="sm" />
             </div>
           </div>
         </div>

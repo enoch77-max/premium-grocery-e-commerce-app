@@ -17,10 +17,10 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
     <article className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-line/80 bg-white transition hover:-translate-y-1 hover:shadow-lift">
       <div className={`relative ${style.panel} px-4 pb-3 pt-4`}>
         <div className="flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-[0.1em] backdrop-blur">
+          <span className="inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded-full bg-white/20 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-[0.1em] backdrop-blur">
             <SparkleIcon className="h-2.5 w-2.5" /> {bundle.badge}
           </span>
-          <span className="rounded-full bg-black/15 px-2 py-0.5 text-[9.5px] font-bold">
+          <span className="shrink-0 whitespace-nowrap rounded-full bg-black/15 px-2 py-0.5 text-[9.5px] font-bold">
             {products.length} items
           </span>
         </div>

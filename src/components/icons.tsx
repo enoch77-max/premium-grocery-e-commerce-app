@@ -20,6 +20,25 @@ export function SearchIcon(props: IconProps) {
   );
 }
 
+export function HomeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 10.6 12 4l8 6.6V19a1.4 1.4 0 0 1-1.4 1.4h-3.4v-5.2H8.8v5.2H5.4A1.4 1.4 0 0 1 4 19Z" />
+    </svg>
+  );
+}
+
+export function AisleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="4" width="6.6" height="6.6" rx="1.8" />
+      <rect x="13.4" y="4" width="6.6" height="6.6" rx="1.8" />
+      <rect x="4" y="13.4" width="6.6" height="6.6" rx="1.8" />
+      <rect x="13.4" y="13.4" width="6.6" height="6.6" rx="1.8" />
+    </svg>
+  );
+}
+
 export function CartIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

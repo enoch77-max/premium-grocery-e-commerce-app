@@ -143,26 +143,37 @@ export function SearchOverlay({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex justify-center px-3 pt-[4vh] sm:px-6 sm:pt-[8vh]" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[80] flex justify-center sm:px-6 sm:pt-[8vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search groceries"
+    >
       <button
         type="button"
         aria-label="Close search"
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[3px]"
+        className="absolute inset-0 bg-ink/40 backdrop-blur-[3px] max-sm:hidden"
         onClick={onClose}
       />
+      {/* Phones get a true full-screen search page (no floating card, no dead
+          space above the keyboard); tablets and up keep the centred dialog. */}
       <div
-        className="animate-scale-in relative w-full max-w-3xl overflow-hidden rounded-[26px] border border-line bg-white shadow-[0_40px_120px_-30px_rgba(19,38,29,0.5)]"
+        className="animate-scale-in relative flex h-[100dvh] w-full flex-col overflow-hidden bg-white max-sm:rounded-none sm:max-h-[80vh] sm:max-w-3xl sm:rounded-[26px] sm:border sm:border-line sm:shadow-[0_40px_120px_-30px_rgba(19,38,29,0.5)]"
         onKeyDown={handleKeyDown}
       >
-        <div className="flex items-center gap-3 border-b border-line/80 px-4 py-3.5 sm:px-5">
+        <div className="safe-t flex shrink-0 items-center gap-2.5 border-b border-line/80 px-3 py-2.5 sm:gap-3 sm:px-5 sm:py-3.5">
           <SearchIcon className="h-5 w-5 shrink-0 text-brand" />
           <input
             ref={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search milk, avocados, sourdough… try “breakfast under $10”"
-            className="w-full bg-transparent text-[15px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-soft/70"
+            placeholder="Search milk, avocados, sourdough…"
+            className="h-10 min-w-0 flex-1 bg-transparent text-[16px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-soft/70 sm:h-auto sm:text-[15px]"
             aria-label="Search groceries"
+            enterKeyHint="search"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
           />
           {query ? (
             <button
@@ -171,12 +182,19 @@ export function SearchOverlay({
                 setQuery("");
                 inputRef.current?.focus();
               }}
-              className="press rounded-full p-1.5 text-ink-soft hover:bg-cream-deep"
+              className="press tap-xl grid shrink-0 place-items-center rounded-full text-ink-soft hover:bg-cream-deep"
               aria-label="Clear search"
             >
               <CloseIcon className="h-4 w-4" />
             </button>
           ) : null}
+          <button
+            type="button"
+            onClick={onClose}
+            className="press -mr-1 flex h-10 shrink-0 items-center rounded-xl px-3 text-[14px] font-bold text-brand hover:bg-cream-deep sm:hidden"
+          >
+            Cancel
+          </button>
           <button
             type="button"
             onClick={onClose}
@@ -186,14 +204,14 @@ export function SearchOverlay({
           </button>
         </div>
 
-        <div className="max-h-[64vh] overflow-y-auto overscroll-contain">
+        <div className="sheet-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain sm:max-h-[64vh]">
           {query ? (
             <div className="flex flex-wrap items-center gap-2 border-b border-line/70 bg-cream/60 px-4 py-2.5 text-[11px] font-semibold text-ink-soft sm:px-5">
               <SparkleIcon className="h-3.5 w-3.5 text-brand" />
               <span className="text-ink">Smart search</span>
               {loading ? <span className="text-ink-soft">thinking…</span> : null}
               {interpreted?.filters.map((filter) => (
-                <span key={filter} className="rounded-full bg-brand-soft px-2 py-0.5 text-brand-deep">
+                <span key={filter} className="whitespace-nowrap rounded-full bg-brand-soft px-2 py-0.5 text-brand-deep">
                   {filter}
                 </span>
               ))}
@@ -201,7 +219,7 @@ export function SearchOverlay({
                 <button
                   type="button"
                   onClick={() => setQuery(interpreted.corrected ?? "")}
-                  className="rounded-full bg-amber-soft px-2 py-0.5 text-[11px] font-bold text-ink"
+                  className="rounded-lg bg-amber-soft px-2 py-1 text-left text-[11px] font-bold leading-snug text-balance text-ink"
                 >
                   Did you mean “{interpreted.corrected}”?
                 </button>
@@ -233,7 +251,7 @@ export function SearchOverlay({
                         key={term}
                         type="button"
                         onClick={() => setQuery(term)}
-                        className="press rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:border-brand hover:text-brand"
+                        className="press rounded-xl border border-line px-3 py-1.5 text-left text-xs font-semibold leading-snug text-balance text-ink hover:border-brand hover:text-brand"
                       >
                         {term}
                       </button>
@@ -250,7 +268,7 @@ export function SearchOverlay({
                       key={term}
                       type="button"
                       onClick={() => setQuery(term)}
-                      className="press rounded-full bg-cream-deep/70 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-soft hover:text-brand-deep"
+                      className="press rounded-xl bg-cream-deep/70 px-3 py-1.5 text-left text-xs font-semibold leading-snug text-balance text-ink hover:bg-brand-soft hover:text-brand-deep"
                     >
                       {term}
                     </button>
@@ -313,7 +331,7 @@ export function SearchOverlay({
                         key={term}
                         type="button"
                         onClick={() => setQuery(term)}
-                        className="press rounded-full border border-line px-3 py-1.5 text-xs font-semibold hover:border-brand hover:text-brand"
+                        className="press rounded-xl border border-line px-3 py-1.5 text-left text-xs font-semibold leading-snug text-balance hover:border-brand hover:text-brand"
                       >
                         {term}
                       </button>
@@ -382,14 +400,14 @@ export function SearchOverlay({
               ) : null}
 
               {products.length ? (
-                <div className="sticky bottom-0 mt-2 flex items-center justify-between gap-3 border-t border-line/80 bg-white/95 px-4 py-3 backdrop-blur sm:px-5">
+                <div className="safe-b sticky bottom-0 mt-2 flex items-center justify-between gap-3 border-t border-line/80 bg-white/95 px-3 py-2.5 backdrop-blur sm:px-5 sm:py-3">
                   <span className="hidden text-[11px] font-medium text-ink-soft sm:block">
                     ↑↓ to browse · Enter to open
                   </span>
                   <button
                     type="button"
                     onClick={() => goToSearch(query)}
-                    className="press ml-auto inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-xs font-bold text-cream hover:bg-brand-deep"
+                    className="press ml-auto inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-bold text-cream hover:bg-brand-deep sm:h-auto sm:px-4 sm:py-2 sm:text-xs"
                   >
                     See all {data?.total ?? products.length} results
                     <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -422,10 +440,10 @@ function SearchProductRow({
   return (
     <div
       onMouseEnter={onHover}
-      className={`group flex items-center gap-3 rounded-xl px-2 py-1.5 transition ${active ? "bg-cream-deep" : "hover:bg-cream/70"}`}
+      className={`group flex items-center gap-3 rounded-xl px-2 py-2.5 transition sm:py-1.5 ${active ? "bg-cream-deep" : "hover:bg-cream/70"}`}
     >
       <button type="button" onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-        <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-line/70 bg-cream">
+        <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-line/70 bg-cream sm:h-12 sm:w-12">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
         </span>
@@ -443,12 +461,12 @@ function SearchProductRow({
           </span>
         </span>
       </button>
-      <span className="text-sm font-bold text-ink">{formatMoney(product.priceCents)}</span>
+      <span className="shrink-0 text-sm font-bold text-ink">{formatMoney(product.priceCents)}</span>
       <button
         type="button"
         onClick={onAdd}
         disabled={pending}
-        className="press grid h-8 w-8 place-items-center rounded-full bg-brand text-white hover:bg-brand-deep disabled:opacity-60"
+        className="press grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand text-white hover:bg-brand-deep disabled:opacity-60 sm:h-8 sm:w-8"
         aria-label={`Add ${product.name} to basket`}
       >
         <PlusIcon className="h-4 w-4" strokeWidth={2.2} />

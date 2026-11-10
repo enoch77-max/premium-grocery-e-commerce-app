@@ -17,6 +17,9 @@ export type SessionUser = {
   name: string;
   phone: string;
   marketingOptIn: boolean;
+  orderUpdatesEmail?: boolean;
+  orderUpdatesSms?: boolean;
+  role?: string;
   createdAt: string;
 };
 
@@ -27,7 +30,13 @@ type SessionContextValue = {
   loading: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<AuthResult>;
-  register: (name: string, email: string, password: string, marketingOptIn: boolean) => Promise<AuthResult>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    marketingOptIn: boolean,
+    phone?: string,
+  ) => Promise<AuthResult>;
   loginDemo: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   refresh: () => Promise<SessionUser | null>;
@@ -44,6 +53,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const tokenRef = useRef<string | null>(null);
+  /**
+   * Invalidates in-flight /api/auth/me calls.
+   *
+   * On mount we call refresh(). If the user signs in before that request comes
+   * back (slow network, slow device, embedded preview), the stale response would
+   * land afterwards, see "no user", and wipe the session we just created — which
+   * is why the account page flashed and bounced back to sign-in. Every sign-in,
+   * sign-out and password change bumps this counter so older responses are ignored.
+   */
+  const epochRef = useRef(0);
 
   const saveToken = useCallback((next: string | null) => {
     tokenRef.current = next;
@@ -73,21 +92,43 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refresh = useCallback(async () => {
+    const epoch = epochRef.current;
+    let stored = tokenRef.current;
+    if (!stored) {
+      try {
+        stored = window.localStorage.getItem(TOKEN_KEY);
+      } catch {
+        stored = null;
+      }
+    }
     try {
-      const stored = tokenRef.current ?? window.localStorage.getItem(TOKEN_KEY);
-      tokenRef.current = stored;
       const headers = new Headers();
       if (stored) headers.set("x-session-token", stored);
       const response = await fetch("/api/auth/me", { headers, cache: "no-store" });
       const data = (await response.json().catch(() => null)) as { user?: SessionUser | null } | null;
+
+      // A sign-in or sign-out happened while this was in flight: its answer is
+      // already stale, so drop it rather than overwriting the live session.
+      if (epoch !== epochRef.current) return null;
+
       const nextUser = data?.user ?? null;
-      setUser(nextUser);
-      if (!nextUser) saveToken(null);
+      if (nextUser) {
+        tokenRef.current = stored;
+        setToken(stored);
+        setUser(nextUser);
+      } else if (!stored) {
+        // Only clear when we genuinely had nothing to authenticate with.
+        setUser(null);
+      } else {
+        // Token was rejected (expired / revoked): clear it.
+        saveToken(null);
+        setUser(null);
+      }
       return nextUser;
     } catch {
       return null;
     } finally {
-      setLoading(false);
+      if (epoch === epochRef.current) setLoading(false);
     }
   }, [saveToken]);
 
@@ -108,19 +149,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!response.ok || !data?.user || !data.token) {
         return { ok: false, message: data?.error ?? "We couldn't sign you in." };
       }
+      epochRef.current += 1;
       saveToken(data.token);
       setUser(data.user);
+      setLoading(false);
       return { ok: true, message: `Welcome back, ${data.user.name.split(" ")[0]}` };
     },
     [saveToken],
   );
 
   const register = useCallback(
-    async (name: string, email: string, password: string, marketingOptIn: boolean): Promise<AuthResult> => {
+    async (
+      name: string,
+      email: string,
+      password: string,
+      marketingOptIn: boolean,
+      phone = "",
+    ): Promise<AuthResult> => {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, marketingOptIn }),
+        body: JSON.stringify({ name, email, password, phone, marketingOptIn }),
       });
       const data = (await response.json().catch(() => null)) as
         | { user?: SessionUser; token?: string; error?: string }
@@ -128,8 +177,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!response.ok || !data?.user || !data.token) {
         return { ok: false, message: data?.error ?? "We couldn't create your account." };
       }
+      epochRef.current += 1;
       saveToken(data.token);
       setUser(data.user);
+      setLoading(false);
       return { ok: true, message: `Account created — welcome, ${data.user.name.split(" ")[0]}` };
     },
     [saveToken],
@@ -143,8 +194,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (!response.ok || !data?.user || !data.token) {
       return { ok: false, message: data?.error ?? "The demo account is unavailable right now." };
     }
+    epochRef.current += 1;
     saveToken(data.token);
     setUser(data.user);
+    setLoading(false);
     return { ok: true, message: `Signed in as ${data.user.name}` };
   }, [saveToken]);
 
@@ -152,6 +205,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       await authFetch("/api/auth/logout", { method: "POST" });
     } finally {
+      epochRef.current += 1;
       saveToken(null);
       setUser(null);
     }

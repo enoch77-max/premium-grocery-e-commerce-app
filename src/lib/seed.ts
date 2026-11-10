@@ -3,11 +3,20 @@ import { db } from "@/db";
 import { bundles, categories, coupons, offers, products } from "@/db/schema";
 import { seedBundles, seedCategories, seedCoupons, seedOffers, seedProducts } from "@/lib/catalog-data";
 import { ensureDemoAccount } from "@/lib/demo-account";
+import { ensureConfiguredAccounts } from "@/lib/configured-accounts";
 
 let seedPromise: Promise<void> | null = null;
 
+/** Set SEED_DEMO_DATA=0 on a real store to skip the demo shopper account. */
+export function demoDataEnabled() {
+  return process.env.SEED_DEMO_DATA !== "0";
+}
+
 async function runSeed() {
-  await ensureDemoAccount();
+  // Owner/demo accounts come from env (ADMIN_*, DEMO_*); the demo shopper also
+  // gets addresses, saved items and sample orders for a usable first visit.
+  await ensureConfiguredAccounts();
+  if (demoDataEnabled()) await ensureDemoAccount();
   const existing = await db.execute<{ count: string }>(sql`select count(*)::text as count from categories`);
   const count = Number(existing.rows[0]?.count ?? "0");
 

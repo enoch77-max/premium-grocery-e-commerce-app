@@ -18,8 +18,10 @@ export function ProductGallery({ product, categoryName }: { product: Product; ca
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-[26px] border border-line/80 bg-white">
-        <div className="relative aspect-square w-full overflow-hidden bg-cream">
+      <div className="relative overflow-hidden rounded-[22px] border border-line/80 bg-white sm:rounded-[26px]">
+        {/* A full square photo pushed the title and price ~750px down a phone
+            screen. Phones get a 4:3 hero capped to 38% of the viewport. */}
+        <div className="gallery-frame relative aspect-[4/3] max-h-[38dvh] w-full overflow-hidden bg-cream sm:aspect-square sm:max-h-none">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={product.imageUrl}
@@ -29,41 +31,49 @@ export function ProductGallery({ product, categoryName }: { product: Product; ca
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/10 via-transparent to-transparent" />
 
-          <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
-            {discount > 0 ? (
-              <span className="rounded-full bg-clay px-2.5 py-1 text-[10.5px] font-extrabold tracking-wide text-white shadow-sm">
-                SAVE {discount}%
+          {/* One flex row so the left badges and the right chip can never
+              overlap on narrow screens; each capsule keeps its text on one line. */}
+          <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-col items-start gap-1.5">
+              {discount > 0 ? (
+                <span className="whitespace-nowrap rounded-full bg-clay px-2.5 py-1 text-[10.5px] font-extrabold tracking-wide text-white shadow-sm">
+                  SAVE {discount}%
+                </span>
+              ) : null}
+              {product.badge && !product.badge.toLowerCase().includes("save") ? (
+                <span className="max-w-full whitespace-nowrap rounded-full bg-white/95 px-2.5 py-1 text-[10.5px] font-bold text-ink shadow-sm backdrop-blur">
+                  {product.badge}
+                </span>
+              ) : null}
+              {/* Origin sits with the other metadata chips so the photo bottom
+                  only has to carry a single status line. */}
+              <span className="max-w-full whitespace-nowrap rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm backdrop-blur">
+                {product.origin}
               </span>
-            ) : null}
-            {product.badge ? (
-              <span className="rounded-full bg-white/95 px-2.5 py-1 text-[10.5px] font-bold text-ink shadow-sm backdrop-blur">
-                {product.badge}
-              </span>
-            ) : null}
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-brand-deep shadow-sm backdrop-blur">
+              <LeafIcon className="h-3 w-3" /> Fresh today
+            </span>
           </div>
 
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-brand-deep shadow-sm backdrop-blur">
-            <LeafIcon className="h-3 w-3" /> Fresh today
-          </span>
-
-          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-semibold text-cream backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-lime" /> In stock · ships from {categoryName}
-            </span>
-            <span className="rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm">
-              {product.origin}
+          {/* A single capsule with the whole line intact — no competing width,
+              so "ships from …" always reads on one line. */}
+          <div className="absolute inset-x-3 bottom-3 flex">
+            <span className="inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-semibold text-cream backdrop-blur">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-lime" />
+              In stock · ships from {categoryName}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-line/70 p-2.5">
+        <div className="gallery-strip flex items-center gap-2 border-t border-line/70 p-2 sm:p-2.5">
           {views.map((item, index) => (
             <button
               key={item.id}
               type="button"
               onClick={() => setActive(index)}
               aria-label={`View ${item.label}`}
-              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 bg-cream transition ${
+              className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border-2 bg-cream transition sm:h-14 sm:w-14 sm:rounded-xl ${
                 active === index ? "border-brand" : "border-transparent hover:border-line"
               }`}
             >
@@ -76,7 +86,7 @@ export function ProductGallery({ product, categoryName }: { product: Product; ca
               />
             </button>
           ))}
-          <div className="ml-auto flex flex-col items-end pr-1 text-right">
+          <div className="ml-auto hidden flex-col items-end pr-1 text-right sm:flex">
             <p className="inline-flex items-center gap-1 text-[10.5px] font-bold text-brand-deep">
               <CheckIcon className="h-3 w-3" /> Freshness guaranteed
             </p>
@@ -85,7 +95,7 @@ export function ProductGallery({ product, categoryName }: { product: Product; ca
         </div>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-3 gap-2">
+      <div className="mt-2.5 hidden grid-cols-3 gap-2 sm:grid">
         {[
           { label: "Next slot", value: "6–8pm today" },
           { label: "Delivery", value: "Free over $35" },
@@ -97,7 +107,7 @@ export function ProductGallery({ product, categoryName }: { product: Product; ca
           </div>
         ))}
       </div>
-      <p className="mt-2 inline-flex items-center gap-1 text-[10.5px] text-ink-soft">
+      <p className="mt-2 hidden items-center gap-1 text-[10.5px] text-ink-soft sm:inline-flex">
         <SparkleIcon className="h-3 w-3 text-amber" /> Price locked for this basket — no surprise fees at checkout.
       </p>
     </div>
