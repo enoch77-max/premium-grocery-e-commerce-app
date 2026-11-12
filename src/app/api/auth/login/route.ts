@@ -1,13 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import {
-  claimGuestOrders,
-  createSession,
-  normaliseEmail,
-  rateLimit,
-  verifyPassword,
-} from "@/lib/auth";
+import { claimGuestOrders, createSession, normaliseEmail, rateLimit, verifyPassword } from "@/lib/auth";
 import { getOrCreateCartToken, linkCartToUser } from "@/lib/cart-server";
 import { ensureConfiguredAccounts } from "@/lib/configured-accounts";
 import { ensureDemoAccount } from "@/lib/demo-account";
@@ -48,8 +42,7 @@ export async function POST(request: Request) {
     if (!user.isActive) {
       return Response.json(
         {
-          error:
-            "This account has been closed. Reply to any receipt email and we can reopen it for you.",
+          error: "This account has been closed. Reply to any receipt email and we can reopen it for you.",
           code: "ACCOUNT_CLOSED",
         },
         { status: 403 },

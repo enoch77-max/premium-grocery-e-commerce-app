@@ -11,6 +11,14 @@ import {
   type ReactNode,
 } from "react";
 import type { CartState, Product } from "@/lib/types";
+import {
+  clearSnapshot,
+  readSnapshot,
+  readToken,
+  storeToken,
+  writeSnapshot,
+  type SnapshotItem,
+} from "@/features/cart/lib/cart-storage";
 
 type AddableProduct = Pick<Product, "id" | "name" | "imageUrl" | "unit">;
 
@@ -48,54 +56,6 @@ type CartContextValue = {
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
-
-const CART_TOKEN_KEY = "fresco:cart-token";
-const SNAPSHOT_KEY = "fresco:cart-snapshot";
-
-type SnapshotItem = { productId: number; quantity: number };
-
-function readToken() {
-  try {
-    return window.localStorage.getItem(CART_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function storeToken(token: string | null) {
-  try {
-    if (token) window.localStorage.setItem(CART_TOKEN_KEY, token);
-  } catch {
-    // ignore
-  }
-}
-
-function writeSnapshot(lines: SnapshotItem[]) {
-  try {
-    if (lines.length) window.localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(lines));
-  } catch {
-    // ignore
-  }
-}
-
-function clearSnapshot() {
-  try {
-    window.localStorage.removeItem(SNAPSHOT_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-function readSnapshot(): SnapshotItem[] {
-  try {
-    const raw = window.localStorage.getItem(SNAPSHOT_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as SnapshotItem[];
-    return Array.isArray(parsed) ? parsed.filter((item) => Number.isFinite(item.productId)) : [];
-  } catch {
-    return [];
-  }
-}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartState | null>(null);
@@ -202,9 +162,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         body: body ? JSON.stringify(body) : undefined,
         cache: "no-store",
       });
-      const data = (await response.json().catch(() => null)) as
-        | { cart?: CartState; cartToken?: string | null }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        cart?: CartState;
+        cartToken?: string | null;
+      } | null;
       const updated = acceptCart(data);
       if (updated) {
         setPulse((value) => value + 1);
@@ -281,9 +242,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ code }),
         cache: "no-store",
       });
-      const data = (await response.json().catch(() => null)) as
-        | { cart?: CartState; cartToken?: string | null }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        cart?: CartState;
+        cartToken?: string | null;
+      } | null;
       const updated = acceptCart(data);
       if (updated) {
         setPulse((value) => value + 1);
@@ -304,9 +266,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       cache: "no-store",
       headers: cartHeaders(),
     });
-    const data = (await response.json().catch(() => null)) as
-      | { cart?: CartState; cartToken?: string | null }
-      | null;
+    const data = (await response.json().catch(() => null)) as {
+      cart?: CartState;
+      cartToken?: string | null;
+    } | null;
     acceptCart(data);
     setPulse((value) => value + 1);
   }, [acceptCart, cartHeaders]);
@@ -317,7 +280,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setRestoreCount(0);
       return;
     }
-    await mutate("POST", { items: snapshot.map((item) => ({ productId: item.productId, quantity: item.quantity })) });
+    await mutate("POST", {
+      items: snapshot.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+    });
     clearSnapshot();
     setRestoreCount(0);
   }, [mutate]);

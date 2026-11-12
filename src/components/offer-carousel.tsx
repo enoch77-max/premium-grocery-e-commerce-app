@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Offer } from "@/lib/types";
@@ -33,13 +34,18 @@ export function OfferHero({ offers }: { offers: Offer[] }) {
           className={`pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-gradient-to-br ${style.glow} blur-2xl`}
         />
         {active.imageUrl ? (
-          <div className="pointer-events-none absolute -bottom-8 -right-6 h-[150px] w-[150px] overflow-hidden rounded-full border-[6px] border-white/15 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] sm:h-[250px] sm:w-[250px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={active.imageUrl} alt="" className="h-full w-full object-cover" />
+          <div className="pointer-events-none absolute -bottom-6 -right-6 z-0 h-[150px] w-[150px] overflow-hidden rounded-full border-[6px] border-white/15 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] sm:h-[250px] sm:w-[250px]">
+            <Image
+              src={active.imageUrl}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 150px, 250px"
+              className="object-cover"
+            />
           </div>
         ) : null}
 
-        <div className="relative z-[15] w-full">
+        <div className="relative z-10 w-full">
           <span
             className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.09em] sm:text-[10px] sm:tracking-[0.12em] ${style.badge}`}
           >
@@ -61,7 +67,7 @@ export function OfferHero({ offers }: { offers: Offer[] }) {
           </span>
         </div>
 
-        <div className="relative z-[20] mt-4 flex items-center gap-2">
+        <div className="relative z-10 mt-4 flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             {slides.map((offer, slideIndex) => (
               <button
@@ -70,7 +76,9 @@ export function OfferHero({ offers }: { offers: Offer[] }) {
                 onClick={() => setIndex(slideIndex)}
                 aria-label={`Show offer ${slideIndex + 1}`}
                 className={`h-1.5 rounded-full transition-all ${
-                  slideIndex === index ? "w-7 bg-current opacity-90" : "w-1.5 bg-current opacity-35 hover:opacity-60"
+                  slideIndex === index
+                    ? "w-7 bg-current opacity-90"
+                    : "w-1.5 bg-current opacity-35 hover:opacity-60"
                 }`}
               />
             ))}
@@ -129,9 +137,14 @@ export function MiniOfferCard({ offer }: { offer: Offer }) {
         </span>
       </div>
       {offer.imageUrl ? (
-        <div className="absolute -bottom-6 -right-6 h-[112px] w-[112px] overflow-hidden rounded-full border-4 border-white/20">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={offer.imageUrl} alt="" className="h-full w-full object-cover" />
+        <div className="absolute -bottom-8 -right-8 h-[112px] w-[112px] overflow-hidden rounded-full border-4 border-white/20">
+<Image
+            src={offer.imageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 120px, 250px"
+            className="h-full w-full object-cover"
+          />
         </div>
       ) : (
         <span className="absolute -right-1 bottom-1 text-[64px] opacity-25">{offer.emoji}</span>

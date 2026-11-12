@@ -24,12 +24,18 @@ export function ForgotPasswordForm() {
             <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
               Use this one-time link to continue:
             </p>
-            <Link href={result.link} className="mt-2 block truncate text-[12px] font-bold text-brand underline">
+            <Link
+              href={result.link}
+              className="mt-2 block truncate text-[12px] font-bold text-brand underline"
+            >
               {result.link}
             </Link>
           </div>
         ) : null}
-        <Link href="/login" className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white">
+        <Link
+          href="/login"
+          className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white"
+        >
           Back to sign in
         </Link>
       </div>
@@ -60,7 +66,9 @@ export function ForgotPasswordForm() {
       }}
     >
       <label className="block">
-        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Email</span>
+        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          Email
+        </span>
         <input
           type="email"
           required
@@ -71,7 +79,9 @@ export function ForgotPasswordForm() {
           className="h-11 w-full rounded-xl border border-line bg-white px-3 text-[15px] outline-none focus:border-brand sm:text-[13px]"
         />
       </label>
-      {error ? <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}

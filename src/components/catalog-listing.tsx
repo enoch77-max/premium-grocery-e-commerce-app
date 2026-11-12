@@ -81,7 +81,7 @@ export function CatalogListing({
           directly beneath the sticky header at every breakpoint. */}
       <div className="under-header sticky z-30 -mx-4 mb-3 border-y border-line/80 bg-cream/95 px-4 py-2 backdrop-blur-md sm:-mx-1 sm:mb-4 sm:rounded-2xl sm:border sm:px-2.5">
         <div className="flex items-center gap-2">
-          <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5">
+          <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-0.5 pr-2">
             <button
               type="button"
               onClick={() => setActive([])}
@@ -113,7 +113,7 @@ export function CatalogListing({
             })}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 border-l border-line/60 pl-2">
             <span className="hidden text-[11px] font-medium text-ink-soft sm:inline">
               {filtered.length} item{filtered.length === 1 ? "" : "s"}
             </span>
@@ -122,7 +122,7 @@ export function CatalogListing({
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortId)}
                 aria-label="Sort products"
-                className="field-compact h-9 w-[104px] appearance-none rounded-full border border-line bg-white pl-3 pr-7 text-[12px] font-semibold text-ink outline-none hover:border-brand sm:h-8 sm:w-auto sm:text-[11.5px]"
+                className="field-compact h-9 max-w-[148px] appearance-none truncate rounded-full border border-line bg-white pl-3 pr-7 text-[11.5px] font-semibold text-ink outline-none hover:border-brand sm:h-8 sm:max-w-none sm:w-auto"
               >
                 {SORTS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -154,14 +154,16 @@ export function CatalogListing({
       </div>
 
       {filtered.length ? (
-        <div className="grid grid-cols-2 gap-2.5 min-[420px]:gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 min-[420px]:gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {filtered.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-line bg-white/60 px-6 py-14 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cream-deep text-2xl">🫙</div>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cream-deep text-2xl">
+            🫙
+          </div>
           <h3 className="mt-3 font-display text-xl font-semibold">Nothing quite matches</h3>
           <p className="mx-auto mt-1 max-w-sm text-[12.5px] leading-relaxed text-ink-soft">{emptyMessage}</p>
           <button

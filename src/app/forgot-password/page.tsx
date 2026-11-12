@@ -12,7 +12,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-10">
       <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">Account recovery</p>
-      <h1 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight">Forgot your password?</h1>
+      <h1 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight">
+        Forgot your password?
+      </h1>
       <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">
         Enter the email you shop with and we&apos;ll send a link to set a new password.
       </p>

@@ -9,9 +9,15 @@ const FLOW = ["confirmed", "packing", "on_the_way", "delivered"] as const;
 
 export const GET = withAdmin(async (_admin, request) => {
   const status = new URL(request.url).searchParams.get("status");
-  const rows = status && status !== "all"
-    ? await db.select().from(orders).where(eq(orders.status, status)).orderBy(desc(orders.createdAt)).limit(100)
-    : await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(100);
+  const rows =
+    status && status !== "all"
+      ? await db
+          .select()
+          .from(orders)
+          .where(eq(orders.status, status))
+          .orderBy(desc(orders.createdAt))
+          .limit(100)
+      : await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(100);
   return { orders: rows, flow: FLOW };
 });
 

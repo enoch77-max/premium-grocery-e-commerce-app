@@ -49,7 +49,8 @@ export function formatDeliverySlot(slotId: string) {
   const preset = deliverySlots.find((slot) => slot.id === slotId);
   if (preset) return `${preset.label} · ${preset.detail}`;
   if (slotId.startsWith("today-")) return `Today · ${slotId.replace("today-", "").replace("-", ":")}`;
-  if (slotId.startsWith("tomorrow-")) return `Tomorrow · ${slotId.replace("tomorrow-", "").replace("-", ":")}`;
+  if (slotId.startsWith("tomorrow-"))
+    return `Tomorrow · ${slotId.replace("tomorrow-", "").replace("-", ":")}`;
   return slotId;
 }
 

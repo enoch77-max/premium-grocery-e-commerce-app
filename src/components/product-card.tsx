@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { discountPercent, formatMoney } from "@/lib/format";
@@ -8,6 +9,7 @@ import { useCart } from "@/components/cart-provider";
 import { useSaved } from "@/components/saved-provider";
 import { CartControls } from "@/components/cart-controls";
 import { HeartIcon, PlusIcon, StarIcon } from "@/components/icons";
+import { SignalStack } from "@/components/product-signals";
 
 export function ProductCard({ product, className = "" }: { product: Product; className?: string }) {
   const { add, isPending } = useCart();
@@ -34,30 +36,32 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
       className={`group relative flex flex-col overflow-hidden rounded-[20px] border border-line/80 bg-white transition duration-300 hover:-translate-y-1 hover:border-brand/25 hover:shadow-lift ${className}`}
     >
       <div className="relative overflow-hidden bg-cream">
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div className="shine relative aspect-square w-full overflow-hidden">
           <Link href={`/product/${product.slug}`} className="block h-full w-full" aria-label={product.name}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              loading="lazy"
-              className="h-full w-full object-cover transition duration-[600ms] ease-out group-hover:scale-[1.05]"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+              className="object-cover transition duration-[600ms] ease-out group-hover:scale-[1.05]"
             />
           </Link>
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/5 to-transparent" />
         </div>
 
-        <div className="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1">
-          {discount > 0 ? (
-            <span className="rounded-full bg-clay px-2 py-0.5 text-[10px] font-extrabold tracking-wide text-white shadow-sm">
-              SAVE {discount}%
-            </span>
-          ) : null}
-          {product.badge && !product.badge.toLowerCase().includes("save") ? (
-            <span className="rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold text-ink shadow-sm backdrop-blur">
-              {product.badge}
-            </span>
-          ) : null}
+        {/* discount first, then the icon-first signal chips — the whole story
+            of this product in two glances, zero paragraphs */}
+        <div>
+          <SignalStack
+            product={product}
+            leading={
+              discount > 0 ? (
+                <span className="rounded-full bg-clay px-1.5 py-0.5 text-[9.5px] font-extrabold tracking-wide text-white shadow-sm">
+                  −{discount}%
+                </span>
+              ) : null
+            }
+          />
         </div>
 
         <button
@@ -70,7 +74,7 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
           disabled={savedBusy}
           aria-label={saved ? `Remove ${product.name} from saved items` : `Save ${product.name} for later`}
           aria-pressed={saved}
-          className={`press absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/95 shadow-soft backdrop-blur transition hover:text-clay disabled:opacity-60 sm:right-2.5 sm:top-2.5 sm:h-8 sm:w-8 ${
+          className={`press absolute bottom-2 left-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-soft backdrop-blur transition hover:text-clay disabled:opacity-60 ${
             saved ? "text-clay" : "text-ink-soft"
           }`}
         >
@@ -115,7 +119,9 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
 
         <div className="mt-2 flex items-end justify-between gap-1">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[15px] font-extrabold tracking-tight text-ink">{formatMoney(product.priceCents)}</span>
+            <span className="text-[15px] font-extrabold tracking-tight text-ink">
+              {formatMoney(product.priceCents)}
+            </span>
             {product.compareAtCents ? (
               <span className="text-[11px] font-medium text-ink-soft line-through">
                 {formatMoney(product.compareAtCents)}

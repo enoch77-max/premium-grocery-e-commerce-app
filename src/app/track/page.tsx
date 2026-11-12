@@ -14,8 +14,8 @@ export default function TrackPage() {
         Where&apos;s my order?
       </h1>
       <p className="mt-2 max-w-lg text-[12.5px] leading-relaxed text-ink-soft">
-        Enter the order number from your confirmation (it starts with FR-) and the email you used at checkout. No account
-        needed.
+        Enter the order number from your confirmation (it starts with FR-) and the email you used at checkout.
+        No account needed.
       </p>
       <div className="mt-5">
         <TrackOrder />

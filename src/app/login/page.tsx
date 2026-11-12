@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useSession } from "@/components/session-provider";
+import { Field } from "@/features/auth/components/auth-field";
+import { LoginAside } from "@/features/auth/components/login-aside";
 import { useCart } from "@/components/cart-provider";
 import { ArrowRightIcon, CheckIcon, LeafIcon, ShieldIcon, SparkleIcon, TruckIcon } from "@/components/icons";
-
 
 function LoginContent() {
   const router = useRouter();
@@ -14,7 +15,9 @@ function LoginContent() {
   const next = params.get("next") ?? "/account";
   const { login, register, loginDemo, user, loading } = useSession();
   const { cart, refresh: refreshCart } = useCart();
-  const [mode, setMode] = useState<"signin" | "create">(params.get("mode") === "create" ? "create" : "signin");
+  const [mode, setMode] = useState<"signin" | "create">(
+    params.get("mode") === "create" ? "create" : "signin",
+  );
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", marketing: true });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -65,7 +68,13 @@ function LoginContent() {
     setBusy(true);
     const result =
       mode === "create"
-        ? await register(form.name.trim(), form.email.trim(), form.password, form.marketing, form.phone.trim())
+        ? await register(
+            form.name.trim(),
+            form.email.trim(),
+            form.password,
+            form.marketing,
+            form.phone.trim(),
+          )
         : await login(form.email.trim(), form.password);
     setBusy(false);
 
@@ -191,7 +200,9 @@ function LoginContent() {
             ) : null}
 
             {message ? (
-              <p className="rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">{message}</p>
+              <p className="rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">
+                {message}
+              </p>
             ) : null}
 
             <button
@@ -231,13 +242,16 @@ function LoginContent() {
                 Sign in as the demo shopper{demo?.name ? ` (${demo.name})` : ""}
               </button>
               <p className="mt-1 text-center text-[10px] text-ink-soft">
-                {demo?.email ? `${demo.email} · password: ${demo.name ? "set by the store" : "frescodemo"}` : "Checking demo availability…"}
+                {demo?.email
+                  ? `${demo.email} · password: ${demo.name ? "set by the store" : "frescodemo"}`
+                  : "Checking demo availability…"}
               </p>
             </>
           ) : null}
 
           <p className="mt-3 flex items-center justify-center gap-1 text-[10.5px] text-ink-soft">
-            <ShieldIcon className="h-3.5 w-3.5" /> Passwords are salted and hashed — never stored in plain text.
+            <ShieldIcon className="h-3.5 w-3.5" /> Passwords are salted and hashed — never stored in plain
+            text.
           </p>
           <p className="mt-1 text-center text-[11px] text-ink-soft">
             Just browsing?{" "}
@@ -247,99 +261,17 @@ function LoginContent() {
           </p>
         </div>
 
-        <div className="space-y-3">
-          <div className="rounded-[26px] bg-[#13261d] p-5 text-cream sm:p-6">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-lime">Why create an account</p>
-            <div className="mt-3 space-y-3">
-              {[
-                { title: "Basket follows you", note: "Add on your phone, finish on your laptop." },
-                { title: "One-tap reorder", note: "Repeat last week's shop in a single tap." },
-                { title: "Saved addresses", note: "Switch between home, work and a neighbour." },
-                { title: "Full order history", note: "Track, cancel or reorder — receipts kept safe." },
-              ].map((item) => (
-                <div key={item.title} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lime text-brand-deep">
-                    <CheckIcon className="h-3 w-3" strokeWidth={3} />
-                  </span>
-                  <div>
-                    <p className="text-[12px] font-bold">{item.title}</p>
-                    <p className="text-[10.5px] text-cream/70">{item.note}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {cart?.itemCount ? (
-              <div className="mt-4 rounded-xl border border-white/15 bg-white/5 px-3 py-2">
-                <p className="flex items-center gap-1.5 text-[11px] font-bold text-lime">
-                  <SparkleIcon className="h-3 w-3" /> Your basket travels with you
-                </p>
-                <p className="text-[10.5px] text-cream/70">
-                  {cart.itemCount} item{cart.itemCount === 1 ? "" : "s"} ({cart.subtotalCents ? `$${(cart.subtotalCents / 100).toFixed(2)}` : ""}) will be
-                  waiting after you sign in.
-                </p>
-              </div>
-            ) : null}
-            <div className="mt-4 flex flex-wrap gap-2 text-[10.5px] text-cream/60">
-              <span className="inline-flex items-center gap-1">
-                <TruckIcon className="h-3.5 w-3.5" /> 30-minute slots
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <LeafIcon className="h-3.5 w-3.5" /> Freshness guarantee
-              </span>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-line/80 bg-white p-4">
-            <p className="text-[11px] font-bold text-ink">Guest checkout is always available</p>
-            <p className="mt-0.5 text-[10.5px] leading-relaxed text-ink-soft">
-              No account required to order. If you register later with the same email, past guest orders appear in your
-              history automatically.
-            </p>
-          </div>
-        </div>
+        <LoginAside />
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  error,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  type?: string;
-  error?: string;
-  autoComplete?: string;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">{label}</label>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        type={type}
-        autoComplete={autoComplete}
-        aria-invalid={Boolean(error)}
-        className={`h-10 w-full rounded-xl border px-3 text-[13px] outline-none transition ${
-          error ? "border-clay/60 bg-rose-soft/40" : "border-line bg-cream/40 focus:border-brand focus:bg-white"
-        }`}
-      />
-      {error ? <p className="mt-0.5 text-[10px] font-semibold text-clay">{error}</p> : null}
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-md px-4 py-20 text-center text-sm text-ink-soft">Loading…</div>}>
+    <Suspense
+      fallback={<div className="mx-auto max-w-md px-4 py-20 text-center text-sm text-ink-soft">Loading…</div>}
+    >
       <LoginContent />
     </Suspense>
   );

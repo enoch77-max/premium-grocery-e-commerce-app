@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AccountGate, AccountShell } from "@/components/account-shell";
+import { Field } from "@/features/account/addresses/address-field";
 import { useAccountAddresses, type AccountAddress } from "@/components/account/data";
 import { useSession } from "@/components/session-provider";
 import { useDelivery } from "@/components/delivery-provider";
@@ -54,7 +55,13 @@ function AddressBook() {
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const openNew = () =>
-    setForm({ ...emptyForm, recipient: user?.name ?? "", phone: user?.phone ?? "", postcode: area.postcode, city: area.city });
+    setForm({
+      ...emptyForm,
+      recipient: user?.name ?? "",
+      phone: user?.phone ?? "",
+      postcode: area.postcode,
+      city: area.city,
+    });
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -67,9 +74,12 @@ function AddressBook() {
         method: form.id ? "PATCH" : "POST",
         body: JSON.stringify({ ...form, id: form.id }),
       });
-      const data = (await response.json().catch(() => null)) as
-        | { addresses?: AccountAddress[]; address?: AccountAddress; errors?: Record<string, string>; error?: string }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        addresses?: AccountAddress[];
+        address?: AccountAddress;
+        errors?: Record<string, string>;
+        error?: string;
+      } | null;
       if (!response.ok) {
         setErrors(data?.errors ?? {});
         setMessage(data?.error ?? "We couldn't save that address.");
@@ -133,7 +143,9 @@ function AddressBook() {
       </div>
 
       {message ? (
-        <p className="rounded-xl bg-brand-soft/70 px-3 py-2 text-[11.5px] font-semibold text-brand-deep">{message}</p>
+        <p className="rounded-xl bg-brand-soft/70 px-3 py-2 text-[11.5px] font-semibold text-brand-deep">
+          {message}
+        </p>
       ) : null}
 
       {form ? (
@@ -153,7 +165,12 @@ function AddressBook() {
             </button>
           </div>
           <div className="mt-2 grid gap-2.5 sm:grid-cols-2">
-            <Field label="Label" value={form.label} onChange={(value) => setForm({ ...form, label: value })} placeholder="Home" />
+            <Field
+              label="Label"
+              value={form.label}
+              onChange={(value) => setForm({ ...form, label: value })}
+              placeholder="Home"
+            />
             <Field
               label="Recipient"
               value={form.recipient}
@@ -183,15 +200,21 @@ function AddressBook() {
               placeholder="(555) 012-3456"
             />
             <div>
-              <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">City</label>
+              <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+                City
+              </label>
               <input
                 value={form.city}
                 onChange={(event) => setForm({ ...form, city: event.target.value })}
                 className={`h-10 w-full rounded-xl border px-3 text-[13px] outline-none transition ${
-                  errors.city ? "border-clay/60 bg-rose-soft/40" : "border-line bg-cream/40 focus:border-brand focus:bg-white"
+                  errors.city
+                    ? "border-clay/60 bg-rose-soft/40"
+                    : "border-line bg-cream/40 focus:border-brand focus:bg-white"
                 }`}
               />
-              {errors.city ? <p className="mt-0.5 text-[10px] font-semibold text-clay">{errors.city}</p> : null}
+              {errors.city ? (
+                <p className="mt-0.5 text-[10px] font-semibold text-clay">{errors.city}</p>
+              ) : null}
             </div>
             <div>
               <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
@@ -202,7 +225,9 @@ function AddressBook() {
                 onChange={(event) => setForm({ ...form, postcode: event.target.value })}
                 list="service-postcodes"
                 className={`h-10 w-full rounded-xl border px-3 text-[13px] outline-none transition ${
-                  errors.postcode ? "border-clay/60 bg-rose-soft/40" : "border-line bg-cream/40 focus:border-brand focus:bg-white"
+                  errors.postcode
+                    ? "border-clay/60 bg-rose-soft/40"
+                    : "border-line bg-cream/40 focus:border-brand focus:bg-white"
                 }`}
               />
               <datalist id="service-postcodes">
@@ -212,7 +237,9 @@ function AddressBook() {
                   </option>
                 ))}
               </datalist>
-              {errors.postcode ? <p className="mt-0.5 text-[10px] font-semibold text-clay">{errors.postcode}</p> : null}
+              {errors.postcode ? (
+                <p className="mt-0.5 text-[10px] font-semibold text-clay">{errors.postcode}</p>
+              ) : null}
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
@@ -241,7 +268,11 @@ function AddressBook() {
               disabled={busy}
               className="press inline-flex h-9 items-center gap-1.5 rounded-full bg-brand px-4 text-[11.5px] font-bold text-white hover:bg-brand-deep disabled:opacity-60"
             >
-              {busy ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <CheckIcon className="h-3.5 w-3.5" />}
+              {busy ? (
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <CheckIcon className="h-3.5 w-3.5" />
+              )}
               Save address
             </button>
             <button
@@ -290,7 +321,9 @@ function AddressBook() {
                   <p className="inline-flex items-center gap-1.5 text-[11.5px] font-extrabold text-ink">
                     {address.label}
                     {address.isDefault ? (
-                      <span className="rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold text-white">Default</span>
+                      <span className="rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold text-white">
+                        Default
+                      </span>
                     ) : null}
                   </p>
                   <p className="mt-0.5 text-[11px] text-ink-soft">{address.recipient}</p>
@@ -304,7 +337,9 @@ function AddressBook() {
                 {address.city} {address.postcode}
               </p>
               {address.instructions ? (
-                <p className="mt-1 rounded-lg bg-cream px-2 py-1 text-[10px] italic text-ink-soft">{address.instructions}</p>
+                <p className="mt-1 rounded-lg bg-cream px-2 py-1 text-[10px] italic text-ink-soft">
+                  {address.instructions}
+                </p>
               ) : null}
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {!address.isDefault ? (
@@ -368,34 +403,5 @@ function AddressBook() {
         </div>
       </div>
     </>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  error,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  error?: string;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">{label}</label>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className={`h-10 w-full rounded-xl border px-3 text-[13px] outline-none transition ${
-          error ? "border-clay/60 bg-rose-soft/40" : "border-line bg-cream/40 focus:border-brand focus:bg-white"
-        }`}
-      />
-      {error ? <p className="mt-0.5 text-[10px] font-semibold text-clay">{error}</p> : null}
-    </div>
   );
 }

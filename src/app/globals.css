@@ -185,6 +185,37 @@
   .animate-marquee {
     animation: marquee 26s linear infinite;
   }
+  /* ── grocery theatre: gentle, never noisy, all disabled by reduced-motion ── */
+  .animate-spin-slower {
+    animation: spin-slower 22s linear infinite;
+  }
+  .animate-pulse-soft {
+    animation: pulse-soft 3.2s ease-in-out infinite;
+  }
+  .animate-floaty {
+    animation: floaty 7s ease-in-out infinite;
+  }
+  .animate-sway {
+    animation: sway 6s ease-in-out infinite;
+    transform-origin: 80% 90%;
+  }
+  .animate-twinkle {
+    animation: twinkle 2.8s ease-in-out infinite;
+  }
+  /* light sweeping across a product photo on hover */
+  .shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%);
+    transform: translateX(-120%);
+    transition: transform 0.9s ease;
+    pointer-events: none;
+  }
+  .group:hover .shine::after,
+  .shine:hover::after {
+    transform: translateX(120%);
+  }
   .shimmer {
     background: linear-gradient(100deg, #f2ecdd 20%, #faf7f0 40%, #f2ecdd 60%);
     background-size: 220% 100%;
@@ -234,12 +265,18 @@
   /* Horizontal snap rail used by every product carousel on touch. */
   .rail {
     scroll-snap-type: x mandatory;
+    /* Keep the leading gutter when snapping: without this the browser scrolls the
+       rail by its own padding on load and the first card sits flush to the edge. */
+    scroll-padding-inline: 1rem;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .rail > * {
     scroll-snap-align: start;
+  }
+  [class*="snap-x"] {
+    scroll-padding-inline: 1rem;
   }
   /* Soft edge fade that tells a thumb there is more to scroll. */
   .rail-mask {
@@ -362,6 +399,49 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+@keyframes spin-slower {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.1);
   }
 }
 @keyframes shimmer {

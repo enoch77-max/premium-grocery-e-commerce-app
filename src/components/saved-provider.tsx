@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSession } from "@/components/session-provider";
 import type { Product } from "@/lib/types";
 
@@ -66,7 +58,10 @@ export function SavedProvider({ children }: { children: ReactNode }) {
         data.saved
           ? prev.some((item) => item.slug === slug)
             ? prev
-            : [...prev, { id: Date.now(), slug, product: prev.find((item) => item.slug === slug)?.product ?? null }]
+            : [
+                ...prev,
+                { id: Date.now(), slug, product: prev.find((item) => item.slug === slug)?.product ?? null },
+              ]
           : prev.filter((item) => item.slug !== slug),
       );
       setVersion((value) => value + 1);

@@ -88,7 +88,17 @@ export function useAccountAddresses() {
   return { addresses, setAddresses, loading, error, reload: load };
 }
 
-export function orderTotals(order: AccountOrder | { subtotalCents: number; discountCents: number; deliveryCents: number; totalCents: number; savingsCents: number }) {
+export function orderTotals(
+  order:
+    | AccountOrder
+    | {
+        subtotalCents: number;
+        discountCents: number;
+        deliveryCents: number;
+        totalCents: number;
+        savingsCents: number;
+      },
+) {
   return {
     subtotal: order.subtotalCents,
     discount: order.discountCents,

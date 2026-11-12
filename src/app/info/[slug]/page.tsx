@@ -134,7 +134,9 @@ export default async function InfoPage({ params }: { params: Promise<{ slug: str
       <Link href="/" className="text-[11.5px] font-semibold text-ink-soft hover:text-brand">
         ← Back to the shop
       </Link>
-      <p className="mt-4 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">{page.eyebrow}</p>
+      <p className="mt-4 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">
+        {page.eyebrow}
+      </p>
       <h1 className="mt-1.5 font-display text-[32px] font-semibold leading-tight tracking-[-0.02em] sm:text-[40px]">
         {page.title}
       </h1>

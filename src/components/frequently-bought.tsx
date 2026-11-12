@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/lib/types";
@@ -25,7 +26,10 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
   };
 
   return (
-    <section id="frequently-bought" className="scroll-mt-32 rounded-[24px] border border-line/80 bg-white p-4 sm:p-5">
+    <section
+      id="frequently-bought"
+      className="scroll-mt-32 rounded-[24px] border border-line/80 bg-white p-4 sm:p-5"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand">
@@ -45,9 +49,14 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
       <div className="mt-3 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
-            <div className="aspect-square overflow-hidden rounded-xl border border-line/70 bg-cream">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
+            <div className="relative aspect-square overflow-hidden rounded-xl border border-line/70 bg-cream">
+<Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 28vw, 120px"
+                className="h-full w-full object-cover"
+              />
             </div>
             <p className="mt-1 line-clamp-1 text-[10.5px] font-bold text-ink">{product.name}</p>
             <p className="text-[10px] font-semibold text-brand-deep">{formatMoney(product.priceCents)}</p>
@@ -69,9 +78,14 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
                       isOn ? "border-brand" : "border-line/70 opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <span className="block aspect-square">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                    <span className="relative block aspect-square">
+<Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        fill
+                        sizes="(max-width: 640px) 28vw, 120px"
+                        className="h-full w-full object-cover"
+                      />
                     </span>
                     <span
                       className={`absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full ${
@@ -81,7 +95,10 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
                       <CheckIcon className="h-3 w-3" strokeWidth={3} />
                     </span>
                   </button>
-                  <Link href={`/product/${item.slug}`} className="mt-1 block line-clamp-1 text-[10.5px] font-bold text-ink hover:text-brand">
+                  <Link
+                    href={`/product/${item.slug}`}
+                    className="mt-1 block line-clamp-1 text-[10.5px] font-bold text-ink hover:text-brand"
+                  >
                     {item.name}
                   </Link>
                   <p className="text-[10px] font-semibold text-brand-deep">{formatMoney(item.priceCents)}</p>
@@ -96,7 +113,9 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
             {chosen.length + 1} items · total
           </p>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="font-display text-[25px] font-semibold leading-none tracking-tight">{formatMoney(total)}</span>
+            <span className="font-display text-[25px] font-semibold leading-none tracking-tight">
+              {formatMoney(total)}
+            </span>
             {savings > 0 ? (
               <span className="text-[11px] text-ink-soft line-through">{formatMoney(compareTotal)}</span>
             ) : null}
@@ -119,7 +138,9 @@ export function FrequentlyBought({ product, companions }: { product: Product; co
             )}
             Add all {chosen.length + 1} to basket
           </button>
-          <p className="mt-1.5 text-center text-[9.5px] text-ink-soft">One tap · no need to hunt for the extras</p>
+          <p className="mt-1.5 text-center text-[9.5px] text-ink-soft">
+            One tap · no need to hunt for the extras
+          </p>
         </div>
       </div>
     </section>

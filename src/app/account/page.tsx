@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AccountGate, AccountShell } from "@/components/account-shell";
 import { useAccountAddresses, useAccountOrders } from "@/components/account/data";
 import { ActiveDelivery } from "@/components/account/active-delivery";
@@ -9,16 +10,15 @@ import { useSession } from "@/components/session-provider";
 import { useSaved } from "@/components/saved-provider";
 import { useCart } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/format";
-import { isActiveOrder } from "@/lib/order-types";
+import { isActiveOrder, normaliseOrderStatus, ORDER_STATUS_LABELS } from "@/lib/order-types";
 import {
   ArrowRightIcon,
-  CheckIcon,
+  ChevronRightIcon,
+  ClockIcon,
   HeartIcon,
-  PackageIcon,
   PinIcon,
-  PlusIcon,
-  SparkleIcon,
-  TruckIcon,
+  RefreshIcon,
+  ShieldIcon,
   UserIcon,
 } from "@/components/icons";
 
@@ -32,282 +32,290 @@ export default function AccountPage() {
   );
 }
 
-/** Action shortcuts instead of KPI tiles. This is where a shopper starts, not a report. */
-const SHORTCUTS = [
-  { href: "/account/orders", label: "Your orders", note: "Track & reorder", Icon: PackageIcon },
-  { href: "/account/saved", label: "Saved items", note: "Your wishlist", Icon: HeartIcon },
-  { href: "/account/addresses", label: "Addresses", note: "Where we deliver", Icon: PinIcon },
-  { href: "/account/settings", label: "Settings", note: "Profile & alerts", Icon: UserIcon },
-];
-
 function Overview() {
-  const { user } = useSession();
-  const { orders, loading: ordersLoading } = useAccountOrders();
+  const { user, authFetch } = useSession();
+  const { orders, loading: ordersLoading, reload } = useAccountOrders();
   const { addresses } = useAccountAddresses();
   const { items: savedItems, loading: savedLoading } = useSaved();
-  const { cart, openCart } = useCart();
+  const { cart, refresh: refreshCart } = useCart();
+  const router = useRouter();
+  const [busyOrder, setBusyOrder] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const activeOrder = useMemo(
-    () =>
-      [...orders]
-        .filter((order) => isActiveOrder(order.status))
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null,
+  const sorted = useMemo(
+    () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [orders],
   );
-
-  const lastOrder = useMemo(() => {
-    if (activeOrder) return null;
-    return [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null;
-  }, [activeOrder, orders]);
-
-  const totalSaved = useMemo(
-    () => orders.reduce((sum, order) => sum + (order.savingsCents > 0 ? order.savingsCents : 0), 0),
-    [orders],
-  );
-
+  const activeOrder = sorted.find((order) => isActiveOrder(order.status)) ?? null;
+  const recent = sorted.filter((order) => order.id !== activeOrder?.id).slice(0, 3);
   const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
   const cartCount = cart?.itemCount ?? 0;
 
+  async function reorder(orderNumber: string) {
+    setBusyOrder(orderNumber);
+    setNotice(null);
+    try {
+      const response = await authFetch(`/api/orders/${orderNumber}/reorder`, { method: "POST" });
+      const data = (await response.json().catch(() => null)) as { error?: string; cartToken?: string } | null;
+      if (!response.ok) throw new Error(data?.error ?? "Could not add those items");
+      if (data?.cartToken) window.localStorage.setItem("fresco:cart-token", data.cartToken);
+      await refreshCart();
+      setNotice("Added to your basket");
+      await reload();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not add those items");
+    } finally {
+      setBusyOrder(null);
+    }
+  }
+
   return (
-    <>
-      {/* ---- next delivery / last order: the reason most people open this tab ---- */}
-      {ordersLoading ? (
-        <div className="shimmer h-56 rounded-3xl" />
-      ) : activeOrder ? (
-        <ActiveDelivery order={activeOrder} />
-      ) : lastOrder ? (
-        <ActiveDelivery order={lastOrder} />
-      ) : (
-        <section className="rounded-3xl border border-brand/25 bg-brand-soft/40 p-5">
-          <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
-            <SparkleIcon className="h-3 w-3" /> Welcome, {user?.name.split(" ")[0] ?? "shopper"}
-          </p>
-          <h2 className="mt-1.5 font-display text-[24px] font-semibold leading-tight tracking-tight">
-            Let&apos;s get your first basket in.
-          </h2>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">
-            Fresh produce, bakery and pantry staples delivered in about 30 minutes. Add a bundle and the savings apply
-            themselves.
-          </p>
-          <div className="mt-3.5 flex flex-wrap gap-2">
-            <Link
-              href="/category/fresh-produce"
-              className="press inline-flex h-11 items-center gap-1.5 rounded-full bg-brand px-5 text-[13px] font-bold text-white hover:bg-brand-deep"
-            >
-              Start shopping <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/offers"
-              className="press inline-flex h-11 items-center rounded-full border border-line bg-white px-5 text-[13px] font-bold text-ink hover:border-brand hover:text-brand"
-            >
-              Today&apos;s offers
-            </Link>
-          </div>
-        </section>
-      )}
+    <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_336px] xl:items-start">
+      <div className="space-y-3">
+        {/* 1 — the thing a shopper came for: their current delivery */}
+        {ordersLoading ? (
+          <div className="shimmer h-52 rounded-2xl" />
+        ) : activeOrder ? (
+          <ActiveDelivery order={activeOrder} />
+        ) : null}
 
-      {/* ---- shortcuts row (AliExpress-style, shopping actions not statistics) ---- */}
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {SHORTCUTS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="press flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-line/80 bg-white px-3 py-2.5 hover:border-brand/30 hover:shadow-card"
+        {notice ? (
+          <p
+            role="status"
+            className="rounded-xl bg-brand-soft/70 px-3 py-2 text-[12px] font-semibold text-brand-deep"
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-deep" aria-hidden>
-              <item.Icon className="h-4.5 w-4.5" />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[12.5px] font-bold text-ink">{item.label}</span>
-              <span className="block truncate text-[10.5px] text-ink-soft">{item.note}</span>
-            </span>
-          </Link>
-        ))}
-      </section>
-
-      {/* ---- basket: the one thing you can act on right now ---- */}
-      <section className="overflow-hidden rounded-3xl bg-[#13261d] p-4 text-cream">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-lime">
-              <SparkleIcon className="h-3 w-3" /> Your basket
-            </p>
-            <p className="mt-1 font-display text-[22px] font-semibold leading-tight">
-              {cartCount ? `${cartCount} item${cartCount === 1 ? "" : "s"} ready` : "Nothing in here yet"}
-            </p>
-            <p className="mt-0.5 text-[11.5px] text-cream/70">
-              {cartCount
-                ? `${formatMoney(cart?.subtotalCents ?? 0)} · ${
-                    cart?.deliveryCents === 0 ? "free delivery" : `${formatMoney(cart?.deliveryCents ?? 0)} delivery`
-                  }`
-                : "Pick a bundle and the multi-buy savings apply automatically."}
-            </p>
-            {cart && cart.freeDeliveryRemainingCents > 0 && cartCount ? (
-              <p className="mt-1 text-[10.5px] font-semibold text-lime">
-                {formatMoney(cart.freeDeliveryRemainingCents)} more for free delivery
-              </p>
-            ) : null}
-          </div>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={openCart}
-              className="press flex h-11 flex-1 items-center justify-center rounded-full bg-lime px-4 text-[12.5px] font-bold text-brand-deep hover:bg-white sm:flex-none"
-            >
-              {cartCount ? "Review basket" : "Open basket"}
-            </button>
-            <Link
-              href={cartCount ? "/checkout" : "/category/fresh-produce"}
-              className="press flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/25 px-4 text-[12.5px] font-bold text-cream hover:bg-white/10 sm:flex-none"
-            >
-              {cartCount ? "Checkout" : "Browse aisles"} <ArrowRightIcon className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ---- saved items: real wishlist, with prices and quick add ---- */}
-      <section className="rounded-3xl border border-line/80 bg-white p-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink">
-            <HeartIcon className="h-4 w-4 text-clay" /> Saved for later
-          </h2>
-          <Link href="/account/saved" className="text-[11.5px] font-bold text-brand hover:underline">
-            See all
-          </Link>
-        </div>
-        {savedLoading ? (
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {[0, 1, 2].map((slot) => (
-              <div key={slot} className="shimmer h-32 rounded-xl" />
-            ))}
-          </div>
-        ) : savedItems.length === 0 ? (
-          <div className="mt-3 rounded-xl border border-dashed border-line bg-cream/50 px-4 py-6 text-center">
-            <p className="text-[12.5px] font-bold text-ink">Tap the heart on anything you like</p>
-            <p className="mx-auto mt-1 max-w-xs text-[11px] leading-relaxed text-ink-soft">
-              Saved items live here so your regulars are one tap away next week.
-            </p>
-            <Link
-              href="/category/fresh-produce"
-              className="press mt-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-[11.5px] font-bold text-ink hover:border-brand hover:text-brand"
-            >
-              Find favourites
-            </Link>
-          </div>
-        ) : (
-          <div className="no-scrollbar -mx-4 mt-3 flex gap-2.5 overflow-x-auto px-4 pb-1">
-            {savedItems.slice(0, 6).map((entry) => {
-              const product = entry.product;
-              if (!product) return null;
-              return (
-                <Link
-                  key={entry.id}
-                  href={`/product/${product.slug}`}
-                  className="w-[128px] shrink-0 rounded-xl border border-line/80 bg-cream/40 p-2 transition hover:border-brand/40"
-                >
-                  <span className="block aspect-square overflow-hidden rounded-lg bg-white">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
-                  </span>
-                  <span className="mt-1.5 line-clamp-2 block text-[11px] font-bold leading-tight text-ink">
-                    {product.name}
-                  </span>
-                  <span className="mt-0.5 block text-[12px] font-extrabold text-brand-deep">
-                    {formatMoney(product.priceCents)}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* ---- delivery details + savings, supporting rather than leading ---- */}
-      <section className="grid gap-3 sm:grid-cols-2">
-        <Link
-          href="/account/addresses"
-          className="press rounded-3xl border border-line/80 bg-white p-4 transition hover:border-brand/30"
-        >
-          <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand">
-            <PinIcon className="h-3.5 w-3.5" /> Default delivery address
+            {notice}
           </p>
-          {defaultAddress ? (
-            <>
-              <p className="mt-1.5 text-[12.5px] font-bold text-ink">{defaultAddress.label}</p>
-              <p className="mt-0.5 text-[11px] leading-relaxed text-ink-soft">
-                {defaultAddress.line1}
-                {defaultAddress.line2 ? `, ${defaultAddress.line2}` : ""}, {defaultAddress.city} {defaultAddress.postcode}
+        ) : null}
+
+        {/* 2 — recent orders, the most repeated task on this page */}
+        <section className="rounded-2xl border border-line/80 bg-white">
+          <div className="flex items-center justify-between gap-2 border-b border-line/70 px-4 py-2.5">
+            <h2 className="text-[13px] font-bold text-ink">{activeOrder ? "Past orders" : "Your orders"}</h2>
+            <Link href="/account/orders" className="text-[11.5px] font-bold text-brand hover:underline">
+              View all
+            </Link>
+          </div>
+
+          {ordersLoading ? (
+            <div className="space-y-2 p-4">
+              <div className="shimmer h-12 rounded-lg" />
+              <div className="shimmer h-12 rounded-lg" />
+            </div>
+          ) : recent.length === 0 ? (
+            <div className="px-4 py-7 text-center">
+              <p className="text-[13px] font-bold text-ink">No orders yet</p>
+              <p className="mx-auto mt-1 max-w-[260px] text-[11.5px] leading-relaxed text-ink-soft">
+                Your first basket takes about 30 seconds. Start with this week&apos;s produce.
               </p>
-              {defaultAddress.instructions ? (
-                <p className="mt-1 text-[10.5px] text-ink-soft">“{defaultAddress.instructions}”</p>
-              ) : null}
-            </>
+              <Link
+                href="/category/fresh-produce"
+                className="press mt-3 inline-flex h-10 items-center gap-1.5 rounded-full bg-brand px-5 text-[12.5px] font-bold text-white hover:bg-brand-deep"
+              >
+                Start shopping <ArrowRightIcon className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           ) : (
-            <p className="mt-1.5 text-[12px] leading-relaxed text-ink-soft">
-              Add an address so checkout takes seconds.
-            </p>
+            <ul className="divide-y divide-line/70">
+              {recent.map((order) => {
+                const status =
+                  ORDER_STATUS_LABELS[normaliseOrderStatus(order.status)] ?? ORDER_STATUS_LABELS.confirmed;
+                return (
+                  <li key={order.id} className="flex items-center gap-3 px-3 py-2.5">
+                    <Link
+                      href={`/account/orders/${order.orderNumber}`}
+                      className="flex min-w-0 flex-1 items-center gap-3"
+                    >
+                      <span className="flex -space-x-2">
+                        {order.items.slice(0, 2).map((item) => (
+                          <span
+                            key={item.id}
+                            className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white bg-cream"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.imageUrl}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          </span>
+                        ))}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-[12.5px] font-bold text-ink">
+                            {formatMoney(order.totalCents)}
+                          </span>
+                          <span className="text-[10.5px] text-ink-soft">
+                            · {order.itemCount} item{order.itemCount === 1 ? "" : "s"}
+                          </span>
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1 text-[10.5px] text-ink-soft">
+                          <ClockIcon className="h-3 w-3 shrink-0" />
+                          {new Date(order.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          · {status.label}
+                        </span>
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => void reorder(order.orderNumber)}
+                      disabled={busyOrder === order.orderNumber}
+                      className="press inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-line px-3 text-[11px] font-bold text-ink hover:border-brand hover:text-brand disabled:opacity-60"
+                      aria-label={`Add the items from order ${order.orderNumber} to your basket`}
+                    >
+                      <RefreshIcon className="h-3.5 w-3.5" />
+                      {busyOrder === order.orderNumber ? "Adding…" : "Reorder"}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           )}
-          <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand">
-            {defaultAddress ? "Edit addresses" : "Add address"} <ArrowRightIcon className="h-3 w-3" />
-          </span>
-        </Link>
-
-        <div className="rounded-3xl border border-line/80 bg-white p-4">
-          <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand">
-            <TruckIcon className="h-3.5 w-3.5" /> Your savings
-          </p>
-          <p className="mt-1.5 font-display text-[24px] font-semibold leading-none tracking-tight">
-            {formatMoney(totalSaved)}
-          </p>
-          <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
-            From multi-buys and coupons across your orders.
-          </p>
-          <Link
-            href="/offers"
-            className="press mt-2 inline-flex h-9 items-center gap-1 rounded-full border border-line px-3.5 text-[11px] font-bold text-ink hover:border-brand hover:text-brand"
-          >
-            Save more this week <ArrowRightIcon className="h-3 w-3" />
-          </Link>
-        </div>
-      </section>
-
-      {/* ---- first-run checklist, only while it is genuinely useful ---- */}
-      {!ordersLoading && orders.length === 0 ? (
-        <section className="rounded-3xl border border-line/80 bg-white p-4">
-          <h2 className="text-[13px] font-bold text-ink">Finish setting up</h2>
-          <ol className="mt-2.5 space-y-2">
-            {[
-              {
-                title: "Add a delivery address",
-                href: "/account/addresses",
-                cta: defaultAddress ? "Review" : "Add",
-                done: Boolean(defaultAddress),
-              },
-              { title: "Fill your basket", href: "/category/fresh-produce", cta: "Shop", done: cartCount > 0 },
-              { title: "Place your first order", href: cartCount ? "/checkout" : "/offers", cta: cartCount ? "Checkout" : "See offers", done: false },
-            ].map((step, index) => (
-              <li key={step.title} className="flex items-center gap-3 rounded-xl bg-cream/60 px-3 py-2">
-                <span
-                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-extrabold ${
-                    step.done ? "bg-brand text-white" : "bg-cream-deep text-ink"
-                  }`}
-                >
-                  {step.done ? <CheckIcon className="h-3 w-3" strokeWidth={3} /> : index + 1}
-                </span>
-                <span className="min-w-0 flex-1 text-[12px] font-semibold text-ink">{step.title}</span>
-                <Link
-                  href={step.href}
-                  className="press inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-line bg-white px-3 text-[11px] font-bold text-ink hover:border-brand hover:text-brand"
-                >
-                  {step.cta}
-                  {step.done ? null : <PlusIcon className="h-3 w-3" />}
-                </Link>
-              </li>
-            ))}
-          </ol>
         </section>
-      ) : null}
-    </>
+      </div>
+      <div className="space-y-3">
+        {/* 3 — basket: one compact line, only when there is something in it */}
+        {cartCount > 0 ? (
+          <section className="flex items-center gap-3 rounded-2xl bg-[#13261d] px-4 py-3 text-cream">
+            <div className="min-w-0 flex-1">
+              <p className="text-[12.5px] font-bold">
+                {cartCount} item{cartCount === 1 ? "" : "s"} in your basket
+              </p>
+              <p className="text-[10.5px] text-cream/70">
+                {formatMoney(cart?.subtotalCents ?? 0)}
+                {cart && cart.freeDeliveryRemainingCents > 0
+                  ? ` · ${formatMoney(cart.freeDeliveryRemainingCents)} to free delivery`
+                  : " · free delivery"}
+              </p>
+            </div>
+            <Link
+              href="/checkout"
+              className="press inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-lime px-4 text-[12px] font-bold text-brand-deep hover:bg-white"
+            >
+              Checkout <ArrowRightIcon className="h-3.5 w-3.5" />
+            </Link>
+          </section>
+        ) : null}
+
+        {/* 4 — saved items, only when there are some */}
+        {savedLoading ? null : savedItems.length > 0 ? (
+          <section className="rounded-2xl border border-line/80 bg-white p-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink">
+                <HeartIcon className="h-3.5 w-3.5 text-clay" /> Saved for later
+              </h2>
+              <Link href="/account/saved" className="text-[11.5px] font-bold text-brand hover:underline">
+                See all
+              </Link>
+            </div>
+            <div className="no-scrollbar -mx-1 mt-2.5 flex gap-2 overflow-x-auto px-1 pb-1">
+              {savedItems.slice(0, 6).map((entry) =>
+                entry.product ? (
+                  <Link
+                    key={entry.id}
+                    href={`/product/${entry.product.slug}`}
+                    className="flex w-[132px] shrink-0 items-center gap-2 rounded-xl border border-line/70 p-1.5 transition hover:border-brand/40"
+                  >
+                    <span className="block h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-cream">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={entry.product.imageUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="line-clamp-2 block text-[10.5px] font-semibold leading-tight text-ink">
+                        {entry.product.name}
+                      </span>
+                      <span className="mt-0.5 block text-[11.5px] font-extrabold text-brand-deep">
+                        {formatMoney(entry.product.priceCents)}
+                      </span>
+                    </span>
+                  </Link>
+                ) : null,
+              )}
+            </div>
+          </section>
+        ) : null}
+
+        {/* 5 — destinations: one plain list, nothing duplicated */}
+        <section className="overflow-hidden rounded-2xl border border-line/80 bg-white">
+          <h2 className="border-b border-line/70 px-4 py-2.5 text-[13px] font-bold text-ink">Account</h2>
+          <ul className="divide-y divide-line/70">
+            <MenuRow
+              href="/account/addresses"
+              icon={<PinIcon className="h-4 w-4" />}
+              title="Delivery addresses"
+              note={
+                defaultAddress
+                  ? `${defaultAddress.label} · ${defaultAddress.line1}, ${defaultAddress.postcode}`
+                  : "Add a delivery address"
+              }
+            />
+            <MenuRow
+              href="/account/settings"
+              icon={<UserIcon className="h-4 w-4" />}
+              title="Profile & alerts"
+              note="Name, phone, notifications and password"
+            />
+            <MenuRow
+              href="/info/contact"
+              icon={<ShieldIcon className="h-4 w-4" />}
+              title="Help & contact"
+              note="Delivery, refunds and freshness promise"
+            />
+            <li>
+              <button
+                type="button"
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  window.localStorage.removeItem("fresco:session-token");
+                  router.replace("/");
+                  router.refresh();
+                }}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-cream/60"
+              >
+                <span className="text-[12.5px] font-semibold text-ink-soft">Sign out</span>
+                <span className="text-[10.5px] text-ink-soft">{user?.email}</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function MenuRow({
+  href,
+  icon,
+  title,
+  note,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  note: string;
+}) {
+  return (
+    <li>
+      <Link href={href} className="flex items-center gap-3 px-4 py-3 transition hover:bg-cream/60">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-cream text-brand-deep">
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[12.5px] font-bold text-ink">{title}</span>
+          <span className="block truncate text-[10.5px] text-ink-soft">{note}</span>
+        </span>
+        <ChevronRightIcon className="h-4 w-4 shrink-0 text-ink-soft/60" />
+      </Link>
+    </li>
   );
 }

@@ -11,7 +11,9 @@ export default async function AdminOrdersPage() {
     <div className="space-y-3">
       <div>
         <h1 className="font-display text-[22px] font-semibold tracking-tight">Orders</h1>
-        <p className="text-[11.5px] text-ink-soft">Advance fulfilment, cancel with a reason, or open the customer receipt.</p>
+        <p className="text-[11.5px] text-ink-soft">
+          Advance fulfilment, cancel with a reason, or open the customer receipt.
+        </p>
       </div>
       <OrderManager
         initialOrders={rows.map((order) => ({

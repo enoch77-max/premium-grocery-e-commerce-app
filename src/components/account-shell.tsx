@@ -2,17 +2,27 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useSession } from "@/components/session-provider";
-import { useCart } from "@/components/cart-provider";
-import { ArrowRightIcon, CartIcon, CheckIcon, ShieldIcon } from "@/components/icons";
+import { ArrowRightIcon } from "@/components/icons";
 
-const NAV = [
+/**
+ * One navigation model, not three.
+ *
+ * The account used to offer the same destinations from a tab bar, a shortcut grid
+ * and a sidebar, plus basket/sign-out buttons that duplicated the site tab bar.
+ * Now there is a single compact nav: a swipeable pill rail under the header on
+ * phones (a sidebar on desktop). The overview page alone shows a plain list of
+ * destinations instead, because that is the page whose job is "where can I go".
+ */
+
+export const ACCOUNT_NAV = [
   { href: "/account", label: "Overview", icon: "🏠" },
   { href: "/account/orders", label: "Orders", icon: "📦" },
-  { href: "/account/saved", label: "Saved items", icon: "❤️" },
+  { href: "/account/recurring", label: "Repeating", icon: "🔁" },
+  { href: "/account/saved", label: "Saved", icon: "❤️" },
   { href: "/account/addresses", label: "Addresses", icon: "📍" },
-  { href: "/account/settings", label: "Profile & security", icon: "⚙️" },
+  { href: "/account/settings", label: "Settings", icon: "⚙️" },
 ];
 
 export function initials(name: string) {
@@ -28,42 +38,20 @@ export function AccountGate({ children }: { children: ReactNode }) {
   const { user, loading, token, refresh } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const retried = useRef(false);
-
-  /**
-   * A token can exist before the profile has been fetched (fresh sign-in, or a
-   * refresh that is still in flight). Treating that as "signed out" is what sent
-   * shoppers back to /login a second after signing in, so re-check once instead.
-   */
-  useEffect(() => {
-    if (loading || user || retried.current) return;
-    if (!token) return;
-    retried.current = true;
-    void refresh();
-  }, [loading, refresh, token, user]);
 
   useEffect(() => {
-    // Never redirect while a session may still be resolving.
-    if (loading || user) return;
-    if (token && !retried.current) return;
-    const timer = window.setTimeout(() => {
+    // `token && !user` means "still verifying", not "signed out".
+    if (!loading && !user && !token) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-    }, 250);
-    return () => window.clearTimeout(timer);
+    }
   }, [loading, pathname, router, token, user]);
 
-  // `token && !user` means "still verifying", not "signed out".
-  if (loading || (token && !user)) {
+  if (loading) {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6">
-        <div className="shimmer h-8 w-48 rounded-lg" />
-        <div className="mt-5 grid gap-4 lg:grid-cols-[240px_1fr]">
-          <div className="shimmer h-64 rounded-2xl" />
-          <div className="space-y-3">
-            <div className="shimmer h-28 rounded-2xl" />
-            <div className="shimmer h-56 rounded-2xl" />
-          </div>
-        </div>
+      <div className="mx-auto max-w-[900px] px-4 py-6 sm:px-6">
+        <div className="shimmer h-16 rounded-2xl" />
+        <div className="mt-3 shimmer h-40 rounded-2xl" />
+        <div className="mt-3 shimmer h-32 rounded-2xl" />
       </div>
     );
   }
@@ -71,11 +59,10 @@ export function AccountGate({ children }: { children: ReactNode }) {
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-soft text-2xl">🔐</div>
-        <h1 className="mt-3 font-display text-2xl font-semibold">Sign in to view your account</h1>
+        <h1 className="font-display text-2xl font-semibold">Sign in to view your account</h1>
         <p className="mt-1.5 text-[12.5px] text-ink-soft">Taking you to the sign-in page…</p>
         <Link
-          href="/login"
+          href={`/login?next=${encodeURIComponent(pathname)}`}
           className="press mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-[12px] font-bold text-white"
         >
           Go to sign in <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -88,126 +75,88 @@ export function AccountGate({ children }: { children: ReactNode }) {
 }
 
 export function AccountShell({ children }: { children: ReactNode }) {
-  const { user, logout } = useSession();
-  const { cart, openCart } = useCart();
+  const { user } = useSession();
   const pathname = usePathname();
-  const router = useRouter();
+  const isOverview = pathname === "/account";
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 pb-8 pt-5 sm:px-6 sm:py-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">
-            {pathname === "/account" ? "My Fresco" : "Your account"}
-          </p>
-          <h1 className="mt-1 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[34px]">
-            {pathname === "/account" ? `Hi ${user?.name.split(" ")[0] ?? "there"}` : navTitle(pathname)}
+    <div className="mx-auto max-w-[1240px] 2xl:max-w-[1400px] px-4 pb-10 pt-4 sm:px-6 sm:pt-6">
+      {/* profile strip — identity only, no actions competing with the site chrome */}
+      <div className="flex items-center gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand text-[14px] font-extrabold text-white">
+          {initials(user?.name ?? "")}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-display text-[20px] font-semibold leading-tight tracking-tight sm:text-[22px]">
+            {isOverview ? `Hi, ${user?.name.split(" ")[0] ?? "there"}` : navTitle(pathname)}
           </h1>
-          <p className="mt-1.5 text-[12px] text-ink-soft">
-            {pathname === "/account"
-              ? cart?.itemCount
-                ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} in your basket, ready to checkout`
-                : "Track a delivery, reorder your regulars, or start a fresh basket."
-              : cart?.itemCount
-                ? `${cart.itemCount} item${cart.itemCount === 1 ? "" : "s"} waiting in your basket`
-                : "Your basket is empty — start with this week's produce"}
-          </p>
+          <p className="truncate text-[11.5px] text-ink-soft">{user?.email}</p>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <button
-            type="button"
-            onClick={openCart}
-            className="press inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-[12px] font-bold text-ink hover:border-brand hover:text-brand sm:h-9 sm:flex-none sm:text-[11.5px]"
+        {!isOverview ? (
+          <Link
+            href="/account"
+            className="press inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-line bg-white px-3 text-[11.5px] font-bold text-ink hover:border-brand hover:text-brand"
           >
-            <CartIcon className="h-4 w-4" /> Basket{cart?.itemCount ? ` (${cart.itemCount})` : ""}
-          </button>
-          <button
-            type="button"
-            onClick={async () => {
-              await logout();
-              router.push("/");
-            }}
-            className="press inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-ink px-3.5 text-[12px] font-bold text-cream hover:bg-brand-deep sm:h-9 sm:flex-none sm:text-[11.5px]"
-          >
-            Sign out
-          </button>
-        </div>
+            Account
+          </Link>
+        ) : null}
       </div>
 
-      {/* Phones: the account sidebar becomes a swipeable pill rail that sticks
-          under the header, so switching section is always one thumb-flick away. */}
-      <nav
-        aria-label="Account sections"
-        className="no-scrollbar under-header sticky z-30 -mx-4 mt-4 flex gap-1.5 overflow-x-auto border-y border-line/80 bg-cream/95 px-4 py-2 backdrop-blur-md lg:hidden"
-      >
-        {NAV.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`press flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] font-bold transition ${
-                active ? "bg-brand text-white" : "border border-line bg-white text-ink-soft"
-              }`}
-            >
-              <span aria-hidden className="text-[13px]">
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* One nav per breakpoint: swipeable pills on phones, a sticky sidebar on
+          desktop — present on every account page so the options never hide. */}
+      {/* Phones: quick rail on deep pages only — the overview lists its menu. */}
+      {!isOverview ? (
+        <nav
+          aria-label="Account sections"
+          className="no-scrollbar -mx-4 mt-3 flex gap-1.5 overflow-x-auto border-b border-line/80 bg-cream/95 px-4 pb-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:hidden"
+        >
+          {ACCOUNT_NAV.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`press flex h-8 shrink-0 items-center rounded-full px-3 text-[12px] font-bold transition ${
+                  active ? "bg-ink text-cream" : "border border-line bg-white text-ink-soft"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[240px_1fr]">
-        <aside className="hidden lg:sticky lg:top-[126px] lg:block lg:self-start">
-          <div className="rounded-2xl border border-line/80 bg-white p-3">
-            <div className="flex items-center gap-2.5 border-b border-line/70 pb-3">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-soft text-[13px] font-extrabold text-brand-deep">
-                {initials(user?.name ?? "")}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-[12.5px] font-bold text-ink">{user?.name}</p>
-                <p className="truncate text-[10.5px] text-ink-soft">{user?.email}</p>
-              </div>
-            </div>
-            <nav className="mt-2 space-y-0.5">
-              {NAV.map((item) => {
+      <div className="mt-4 grid gap-5 lg:grid-cols-[192px_minmax(0,1fr)]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-[128px] rounded-2xl border border-line/80 bg-white p-2">
+            <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
+              My account
+            </p>
+            <div className="space-y-0.5">
+              {ACCOUNT_NAV.map((item) => {
                 const active = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-semibold transition ${
+                    aria-current={active ? "page" : undefined}
+                    className={`flex min-h-[38px] items-center gap-2 rounded-lg px-2.5 text-[12.5px] font-semibold transition ${
                       active ? "bg-brand-soft/70 text-brand-deep" : "text-ink hover:bg-cream"
                     }`}
                   >
-                    <span className="text-[14px]">{item.icon}</span>
-                    <span className="flex-1">{item.label}</span>
-                    {active ? <CheckIcon className="h-3.5 w-3.5" /> : null}
+                    <span aria-hidden className="text-[13px]">
+                      {item.icon}
+                    </span>
+                    {item.label}
                   </Link>
                 );
               })}
-            </nav>
-            <Link
-              href="/offers"
-              className="mt-2 flex items-center justify-between rounded-xl bg-cream px-2.5 py-2 text-[11.5px] font-bold text-ink hover:bg-cream-deep"
-            >
-              🎁 Offers & coupons <ArrowRightIcon className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <div className="mt-2 rounded-2xl border border-line/80 bg-cream-deep/50 p-3">
-            <p className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-ink-soft">
-              <ShieldIcon className="h-3.5 w-3.5 text-brand" /> Account promise
-            </p>
-            <p className="mt-1 text-[10.5px] leading-relaxed text-ink-soft">
-              We never sell your data. Orders, addresses and saved items stay private to you.
-            </p>
+            </div>
           </div>
         </aside>
-
-        <div className="min-w-0 space-y-4">{children}</div>
+        <div className="min-w-0 space-y-3">{children}</div>
       </div>
     </div>
   );

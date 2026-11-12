@@ -107,12 +107,7 @@ async function ensureDemoAccountInternal(): Promise<number | null> {
 
       const lines = catalogue.rows;
       if (lines.length) {
-        const seedOrder = async (
-          suffix: string,
-          status: string,
-          daysAgo: number,
-          picks: number[],
-        ) => {
+        const seedOrder = async (suffix: string, status: string, daysAgo: number, picks: number[]) => {
           const chosen = picks.map((index) => lines[index % lines.length]);
           const subtotal = chosen.reduce((sum, item) => sum + item.price_cents, 0);
           const delivery = subtotal >= 3500 ? 0 : 399;

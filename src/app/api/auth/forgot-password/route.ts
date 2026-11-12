@@ -33,7 +33,11 @@ export async function POST(request: Request) {
   };
 
   try {
-    const rows = await db.select({ id: users.id, isActive: users.isActive }).from(users).where(eq(users.email, email)).limit(1);
+    const rows = await db
+      .select({ id: users.id, isActive: users.isActive })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
     const user = rows[0];
     if (!user || !user.isActive) return Response.json(generic);
 

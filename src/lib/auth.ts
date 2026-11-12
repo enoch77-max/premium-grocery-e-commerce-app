@@ -11,10 +11,14 @@ export type AccountUser = {
   id: number;
   email: string;
   name: string;
+  role: string;
   phone: string;
   marketingOptIn: boolean;
   orderUpdatesEmail: boolean;
   orderUpdatesSms: boolean;
+  notifyEmail: boolean;
+  notifyWhatsapp: boolean;
+  whatsappNumber: string;
   createdAt: string;
 };
 
@@ -81,11 +85,17 @@ export async function createSession(userId: number, userAgent = "") {
   });
   try {
     const store = await cookies();
+    // Embedded previews (arena's iframe) are a third-party context: browsers drop
+    // lax cookies and localStorage there. CHIPS partitioned cookies are the
+    // standard way to keep a session inside an iframe, with lax as the fallback
+    // for normal top-level browsing.
+    const embedded = process.env.NODE_ENV === "production";
     store.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: embedded ? "none" : "lax",
+      partitioned: embedded,
+      secure: embedded,
       path: "/",
-      secure: process.env.NODE_ENV === "production",
       maxAge: SESSION_DAYS * 24 * 60 * 60,
     });
   } catch {
@@ -113,10 +123,14 @@ export async function getCurrentUser(request?: Request): Promise<AccountUser | n
         id: users.id,
         email: users.email,
         name: users.name,
+        role: users.role,
         phone: users.phone,
         marketingOptIn: users.marketingOptIn,
         orderUpdatesEmail: users.orderUpdatesEmail,
         orderUpdatesSms: users.orderUpdatesSms,
+        notifyEmail: users.notifyEmail,
+        notifyWhatsapp: users.notifyWhatsapp,
+        whatsappNumber: users.whatsappNumber,
         createdAt: users.createdAt,
       })
       .from(sessions)
@@ -129,10 +143,14 @@ export async function getCurrentUser(request?: Request): Promise<AccountUser | n
       id: row.id,
       email: row.email,
       name: row.name,
+      role: row.role,
       phone: row.phone,
       marketingOptIn: row.marketingOptIn,
       orderUpdatesEmail: row.orderUpdatesEmail,
       orderUpdatesSms: row.orderUpdatesSms,
+      notifyEmail: row.notifyEmail,
+      notifyWhatsapp: row.notifyWhatsapp,
+      whatsappNumber: row.whatsappNumber,
       createdAt: row.createdAt.toISOString(),
     };
   } catch (error) {
@@ -193,7 +211,9 @@ export async function getSessionToken(request?: Request): Promise<string | null>
  */
 export async function revokeUserSessions(userId: number, keepToken?: string | null) {
   if (keepToken) {
-    await db.delete(sessions).where(and(eq(sessions.userId, userId), ne(sessions.token, hashSessionToken(keepToken))));
+    await db
+      .delete(sessions)
+      .where(and(eq(sessions.userId, userId), ne(sessions.token, hashSessionToken(keepToken))));
     return;
   }
   await db.delete(sessions).where(eq(sessions.userId, userId));

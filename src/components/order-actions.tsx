@@ -27,9 +27,11 @@ export function OrderActions({
     setMessage(null);
     try {
       const response = await authFetch(`/api/orders/${orderNumber}/reorder`, { method: "POST" });
-      const data = (await response.json().catch(() => null)) as
-        | { error?: string; added?: number; unavailable?: string[] }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+        added?: number;
+        unavailable?: string[];
+      } | null;
       if (!response.ok) {
         setMessage(data?.error ?? "We couldn't reorder that basket.");
         return;
@@ -67,7 +69,9 @@ export function OrderActions({
   return (
     <div className="rounded-2xl border border-line/80 bg-white p-3.5">
       {message ? (
-        <p className="mb-2 rounded-lg bg-brand-soft/70 px-2.5 py-1.5 text-[11px] font-semibold text-brand-deep">{message}</p>
+        <p className="mb-2 rounded-lg bg-brand-soft/70 px-2.5 py-1.5 text-[11px] font-semibold text-brand-deep">
+          {message}
+        </p>
       ) : null}
       <div className="flex flex-wrap gap-1.5">
         <button
@@ -128,7 +132,10 @@ export function OrderActions({
       ) : null}
       {!user && !token ? (
         <p className="mt-2 border-t border-line/70 pt-2 text-[10.5px] leading-relaxed text-ink-soft">
-          <Link href={`/login?next=${encodeURIComponent(`/account/orders/${orderNumber}`)}`} className="inline-flex items-center gap-1 font-bold text-brand hover:underline">
+          <Link
+            href={`/login?next=${encodeURIComponent(`/account/orders/${orderNumber}`)}`}
+            className="inline-flex items-center gap-1 font-bold text-brand hover:underline"
+          >
             <UserIcon className="h-3 w-3" /> Create an account with this email
           </Link>{" "}
           to keep this order in your history and reorder in one tap.

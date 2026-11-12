@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => ({}))) as { password?: string; confirm?: string };
   if ((body.confirm ?? "").trim().toUpperCase() !== "DELETE") {
-    return Response.json({ error: 'Type DELETE to confirm', field: "confirm" }, { status: 422 });
+    return Response.json({ error: "Type DELETE to confirm", field: "confirm" }, { status: 422 });
   }
 
   const rows = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
@@ -49,6 +49,9 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, message: "Your account has been closed." });
   } catch (error) {
     console.error("account delete failed", error);
-    return Response.json({ error: "We couldn't close the account. Please contact support." }, { status: 500 });
+    return Response.json(
+      { error: "We couldn't close the account. Please contact support." },
+      { status: 500 },
+    );
   }
 }

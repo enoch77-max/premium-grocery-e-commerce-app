@@ -12,5 +12,7 @@ export const metadata: Metadata = {
 
 export default async function CheckoutPage() {
   const [coupons, settings] = await Promise.all([getCoupons(), getStoreSettings()]);
-  return <CheckoutForm coupons={coupons} storeOpen={settings.storeOpen} supportEmail={settings.supportEmail} />;
+  return (
+    <CheckoutForm coupons={coupons} storeOpen={settings.storeOpen} supportEmail={settings.supportEmail} />
+  );
 }

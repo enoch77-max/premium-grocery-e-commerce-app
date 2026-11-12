@@ -28,7 +28,9 @@ export function SectionHeading({
         <h2 className="font-display text-[21px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[28px]">
           {title}
         </h2>
-        {subtitle ? <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-ink-soft">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-ink-soft">{subtitle}</p>
+        ) : null}
       </div>
       <div className="flex items-center gap-2">
         {trailing}

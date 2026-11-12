@@ -32,7 +32,8 @@ export async function POST(request: Request) {
     );
   }
   const body = (await request.json().catch(() => ({}))) as OrderPayload;
-  const checkoutId = typeof body.checkoutId === "string" && body.checkoutId.length >= 8 ? body.checkoutId : null;
+  const checkoutId =
+    typeof body.checkoutId === "string" && body.checkoutId.length >= 8 ? body.checkoutId : null;
 
   // Idempotency: a retried submit (double click, refresh, flaky network) with
   // the same checkout id returns the original order instead of an error or a
@@ -74,7 +75,8 @@ export async function POST(request: Request) {
   if (address.length < 4) errors.address = "Add a street address";
   if (city.length < 2) errors.city = "Add a city";
   if (postcode.length < 3) errors.postcode = "Add a postcode";
-  else if (!isServiceable(postcode)) errors.postcode = "We don't deliver to that postcode yet — pick another area";
+  else if (!isServiceable(postcode))
+    errors.postcode = "We don't deliver to that postcode yet — pick another area";
 
   if (Object.keys(errors).length) {
     return Response.json({ error: "Please complete the highlighted fields", errors }, { status: 422 });
@@ -138,7 +140,11 @@ export async function POST(request: Request) {
     const shopper = await getCurrentUser(request);
     if (shopper && postcode && isServiceable(postcode)) {
       try {
-        const existing = await db.select({ id: addresses.id }).from(addresses).where(eq(addresses.userId, shopper.id)).limit(1);
+        const existing = await db
+          .select({ id: addresses.id })
+          .from(addresses)
+          .where(eq(addresses.userId, shopper.id))
+          .limit(1);
         if (!existing.length) {
           await db.insert(addresses).values({
             userId: shopper.id,

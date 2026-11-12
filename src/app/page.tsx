@@ -11,14 +11,7 @@ import { NextSlotCard } from "@/components/next-slot-card";
 import { DealCountdown } from "@/components/deal-countdown";
 import { SectionHeading } from "@/components/section-heading";
 import { ClosedAccountNotice } from "@/components/closed-account-notice";
-import {
-  ArrowRightIcon,
-  BoltIcon,
-  LeafIcon,
-  ShieldIcon,
-  StarIcon,
-  TruckIcon,
-} from "@/components/icons";
+import { ArrowRightIcon, BoltIcon, LeafIcon, ShieldIcon, StarIcon, TruckIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +53,10 @@ export default async function HomePage() {
 
   const deals = [...products]
     .filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents)
-    .sort((a, b) => discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents))
+    .sort(
+      (a, b) =>
+        discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents),
+    )
     .slice(0, 8);
 
   const bestsellers = [...products]
@@ -79,259 +75,276 @@ export default async function HomePage() {
       <Suspense fallback={null}>
         <ClosedAccountNotice />
       </Suspense>
-      <div className="mx-auto max-w-[1340px] px-4 pb-4 pt-4 sm:px-6 sm:pt-5">
-      {/* Phones: one swipeable strip of promise chips (~56px tall) instead of a
+      <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pb-4 pt-4 sm:px-6 sm:pt-5">
+        {/* Phones: one swipeable strip of promise chips (~56px tall) instead of a
           300px stack of cards. Tablets/desktop keep the four-up card grid. */}
-      <div className="rail -mx-4 flex items-stretch gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 lg:gap-3">
-        {services.map((service) => (
-          <div
-            key={service.title}
-            className="flex w-[190px] shrink-0 items-center gap-2.5 rounded-2xl border border-line/70 bg-white/70 px-3 py-2 sm:w-auto sm:px-3.5 sm:py-2.5"
-          >
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-deep sm:h-9 sm:w-9">
-              <service.icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-[11.5px] font-bold text-ink sm:text-[12px]">{service.title}</p>
-              <p className="truncate text-[10px] text-ink-soft sm:text-[10.5px]">{service.note}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 grid gap-5 sm:mt-5 lg:grid-cols-[220px_1fr]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-[152px] space-y-3">
-            <nav className="overflow-hidden rounded-2xl border border-line/80 bg-white">
-              <p className="border-b border-line/70 px-3.5 py-2.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
-                Shop by aisle
-              </p>
-              <div className="p-1.5">
-                {categories.map((category) => {
-                  const count = products.filter((product) => product.categorySlug === category.slug).length;
-                  return (
-                    <Link
-                      key={category.slug}
-                      href={`/category/${category.slug}`}
-                      className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition hover:bg-cream"
-                    >
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-cream-deep/70 text-[15px] transition group-hover:bg-brand-soft">
-                        {category.emoji}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[12px] font-bold text-ink">{category.name}</span>
-                        <span className="block text-[10px] text-ink-soft">{count} products</span>
-                      </span>
-                      <ArrowRightIcon className="h-3.5 w-3.5 text-ink-soft/50 transition group-hover:translate-x-0.5 group-hover:text-brand" />
-                    </Link>
-                  );
-                })}
+        <div className="rail -mx-4 flex scroll-pl-4 items-stretch gap-2 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:scroll-pl-0 sm:px-0 lg:grid-cols-4 lg:gap-3">
+          {services.map((service) => (
+            <div
+              key={service.title}
+              className="flex w-[190px] shrink-0 items-center gap-2.5 rounded-2xl border border-line/70 bg-white/70 px-3 py-2 sm:w-auto sm:px-3.5 sm:py-2.5"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-deep sm:h-9 sm:w-9">
+                <service.icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-[11.5px] font-bold text-ink sm:text-[12px]">{service.title}</p>
+                <p className="truncate text-[10px] text-ink-soft sm:text-[10.5px]">{service.note}</p>
               </div>
-              <Link
-                href="/offers"
-                className="flex items-center justify-between border-t border-line/70 bg-brand-soft/40 px-3.5 py-2.5 text-[11.5px] font-bold text-brand-deep hover:bg-brand-soft"
-              >
-                All offers & coupons <ArrowRightIcon className="h-3.5 w-3.5" />
-              </Link>
-            </nav>
-
-            <NextSlotCard />
-          </div>
-        </aside>
-
-        <div className="min-w-0 space-y-7 sm:space-y-12">
-          <section className="grid gap-3 lg:grid-cols-[1.72fr_1fr]">
-            <OfferHero offers={offers} />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              {offers.slice(3, 5).map((offer) => (
-                <MiniOfferCard key={offer.slug} offer={offer} />
-              ))}
             </div>
-          </section>
+          ))}
+        </div>
 
-          <section>
-            <SectionHeading
-              eyebrow="Today's deals"
-              title="Price drops worth a detour"
-              subtitle="Updated every morning. When they're gone, they're gone."
-              href="/category/fresh-produce"
-              actionLabel="Shop deals"
-              trailing={<DealCountdown />}
-            />
-            <ProductRail products={deals} />
-          </section>
-
-          <section>
-            <SectionHeading
-              eyebrow="Shop by aisle"
-              title="Everything for the week ahead"
-              subtitle="Eight aisles, one basket, zero queues."
-              href="/search?q=organic"
-              actionLabel="Browse all"
-            />
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-              {categories.map((category) => (
+        <div className="mt-4 grid gap-5 sm:mt-5 lg:grid-cols-[220px_1fr]">
+          <aside className="hidden lg:block">
+            <div className="sticky top-[152px] space-y-3">
+              <nav className="overflow-hidden rounded-2xl border border-line/80 bg-white">
+                <p className="border-b border-line/70 px-3.5 py-2.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
+                  Shop by aisle
+                </p>
+                <div className="p-1.5">
+                  {categories.map((category) => {
+                    const count = products.filter((product) => product.categorySlug === category.slug).length;
+                    return (
+                      <Link
+                        key={category.slug}
+                        href={`/category/${category.slug}`}
+                        className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition hover:bg-cream"
+                      >
+                        <span className="grid h-8 w-8 place-items-center rounded-lg bg-cream-deep/70 text-[15px] transition group-hover:bg-brand-soft">
+                          {category.emoji}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[12px] font-bold text-ink">
+                            {category.name}
+                          </span>
+                          <span className="block text-[10px] text-ink-soft">{count} products</span>
+                        </span>
+                        <ArrowRightIcon className="h-3.5 w-3.5 text-ink-soft/50 transition group-hover:translate-x-0.5 group-hover:text-brand" />
+                      </Link>
+                    );
+                  })}
+                </div>
                 <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  className="group flex items-center gap-2 rounded-2xl border border-line/80 bg-white p-2 transition hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-card sm:gap-3 sm:p-2.5"
+                  href="/offers"
+                  className="flex items-center justify-between border-t border-line/70 bg-brand-soft/40 px-3.5 py-2.5 text-[11.5px] font-bold text-brand-deep hover:bg-brand-soft"
                 >
-                  <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line/60 bg-cream sm:h-12 sm:w-12">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={category.imageUrl}
-                      alt={category.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="line-clamp-2 block text-[11.5px] font-bold leading-tight text-ink sm:line-clamp-1 sm:text-[12.5px]">
-                      {category.name}
-                    </span>
-                    <span className="hidden truncate text-[10px] text-ink-soft min-[420px]:block">{category.tagline}</span>
-                  </span>
+                  All offers & coupons <ArrowRightIcon className="h-3.5 w-3.5" />
                 </Link>
-              ))}
+              </nav>
+
+              <NextSlotCard />
             </div>
-          </section>
+          </aside>
 
-          <section>
-            <SectionHeading
-              eyebrow="Loved by 12,000+ households"
-              title="Bestsellers this week"
-              subtitle="The items that keep reappearing in baskets across the neighbourhood."
-              href="/search?q=bestsellers"
-              actionLabel="See bestsellers"
-            />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-              {bestsellers.slice(0, 10).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-
-          <SavingsLadder bundle={featuredBundle} />
-
-          <section>
-            <SectionHeading
-              eyebrow="Bundle & save"
-              title="One tap. A whole meal sorted."
-              subtitle="Curated baskets priced below the sum of their parts — add every item at once."
-              href="/offers#bundles"
-              actionLabel="All bundles"
-            />
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {bundles.map((bundle) => (
-                <BundleCard key={bundle.slug} bundle={bundle} />
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <SectionHeading
-              eyebrow="Small prices, big basket"
-              title="Everyday essentials under $5"
-              subtitle="Good food shouldn't need a budget meeting."
-              href="/search?q=under+%245"
-              actionLabel="Shop under $5"
-            />
-            <ProductRail products={underFive} />
-          </section>
-
-          <section className="grid gap-3 lg:grid-cols-[1.05fr_1fr]">
-            <div className="rounded-3xl border border-line/80 bg-white p-4 sm:p-6">
-              <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">Why Fresco</p>
-              <h2 className="mt-1.5 font-display text-[22px] font-semibold leading-tight tracking-tight sm:text-[28px]">
-                Groceries without the
-                <br className="hidden sm:block" /> admin.
-              </h2>
-              <div className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-                {[
-                  { title: "Pick a slot, not a queue", note: "Same-day 30-minute delivery or a 2-hour window you choose." },
-                  { title: "Prices that don't need a coupon", note: "Weekly multi-buys and honest unit pricing on every card." },
-                  { title: "One-tap reordering", note: "Your basket saves itself, so next week's shop is a two-tap job." },
-                ].map((step, index) => (
-                  <div key={step.title} className="flex items-start gap-3">
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-[11px] font-extrabold text-lime">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="text-[12.5px] font-bold text-ink">{step.title}</p>
-                      <p className="text-[11px] leading-relaxed text-ink-soft">{step.note}</p>
-                    </div>
-                  </div>
+          <div className="min-w-0 space-y-7 sm:space-y-12">
+            <section className="grid gap-3 lg:grid-cols-[1.72fr_1fr]">
+              <OfferHero offers={offers} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                {offers.slice(3, 5).map((offer) => (
+                  <MiniOfferCard key={offer.slug} offer={offer} />
                 ))}
               </div>
-              <div className="mt-4 flex items-center gap-4 border-t border-line/70 pt-3 sm:mt-5 sm:pt-4">
-                <div className="flex items-center gap-1 text-amber">
-                  {[0, 1, 2, 3, 4].map((star) => (
-                    <StarIcon key={star} className="h-3.5 w-3.5" />
+            </section>
+
+            <section>
+              <SectionHeading
+                eyebrow="Today's deals"
+                title="Price drops worth a detour"
+                subtitle="Updated every morning. When they're gone, they're gone."
+                href="/category/fresh-produce"
+                actionLabel="Shop deals"
+                trailing={<DealCountdown />}
+              />
+              <ProductRail products={deals} />
+            </section>
+
+            <section>
+              <SectionHeading
+                eyebrow="Shop by aisle"
+                title="Everything for the week ahead"
+                subtitle="Eight aisles, one basket, zero queues."
+                href="/search?q=organic"
+                actionLabel="Browse all"
+              />
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                {categories.map((category) => (
+                  <Link
+                    key={category.slug}
+                    href={`/category/${category.slug}`}
+                    className="group flex items-center gap-2 rounded-2xl border border-line/80 bg-white p-2 transition hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-card sm:gap-3 sm:p-2.5"
+                  >
+                    <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line/60 bg-cream sm:h-12 sm:w-12">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={category.imageUrl}
+                        alt={category.name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="line-clamp-2 block text-[11.5px] font-bold leading-tight text-ink sm:line-clamp-1 sm:text-[12.5px]">
+                        {category.name}
+                      </span>
+                      <span className="hidden truncate text-[10px] text-ink-soft min-[420px]:block">
+                        {category.tagline}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <SectionHeading
+                eyebrow="Loved by 12,000+ households"
+                title="Bestsellers this week"
+                subtitle="The items that keep reappearing in baskets across the neighbourhood."
+                href="/search?q=bestsellers"
+                actionLabel="See bestsellers"
+              />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
+                {bestsellers.slice(0, 10).map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+
+            <SavingsLadder bundle={featuredBundle} />
+
+            <section>
+              <SectionHeading
+                eyebrow="Bundle & save"
+                title="One tap. A whole meal sorted."
+                subtitle="Curated baskets priced below the sum of their parts — add every item at once."
+                href="/offers#bundles"
+                actionLabel="All bundles"
+              />
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {bundles.map((bundle) => (
+                  <BundleCard key={bundle.slug} bundle={bundle} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <SectionHeading
+                eyebrow="Small prices, big basket"
+                title="Everyday essentials under $5"
+                subtitle="Good food shouldn't need a budget meeting."
+                href="/search?q=under+%245"
+                actionLabel="Shop under $5"
+              />
+              <ProductRail products={underFive} />
+            </section>
+
+            <section className="grid gap-3 lg:grid-cols-[1.05fr_1fr]">
+              <div className="rounded-3xl border border-line/80 bg-white p-4 sm:p-6">
+                <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">
+                  Why Fresco
+                </p>
+                <h2 className="mt-1.5 font-display text-[22px] font-semibold leading-tight tracking-tight sm:text-[28px]">
+                  Groceries without the
+                  <br className="hidden sm:block" /> admin.
+                </h2>
+                <div className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
+                  {[
+                    {
+                      title: "Pick a slot, not a queue",
+                      note: "Same-day 30-minute delivery or a 2-hour window you choose.",
+                    },
+                    {
+                      title: "Prices that don't need a coupon",
+                      note: "Weekly multi-buys and honest unit pricing on every card.",
+                    },
+                    {
+                      title: "One-tap reordering",
+                      note: "Your basket saves itself, so next week's shop is a two-tap job.",
+                    },
+                  ].map((step, index) => (
+                    <div key={step.title} className="flex items-start gap-3">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-[11px] font-extrabold text-lime">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-[12.5px] font-bold text-ink">{step.title}</p>
+                        <p className="text-[11px] leading-relaxed text-ink-soft">{step.note}</p>
+                      </div>
+                    </div>
                   ))}
                 </div>
-                <p className="text-[11px] font-semibold text-ink">
-                  4.9/5 average <span className="font-medium text-ink-soft">· 2,180 verified reviews</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-1">
-              {reviews.slice(0, 2).map((review) => (
-                <div key={review.name} className="rounded-2xl border border-line/80 bg-white p-3.5 sm:p-4">
-                  <div className="flex items-center gap-0.5 text-amber">
+                <div className="mt-4 flex items-center gap-4 border-t border-line/70 pt-3 sm:mt-5 sm:pt-4">
+                  <div className="flex items-center gap-1 text-amber">
                     {[0, 1, 2, 3, 4].map((star) => (
-                      <StarIcon key={star} className="h-3 w-3" />
+                      <StarIcon key={star} className="h-3.5 w-3.5" />
                     ))}
                   </div>
-                  <p className="mt-2 text-[12px] leading-relaxed text-ink">&ldquo;{review.quote}&rdquo;</p>
-                  <p className="mt-2 text-[10.5px] font-bold text-ink-soft">
-                    {review.name} · {review.area}
+                  <p className="text-[11px] font-semibold text-ink">
+                    4.9/5 average <span className="font-medium text-ink-soft">· 2,180 verified reviews</span>
                   </p>
                 </div>
-              ))}
-              <div className="rounded-2xl border border-line/80 bg-cream-deep/60 p-4">
-                <p className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
-                  Free delivery threshold
-                </p>
-                <p className="mt-1 font-display text-[22px] font-semibold leading-none">$35</p>
-                <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
-                  Most baskets hit it with a bundle. Or use code{" "}
-                  <span className="font-bold text-ink">FREEDEL</span> on $25+.
-                </p>
-                <Link
-                  href="/offers#coupons"
-                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:underline"
-                >
-                  See all coupons <ArrowRightIcon className="h-3 w-3" />
-                </Link>
               </div>
-            </div>
-          </section>
 
-          <Link
-            href="/offers"
-            className="group flex flex-col items-start justify-between gap-3 overflow-hidden rounded-3xl bg-gradient-to-r from-[#0e5c3d] via-[#136b47] to-[#1b8055] p-4 text-cream sm:flex-row sm:items-center sm:gap-4 sm:p-6"
-          >
-            <div className="flex items-center gap-3 sm:gap-4">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white/15 text-xl sm:h-12 sm:w-12 sm:text-2xl">
-                🎁
-              </span>
-              <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-lime">Offers & coupons</p>
-                <h2 className="font-display text-[19px] font-semibold leading-tight sm:text-[26px]">
-                  $10 off your first $60 — plus free delivery.
-                </h2>
-                <p className="mt-0.5 text-[11px] text-cream/70 sm:text-[11.5px]">
-                  FRESH10 stacks with $35+ free delivery and every weekly multi-buy.
-                </p>
+              <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-1">
+                {reviews.slice(0, 2).map((review) => (
+                  <div key={review.name} className="rounded-2xl border border-line/80 bg-white p-3.5 sm:p-4">
+                    <div className="flex items-center gap-0.5 text-amber">
+                      {[0, 1, 2, 3, 4].map((star) => (
+                        <StarIcon key={star} className="h-3 w-3" />
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[12px] leading-relaxed text-ink">&ldquo;{review.quote}&rdquo;</p>
+                    <p className="mt-2 text-[10.5px] font-bold text-ink-soft">
+                      {review.name} · {review.area}
+                    </p>
+                  </div>
+                ))}
+                <div className="rounded-2xl border border-line/80 bg-cream-deep/60 p-4">
+                  <p className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
+                    Free delivery threshold
+                  </p>
+                  <p className="mt-1 font-display text-[22px] font-semibold leading-none">$35</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
+                    Most baskets hit it with a bundle. Or use code{" "}
+                    <span className="font-bold text-ink">FREEDEL</span> on $25+.
+                  </p>
+                  <Link
+                    href="/offers#coupons"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:underline"
+                  >
+                    See all coupons <ArrowRightIcon className="h-3 w-3" />
+                  </Link>
+                </div>
               </div>
-            </div>
-            <span className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-lime px-4 text-[12.5px] font-bold text-brand-deep transition group-hover:bg-white sm:h-auto sm:w-auto sm:py-2.5 sm:text-[12px]">
-              Browse every offer <ArrowRightIcon className="h-3.5 w-3.5" />
-            </span>
-          </Link>
+            </section>
+
+            <Link
+              href="/offers"
+              className="group flex flex-col items-start justify-between gap-3 overflow-hidden rounded-3xl bg-gradient-to-r from-[#0e5c3d] via-[#136b47] to-[#1b8055] p-4 text-cream sm:flex-row sm:items-center sm:gap-4 sm:p-6"
+            >
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white/15 text-xl sm:h-12 sm:w-12 sm:text-2xl">
+                  🎁
+                </span>
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-lime">
+                    Offers & coupons
+                  </p>
+                  <h2 className="font-display text-[19px] font-semibold leading-tight sm:text-[26px]">
+                    $10 off your first $60 — plus free delivery.
+                  </h2>
+                  <p className="mt-0.5 text-[11px] text-cream/70 sm:text-[11.5px]">
+                    FRESH10 stacks with $35+ free delivery and every weekly multi-buy.
+                  </p>
+                </div>
+              </div>
+              <span className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-lime px-4 text-[12.5px] font-bold text-brand-deep transition group-hover:bg-white sm:h-auto sm:w-auto sm:py-2.5 sm:text-[12px]">
+                Browse every offer <ArrowRightIcon className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          </div>
         </div>
-      </div>
       </div>
     </>
   );

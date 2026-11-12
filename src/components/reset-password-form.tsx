@@ -17,8 +17,13 @@ export function ResetPasswordForm() {
     return (
       <div className="mt-5 rounded-2xl border border-clay/30 bg-rose-soft p-4">
         <p className="text-[13px] font-bold text-clay">This reset link is incomplete</p>
-        <p className="mt-1 text-[11.5px] text-ink-soft">Open the link from your reset email again, or request a new one.</p>
-        <Link href="/forgot-password" className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white">
+        <p className="mt-1 text-[11.5px] text-ink-soft">
+          Open the link from your reset email again, or request a new one.
+        </p>
+        <Link
+          href="/forgot-password"
+          className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white"
+        >
           Request a new link
         </Link>
       </div>
@@ -29,8 +34,13 @@ export function ResetPasswordForm() {
     return (
       <div className="mt-5 rounded-2xl border border-brand/30 bg-brand-soft/50 p-4">
         <p className="text-[13px] font-bold text-brand-deep">Password updated</p>
-        <p className="mt-1 text-[11.5px] text-ink-soft">Sign in with your new password to continue shopping.</p>
-        <Link href="/login" className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white">
+        <p className="mt-1 text-[11.5px] text-ink-soft">
+          Sign in with your new password to continue shopping.
+        </p>
+        <Link
+          href="/login"
+          className="press mt-3 flex h-11 items-center justify-center rounded-full bg-brand text-[13px] font-bold text-white"
+        >
           Go to sign in
         </Link>
       </div>
@@ -69,7 +79,9 @@ export function ResetPasswordForm() {
       }}
     >
       <label className="block">
-        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">New password</span>
+        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          New password
+        </span>
         <input
           type="password"
           required
@@ -81,7 +93,9 @@ export function ResetPasswordForm() {
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Confirm password</span>
+        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          Confirm password
+        </span>
         <input
           type="password"
           required
@@ -91,7 +105,9 @@ export function ResetPasswordForm() {
           className="h-11 w-full rounded-xl border border-line bg-white px-3 text-[15px] outline-none focus:border-brand sm:text-[13px]"
         />
       </label>
-      {error ? <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}

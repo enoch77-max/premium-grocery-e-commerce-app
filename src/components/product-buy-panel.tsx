@@ -7,6 +7,7 @@ import { discountPercent, formatMoney } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
 import { useDelivery } from "@/components/delivery-provider";
 import { CartControls } from "@/components/cart-controls";
+import { HighlightTiles, SpecStrip, TrustRow } from "@/components/product-signals";
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -69,22 +70,12 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         <span className="truncate font-semibold text-ink">{product.name}</span>
       </nav>
 
+      {/* brand alone here — freshness, diet and proof signals already speak
+          from the seal, the photo chips and the spec strip */}
       <div className="order-1 flex flex-wrap items-center gap-2">
-        <span className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-brand">{product.brand}</span>
-        <span className="h-1 w-1 rounded-full bg-line" />
-        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-bold text-brand-deep">
-          <CheckIcon className="h-2.5 w-2.5" /> In stock
+        <span className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-brand">
+          {product.brand}
         </span>
-        {product.isOrganic ? (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream-deep px-2 py-0.5 text-[10px] font-bold text-ink">
-            <LeafIcon className="h-2.5 w-2.5 text-brand" /> Organic
-          </span>
-        ) : null}
-        {product.isBestseller ? (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-amber-soft px-2 py-0.5 text-[10px] font-bold text-ink">
-            <SparkleIcon className="h-2.5 w-2.5 text-amber" /> Bestseller
-          </span>
-        ) : null}
       </div>
 
       <h1 className="order-2 mt-1.5 font-display text-[23px] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-[36px] sm:leading-[1.04]">
@@ -95,7 +86,10 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         <div className="flex items-center gap-1">
           <div className="flex items-center gap-0.5 text-amber">
             {[0, 1, 2, 3, 4].map((star) => (
-              <StarIcon key={star} className={`h-3.5 w-3.5 ${star < Math.round(product.rating) ? "" : "text-line"}`} />
+              <StarIcon
+                key={star}
+                className={`h-3.5 w-3.5 ${star < Math.round(product.rating) ? "" : "text-line"}`}
+              />
             ))}
           </div>
           <span className="text-[12px] font-bold text-ink">{product.rating.toFixed(1)}</span>
@@ -107,15 +101,19 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         >
           {product.reviewCount} verified reviews
         </button>
-        <span className="text-[11px] text-ink-soft">· {product.unit}</span>
       </div>
 
-      <p className="order-6 mt-3 text-[12.5px] leading-relaxed text-ink-soft lg:order-3">{product.description}</p>
+      <div className="order-8 mt-3 lg:order-3">
+        <p className="text-[12.5px] leading-relaxed text-ink-soft">{product.description}</p>
+        <div className="mt-2">
+          <HighlightTiles product={product} />
+        </div>
+      </div>
 
-      <div className="order-4 mt-2.5 rounded-2xl border border-line/80 bg-white p-3 sm:mt-3 sm:p-3.5">
+      <div className="order-4 mt-2.5 rounded-xl border border-line/80 bg-white px-3 py-2.5 sm:mt-3 sm:p-3.5">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
-            <span className="font-display text-[30px] font-semibold leading-none tracking-tight text-ink">
+            <span className="font-display text-[26px] font-semibold leading-none tracking-tight text-ink sm:text-[30px]">
               {formatMoney(product.priceCents)}
             </span>
             {product.compareAtCents ? (
@@ -133,19 +131,14 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
             {formatMoney(product.priceCents)} / {product.unit.split("·")[0].trim()} · tax included
           </span>
         </div>
-        <div className="mt-2 hidden flex-wrap gap-1.5 sm:flex">
-          {product.highlights.slice(0, 3).map((highlight) => (
-            <span
-              key={highlight}
-              className="inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2 py-1 text-[10.5px] font-semibold text-ink"
-            >
-              <CheckIcon className="h-3 w-3 text-brand" /> {highlight}
-            </span>
-          ))}
-        </div>
       </div>
 
-      <div className="order-7 mt-3 rounded-2xl border border-line/80 bg-cream/60 p-3 lg:order-6">
+      {/* one compact fact bar replaces four oversized cards */}
+      <div className="order-5 mt-2">
+        <SpecStrip product={product} />
+      </div>
+
+      <div className="order-9 mt-3 rounded-2xl border border-line/80 bg-cream/60 p-3 lg:order-6">
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
@@ -153,7 +146,9 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
             className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-ink hover:text-brand"
           >
             <TruckIcon className="h-4 w-4 text-brand" /> Delivering to {area.postcode}
-            <span className="text-[10px] font-semibold text-brand underline-offset-2 hover:underline">Change</span>
+            <span className="text-[10px] font-semibold text-brand underline-offset-2 hover:underline">
+              Change
+            </span>
           </button>
           <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-brand-deep">
             <ClockIcon className="h-3 w-3" /> {area.eta}
@@ -179,13 +174,14 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
           ))}
         </div>
         <p className="mt-2 text-[10.5px] text-ink-soft">
-          Free delivery on baskets over $35 · otherwise $3.99. Refunds are instant if anything isn&apos;t perfect.
+          Free delivery on baskets over $35 · otherwise $3.99. Refunds are instant if anything isn&apos;t
+          perfect.
         </p>
       </div>
 
       {/* Two full-width stacked CTAs eat ~110px of a phone screen, so below sm
           they share one row; desktop keeps the stacked pair. */}
-      <div className="order-5 mt-2.5 grid grid-cols-2 gap-2 sm:mt-3 sm:grid-cols-1">
+      <div className="order-6 mt-2.5 grid grid-cols-2 gap-2 sm:mt-3 sm:grid-cols-1">
         <CartControls product={product} size="lg" label="Add to basket" />
         <button
           type="button"
@@ -201,31 +197,31 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
         </button>
       </div>
 
-      <div className="order-8 mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-soft/50 px-3 py-2 text-[10.5px]">
-        <span className="inline-flex items-center gap-1 font-semibold text-brand-deep">
-          <ShieldIcon className="h-3.5 w-3.5" /> Secure checkout · Freshness guarantee
-        </span>
+      <div className="order-7 mt-2 rounded-xl bg-brand-soft/50 px-3 py-2">
         {product.stock <= 30 ? (
-          <span className="font-bold text-clay">Only {product.stock} left in today&apos;s stock</span>
-        ) : (
-          <span className="font-medium text-ink-soft">Restocked daily at 6am</span>
-        )}
+          <p className="mb-1.5 text-center text-[10.5px] font-bold text-clay">
+            Only {product.stock} left in today&apos;s stock
+          </p>
+        ) : null}
+        <TrustRow />
       </div>
 
       <a
         href="#frequently-bought"
-        className="press order-9 mt-3 flex items-center justify-between rounded-2xl border border-dashed border-brand/35 bg-white px-3.5 py-2.5 text-left hover:border-brand"
+        className="press order-10 mt-3 flex items-center justify-between rounded-2xl border border-dashed border-brand/35 bg-white px-3.5 py-2.5 text-left hover:border-brand"
       >
         <span>
           <span className="flex items-center gap-1 text-[11.5px] font-bold text-brand-deep">
             <SparkleIcon className="h-3.5 w-3.5 text-amber" /> Make it a meal and save
           </span>
-          <span className="text-[10.5px] text-ink-soft">Our buyers paired this with 2 essentials — add both in one tap.</span>
+          <span className="text-[10.5px] text-ink-soft">
+            Our buyers paired this with 2 essentials — add both in one tap.
+          </span>
         </span>
         <ArrowRightIcon className="h-4 w-4 shrink-0 text-brand" />
       </a>
 
-      <div className="order-10 mt-4 overflow-hidden rounded-2xl border border-line/80 bg-white">
+      <div className="order-11 mt-4 overflow-hidden rounded-2xl border border-line/80 bg-white">
         <div className="flex border-b border-line/70">
           {(
             [
@@ -244,7 +240,9 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
             >
               <span className="sm:hidden">{item.short}</span>
               <span className="hidden sm:inline">{item.label}</span>
-              {tab === item.id ? <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-brand" /> : null}
+              {tab === item.id ? (
+                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-brand" />
+              ) : null}
             </button>
           ))}
         </div>
@@ -266,7 +264,10 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
               </ul>
               <div className="flex flex-wrap gap-1 pt-1">
                 {product.tags.slice(0, 6).map((tag) => (
-                  <span key={tag} className="whitespace-nowrap rounded-full bg-cream px-2 py-0.5 text-[9.5px] font-semibold text-ink-soft">
+                  <span
+                    key={tag}
+                    className="whitespace-nowrap rounded-full bg-cream px-2 py-0.5 text-[9.5px] font-semibold text-ink-soft"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -282,8 +283,8 @@ export function ProductBuyPanel({ product, categoryName }: { product: Product; c
                 <strong className="text-ink">Sourced from.</strong> {product.origin}.
               </p>
               <p>
-                <strong className="text-ink">Packaging.</strong> Recyclable where possible; returnable glass on milk and
-                water bottles.
+                <strong className="text-ink">Packaging.</strong> Recyclable where possible; returnable glass
+                on milk and water bottles.
               </p>
             </div>
           ) : null}

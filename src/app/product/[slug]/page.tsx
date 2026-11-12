@@ -109,13 +109,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pb-24 pt-2 sm:px-6 sm:pt-5 lg:pb-6">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pb-24 pt-2 sm:px-6 sm:pt-5 lg:pb-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Phone order: a compact breadcrumb, then the photo, then the name and
           price. Previously the image filled the whole first screen, so opening
           a product looked like nothing had happened. */}
-      <nav className="mb-2 flex items-center gap-1 text-[11px] font-medium text-ink-soft lg:hidden" aria-label="Breadcrumb">
+      <nav
+        className="mb-2 flex items-center gap-1 text-[11px] font-medium text-ink-soft lg:hidden"
+        aria-label="Breadcrumb"
+      >
         <Link href="/" className="hover:text-brand">
           Home
         </Link>
@@ -152,8 +155,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <SparkleIcon className="h-3 w-3" /> Why bundles convert
                 </p>
                 <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">
-                  Bundles remove the &ldquo;what else do I need?&rdquo; pause. Every basket below is priced from the exact
-                  items and their live multi-buy savings — what you see is what the basket charges.
+                  Bundles remove the &ldquo;what else do I need?&rdquo; pause. Every basket below is priced
+                  from the exact items and their live multi-buy savings — what you see is what the basket
+                  charges.
                 </p>
                 <div className="mt-2.5 flex flex-wrap gap-2 text-[11px] font-semibold text-ink">
                   <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1">
@@ -163,7 +167,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <LeafIcon className="h-3.5 w-3.5 text-brand" /> Freshness guaranteed
                   </span>
                   <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1">
-                    <CheckIcon className="h-3.5 w-3.5 text-brand" /> Save {formatMoney(matchingBundle.compareAtCents - matchingBundle.priceCents)}
+                    <CheckIcon className="h-3.5 w-3.5 text-brand" /> Save{" "}
+                    {formatMoney(matchingBundle.compareAtCents - matchingBundle.priceCents)}
                   </span>
                 </div>
               </div>
@@ -237,7 +242,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <div>
               <p className="text-[12px] font-bold text-ink">
                 Put it in a bundle and save{" "}
-                {formatMoney(Math.max(0, matchingBundle.compareAtCents - matchingBundle.priceCents))} vs usual prices
+                {formatMoney(Math.max(0, matchingBundle.compareAtCents - matchingBundle.priceCents))} vs usual
+                prices
               </p>
               <p className="text-[10.5px] text-ink-soft">
                 Free delivery on baskets over $35, and FRESH10 takes $10 off any $60+ order.

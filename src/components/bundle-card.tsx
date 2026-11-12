@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Bundle } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
@@ -25,12 +26,19 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
           </span>
         </div>
         <div className="mt-2 flex items-center gap-3">
-          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white/30">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={bundle.imageUrl} alt={bundle.title} className="h-full w-full object-cover" />
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white/30">
+<Image
+              src={bundle.imageUrl}
+              alt={bundle.title}
+              fill
+              sizes="56px"
+              className="h-full w-full object-cover"
+            />
           </div>
           <div className="min-w-0">
-            <h3 className="font-display text-[19px] font-semibold leading-tight tracking-tight">{bundle.title}</h3>
+            <h3 className="font-display text-[19px] font-semibold leading-tight tracking-tight">
+              {bundle.title}
+            </h3>
             <p className="line-clamp-2 text-[11px] leading-snug opacity-80">{bundle.subtitle}</p>
           </div>
         </div>
@@ -42,11 +50,16 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
             <Link
               key={product.id}
               href={`/product/${product.slug}`}
-              className="h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-line bg-cream transition hover:-translate-y-0.5"
+              className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-line bg-cream transition hover:-translate-y-0.5"
               title={product.name}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+<Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                sizes="56px"
+                className="h-full w-full object-cover"
+              />
             </Link>
           ))}
           <span className="ml-1 text-[10px] font-medium leading-tight text-ink-soft">
@@ -58,8 +71,12 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
         <div className="mt-3 flex items-end justify-between">
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[18px] font-extrabold tracking-tight text-ink">{formatMoney(bundle.priceCents)}</span>
-              <span className="text-[11.5px] text-ink-soft line-through">{formatMoney(bundle.compareAtCents)}</span>
+              <span className="text-[18px] font-extrabold tracking-tight text-ink">
+                {formatMoney(bundle.priceCents)}
+              </span>
+              <span className="text-[11.5px] text-ink-soft line-through">
+                {formatMoney(bundle.compareAtCents)}
+              </span>
             </div>
             <p className="text-[10.5px] font-bold text-brand">
               Save {formatMoney(bundle.compareAtCents - bundle.priceCents)}
@@ -69,7 +86,12 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
 
         <button
           type="button"
-          onClick={() => addMany(products.map((product) => ({ productId: product.id, quantity: 1 })), bundle.title)}
+          onClick={() =>
+            addMany(
+              products.map((product) => ({ productId: product.id, quantity: 1 })),
+              bundle.title,
+            )
+          }
           disabled={pending || !products.length}
           className="press mt-2.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl bg-ink text-[12px] font-bold text-cream hover:bg-brand-deep disabled:opacity-60"
         >

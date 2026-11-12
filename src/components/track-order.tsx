@@ -40,7 +40,10 @@ export function TrackOrder() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = (await response.json().catch(() => null)) as { order?: TrackedOrder; error?: string } | null;
+      const data = (await response.json().catch(() => null)) as {
+        order?: TrackedOrder;
+        error?: string;
+      } | null;
       if (!response.ok || !data?.order) {
         setError(data?.error ?? "We couldn't find that order.");
         return;
@@ -72,7 +75,9 @@ export function TrackOrder() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Email</label>
+            <label className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+              Email
+            </label>
             <input
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
@@ -83,14 +88,18 @@ export function TrackOrder() {
           </div>
         </div>
         {error ? (
-          <p className="mt-2 rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">{error}</p>
+          <p className="mt-2 rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">
+            {error}
+          </p>
         ) : null}
         <button
           type="submit"
           disabled={busy}
           className="press mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-brand text-[12.5px] font-bold text-white hover:bg-brand-deep disabled:opacity-70"
         >
-          {busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : null}
+          {busy ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : null}
           Track my order <ArrowRightIcon className="h-3.5 w-3.5" />
         </button>
         <p className="mt-1.5 text-center text-[10px] text-ink-soft">
@@ -105,7 +114,9 @@ export function TrackOrder() {
         <div className="animate-fade-up overflow-hidden rounded-[22px] border border-line/80 bg-white">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/70 bg-cream/40 px-4 py-3">
             <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-brand">{order.orderNumber}</p>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-brand">
+                {order.orderNumber}
+              </p>
               <p className="text-[11.5px] font-bold text-ink">
                 {formatMoney(order.totalCents)} · {plural(order.itemCount, "item")}
               </p>
@@ -144,7 +155,11 @@ export function TrackOrder() {
                     <div
                       key={step}
                       className={`rounded-xl border px-2.5 py-2 ${
-                        current ? "border-brand bg-brand-soft/50" : done ? "border-brand/30 bg-cream/60" : "border-line"
+                        current
+                          ? "border-brand bg-brand-soft/50"
+                          : done
+                            ? "border-brand/30 bg-cream/60"
+                            : "border-line"
                       }`}
                     >
                       <span
@@ -157,7 +172,9 @@ export function TrackOrder() {
                       <p className={`mt-1 text-[11px] font-bold ${done ? "text-ink" : "text-ink-soft"}`}>
                         {ORDER_STATUS_LABELS[step].label}
                       </p>
-                      <p className="text-[9.5px] leading-snug text-ink-soft">{ORDER_STATUS_LABELS[step].note}</p>
+                      <p className="text-[9.5px] leading-snug text-ink-soft">
+                        {ORDER_STATUS_LABELS[step].note}
+                      </p>
                     </div>
                   );
                 })}
@@ -187,9 +204,13 @@ export function TrackOrder() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-ink">{item.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-ink">
+                    {item.name}
+                  </span>
                   <span className="text-[10.5px] text-ink-soft">×{item.quantity}</span>
-                  <span className="text-[11px] font-bold text-ink">{formatMoney(item.priceCents * item.quantity)}</span>
+                  <span className="text-[11px] font-bold text-ink">
+                    {formatMoney(item.priceCents * item.quantity)}
+                  </span>
                 </div>
               ))}
             </div>

@@ -19,7 +19,10 @@ const hash = `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 await client.connect();
 try {
-  const { rowCount } = await client.query("update users set password_hash = $2 where email = $1", [email, hash]);
+  const { rowCount } = await client.query("update users set password_hash = $2 where email = $1", [
+    email,
+    hash,
+  ]);
   if (!rowCount) {
     console.error(`No account for ${email}`);
     process.exit(1);

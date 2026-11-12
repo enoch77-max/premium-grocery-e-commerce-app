@@ -33,7 +33,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
   if (user) await linkCartToUser(token, user.id);
   const cart = await addToCart(token, entries);
   const availableSlugs = new Set(products.map((product) => product.slug));
-  const unavailable = order.items.filter((item) => !availableSlugs.has(item.productSlug)).map((item) => item.name);
+  const unavailable = order.items
+    .filter((item) => !availableSlugs.has(item.productSlug))
+    .map((item) => item.name);
 
   return Response.json({ cart, cartToken: token, added: entries.length, unavailable });
 }

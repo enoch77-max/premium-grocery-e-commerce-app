@@ -23,7 +23,9 @@ async function runSeed() {
   if (count === 0) {
     await db.execute(sql`select pg_advisory_lock(918273645)`);
     try {
-      const recheck = await db.execute<{ count: string }>(sql`select count(*)::text as count from categories`);
+      const recheck = await db.execute<{ count: string }>(
+        sql`select count(*)::text as count from categories`,
+      );
       if (Number(recheck.rows[0]?.count ?? "0") === 0) {
         await db.insert(categories).values(seedCategories).onConflictDoNothing();
         await db

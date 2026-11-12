@@ -29,15 +29,27 @@ const check = (name, ok, detail = "") => {
 
 try {
   const login = await call("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
-  check("admin can sign in", login.status === 200 && login.body.user?.role === "admin", `role ${login.body.user?.role}`);
+  check(
+    "admin can sign in",
+    login.status === 200 && login.body.user?.role === "admin",
+    `role ${login.body.user?.role}`,
+  );
   token = login.body.token;
   check("session token returned", Boolean(token));
 
   const anon = await fetch(base + "/api/admin/overview");
-  check("anonymous dashboard access blocked", anon.status === 401 || anon.status === 403, `status ${anon.status}`);
+  check(
+    "anonymous dashboard access blocked",
+    anon.status === 401 || anon.status === 403,
+    `status ${anon.status}`,
+  );
 
   const overview = await call("/api/admin/overview");
-  check("overview loads", overview.status === 200 && overview.body.ok, `${overview.body.data?.catalogue?.total ?? 0} products`);
+  check(
+    "overview loads",
+    overview.status === 200 && overview.body.ok,
+    `${overview.body.data?.catalogue?.total ?? 0} products`,
+  );
 
   const created = await call("/api/admin/products", {
     method: "POST",
@@ -57,21 +69,35 @@ try {
     method: "PATCH",
     body: JSON.stringify({ id: productId, priceCents: 299, isActive: false }),
   });
-  check("product updated + unpublished", patched.status === 200 && patched.body.data?.product?.isActive === false);
+  check(
+    "product updated + unpublished",
+    patched.status === 200 && patched.body.data?.product?.isActive === false,
+  );
 
   const storefront = await fetch(base + "/api/search?q=Smoke+Test+Item").then((r) => r.json());
   const stillListed = (storefront.products ?? []).some((p) => p.id === productId);
   check("unpublished product hidden from storefront", !stillListed);
 
-  const settings = await call("/api/admin/settings", { method: "PATCH", body: JSON.stringify({ storeOpen: true }) });
+  const settings = await call("/api/admin/settings", {
+    method: "PATCH",
+    body: JSON.stringify({ storeOpen: true }),
+  });
   check("settings writable", settings.status === 200 && settings.body.data?.settings?.storeOpen === true);
 
   const finalOverview = await call("/api/admin/overview");
   const activity = finalOverview.body.data?.activity ?? [];
-  check("mutations audited", activity.some((entry) => entry.action === "product.create"), `${activity.length} entries`);
+  check(
+    "mutations audited",
+    activity.some((entry) => entry.action === "product.create"),
+    `${activity.length} entries`,
+  );
 
   // clean up the smoke product
-  if (productId) await call("/api/admin/products", { method: "PATCH", body: JSON.stringify({ id: productId, isActive: false, stock: 0 }) });
+  if (productId)
+    await call("/api/admin/products", {
+      method: "PATCH",
+      body: JSON.stringify({ id: productId, isActive: false, stock: 0 }),
+    });
 } catch (error) {
   steps.push(`✗ aborted: ${error.message}`);
 }

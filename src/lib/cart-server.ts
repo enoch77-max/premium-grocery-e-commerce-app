@@ -5,158 +5,31 @@ import { cartItems, carts } from "@/db/schema";
 import { getCategories, getCoupons, getProducts } from "@/lib/store";
 import { DELIVERY_FEE_CENTS, FREE_DELIVERY_THRESHOLD_CENTS, formatMoney } from "@/lib/format";
 import { getStoreSettings } from "@/lib/admin";
+import { buildUpsells, computeCoupon, emptyState } from "@/lib/cart-pricing";
 import type { CartLine, CartState, CartUpsell, Coupon, Product } from "@/lib/types";
 
-export const CART_COOKIE = "fresco_cart";
-export const CART_HEADER = "x-cart-token";
-const MAX_QTY = 20;
+import {
+  CART_COOKIE,
+  CART_HEADER,
+  MAX_QTY,
+  ensureCart,
+  findCart,
+  getCartCandidates,
+  getOrCreateCartToken,
+  readCartToken,
+  writeCartCookie,
+} from "@/lib/cart-identity";
 
-async function cookieToken() {
-  try {
-    const store = await cookies();
-    return store.get(CART_COOKIE)?.value ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function writeCartCookie(token: string) {
-  try {
-    const store = await cookies();
-    if (store.get(CART_COOKIE)?.value !== token) {
-      store.set(CART_COOKIE, token, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 60,
-      });
-    }
-  } catch {
-    // cookie writing is best-effort; the header/localStorage path still works
-  }
-}
-
-/**
- * Every token that could identify this shopper's basket. The browser can hold
- * up to two (the localStorage header and the httpOnly cookie) and they can drift
- * apart when storage is blocked, cleared or partitioned. Rather than trusting
- * one and risking an empty basket, we resolve all of them and pick the cart that
- * actually has items.
- */
-export async function getCartCandidates(request?: Request): Promise<string[]> {
-  const candidates: string[] = [];
-  const header = request?.headers.get(CART_HEADER)?.trim();
-  if (header) candidates.push(header);
-  const cookie = await cookieToken();
-  if (cookie) candidates.push(cookie);
-  return [...new Set(candidates)];
-}
-
-/** Backwards-compatible single-token read (header first, then cookie). */
-export async function readCartToken(request?: Request) {
-  const candidates = await getCartCandidates(request);
-  return candidates[0] ?? null;
-}
-
-export async function getOrCreateCartToken(request?: Request) {
-  const candidates = await getCartCandidates(request);
-  const token = candidates[0] ?? crypto.randomUUID();
-  await writeCartCookie(token);
-  return token;
-}
-
-async function findCart(token: string) {
-  const rows = await db.select().from(carts).where(eq(carts.token, token)).limit(1);
-  return rows[0] ?? null;
-}
-
-async function ensureCart(token: string) {
-  const existing = await findCart(token);
-  if (existing) return existing;
-  await db.insert(carts).values({ token }).onConflictDoNothing();
-  const created = await findCart(token);
-  if (!created) throw new Error("Unable to create cart");
-  return created;
-}
-
-function emptyState(
-  products: Product[],
-  couponError: string | null = null,
-  freeThreshold = FREE_DELIVERY_THRESHOLD_CENTS,
-): CartState {
-  return {
-    lines: [],
-    itemCount: 0,
-    distinctCount: 0,
-    subtotalCents: 0,
-    savingsCents: 0,
-    discountCents: 0,
-    deliveryCents: 0,
-    totalCents: 0,
-    compareTotalCents: 0,
-    coupon: null,
-    couponError,
-    freeDeliveryThresholdCents: freeThreshold,
-    freeDeliveryRemainingCents: freeThreshold,
-    upsells: products
-      .filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents)
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, 4)
-      .map((product) => ({ product, reason: "Today's best-value add-on" })),
-  };
-}
-
-function computeCoupon(
-  coupon: Coupon | null,
-  subtotalCents: number,
-  deliveryFeeCents: number,
-): { discountCents: number; deliveryOverride: number | null } {
-  if (!coupon) return { discountCents: 0, deliveryOverride: null };
-  if (coupon.kind === "percent" && coupon.percentOff) {
-    return { discountCents: Math.floor((subtotalCents * coupon.percentOff) / 100), deliveryOverride: null };
-  }
-  if (coupon.kind === "fixed" && coupon.valueCents) {
-    return { discountCents: Math.min(coupon.valueCents, subtotalCents), deliveryOverride: null };
-  }
-  if (coupon.kind === "delivery") {
-    return { discountCents: 0, deliveryOverride: 0 };
-  }
-  return { discountCents: 0, deliveryOverride: deliveryFeeCents };
-}
-
-function buildUpsells(cartLines: CartLine[], products: Product[], categories: Map<string, string>): CartUpsell[] {
-  const inCart = new Set(cartLines.map((line) => line.productId));
-  const cartCategories = new Set(cartLines.map((line) => line.categorySlug));
-  const candidates = products.filter((product) => !inCart.has(product.id));
-
-  const scored = candidates.map((product) => {
-    let score = product.popularity / 10;
-    if (product.compareAtCents && product.compareAtCents > product.priceCents) score += 18;
-    if (cartCategories.has(product.categorySlug)) score += 8;
-    if (product.isBestseller) score += 4;
-    return { product, score };
-  });
-
-  return scored
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4)
-    .map(({ product }) => {
-      let reason = "Loved by your neighbours";
-      if (product.compareAtCents && product.compareAtCents > product.priceCents) {
-        reason = `Save ${formatMoney(product.compareAtCents - product.priceCents)} today`;
-      } else if (cartCategories.has(product.categorySlug)) {
-        reason = `Pairs with your ${categories.get(product.categorySlug) ?? "basket"}`;
-      } else if (product.priceCents <= 300) {
-        reason = "Easy add — under $3";
-      }
-      return { product, reason };
-    });
-}
-
+// Re-exported so existing route imports keep working.
+export { CART_COOKIE, CART_HEADER, getCartCandidates, getOrCreateCartToken, readCartToken };
 async function cartScore(token: string) {
   const cart = await findCart(token).catch(() => null);
   if (!cart) return { token, cart: null, units: 0, updated: 0 };
-  const rows = await db.select().from(cartItems).where(eq(cartItems.cartId, cart.id)).catch(() => []);
+  const rows = await db
+    .select()
+    .from(cartItems)
+    .where(eq(cartItems.cartId, cart.id))
+    .catch(() => []);
   return {
     token,
     cart,
@@ -190,7 +63,10 @@ export async function resolveCartForRequest(request?: Request, couponError: stri
   };
 }
 
-export async function resolveCart(token: string | null, couponError: string | null = null): Promise<CartState> {
+export async function resolveCart(
+  token: string | null,
+  couponError: string | null = null,
+): Promise<CartState> {
   const products = await getProducts();
 
   const pricing = await getStoreSettings();
@@ -213,7 +89,10 @@ export async function resolveCart(token: string | null, couponError: string | nu
       .map((row) => {
         const product = productMap.get(row.productId);
         if (!product) return null;
-        const compare = product.compareAtCents && product.compareAtCents > product.priceCents ? product.compareAtCents : null;
+        const compare =
+          product.compareAtCents && product.compareAtCents > product.priceCents
+            ? product.compareAtCents
+            : null;
         return {
           id: row.id,
           productId: product.id,
@@ -247,7 +126,8 @@ export async function resolveCart(token: string | null, couponError: string | nu
     let effectiveCouponError = couponError;
     if (cart.couponCode) {
       const coupons = await getCoupons();
-      const found = coupons.find((item) => item.code.toUpperCase() === cart.couponCode?.toUpperCase()) ?? null;
+      const found =
+        coupons.find((item) => item.code.toUpperCase() === cart.couponCode?.toUpperCase()) ?? null;
       if (!found) {
         effectiveCouponError = "That code is no longer available";
         await db.update(carts).set({ couponCode: null }).where(eq(carts.id, cart.id));
@@ -287,7 +167,9 @@ export async function resolveCart(token: string | null, couponError: string | nu
       deliveryCents,
       totalCents: Math.max(0, subtotalCents - discountCents + deliveryCents),
       compareTotalCents,
-      coupon: coupon ? { code: coupon.code, description: coupon.description, discountCents, label: discountLabel } : null,
+      coupon: coupon
+        ? { code: coupon.code, description: coupon.description, discountCents, label: discountLabel }
+        : null,
       couponError: effectiveCouponError,
       freeDeliveryThresholdCents: freeThreshold,
       freeDeliveryRemainingCents: Math.max(0, freeThreshold - subtotalCents),

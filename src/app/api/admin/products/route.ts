@@ -31,17 +31,17 @@ export const POST = withAdmin(async (admin, request) => {
   if (name.length < 2) throw new Error("Product name is required");
   if (!priceCents) throw new Error("Set a price above zero");
 
-  const [category] = await db.execute<{ image_url: string | null }>(
-    sql`select image_url from categories where slug = ${categorySlug} limit 1`,
-  ).then((result) => result.rows);
+  const [category] = await db
+    .execute<{
+      image_url: string | null;
+    }>(sql`select image_url from categories where slug = ${categorySlug} limit 1`)
+    .then((result) => result.rows);
 
   let slug = slugify(name) || `product-${Date.now()}`;
   const clash = await db.select({ id: products.id }).from(products).where(eq(products.slug, slug)).limit(1);
   if (clash.length) slug = `${slug}-${Date.now().toString().slice(-5)}`;
 
-  const [maxRow] = await db
-    .select({ max: sql<number>`coalesce(max(sort_order), 0)::int` })
-    .from(products);
+  const [maxRow] = await db.select({ max: sql<number>`coalesce(max(sort_order), 0)::int` }).from(products);
 
   const [created] = await db
     .insert(products)
@@ -76,7 +76,8 @@ export const PATCH = withAdmin(async (admin, request) => {
   if (!existing) throw new Error("Product not found");
 
   const patch: Record<string, unknown> = {};
-  if (body.priceCents !== undefined) patch.priceCents = clampInt(body.priceCents, 1, 100_000_000, existing.priceCents);
+  if (body.priceCents !== undefined)
+    patch.priceCents = clampInt(body.priceCents, 1, 100_000_000, existing.priceCents);
   if (body.compareAtCents !== undefined) {
     const compare = clampInt(body.compareAtCents, 0, 100_000_000, 0);
     patch.compareAtCents = compare > 0 ? compare : null;

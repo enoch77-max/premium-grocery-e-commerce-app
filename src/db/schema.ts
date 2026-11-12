@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  boolean,
-  index,
-  integer,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-  unique,
-} from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
 
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
@@ -56,7 +47,7 @@ export const products = pgTable(
     storage: text("storage").notNull().default("Keep in a cool, dry place."),
     sortOrder: integer("sort_order").notNull().default(0),
   },
-  (table) => [index("products_category_idx").on(table.categorySlug)],
+  (table) => [index("products_category_idx").on(table.categorySlug), index("products_active_idx").on(table.isActive)],
 );
 
 export const offers = pgTable("offers", {
@@ -121,7 +112,7 @@ export const cartItems = pgTable(
     quantity: integer("quantity").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [unique("cart_items_cart_product_unique").on(table.cartId, table.productId)],
+  (table) => [unique("cart_items_cart_product_unique").on(table.cartId, table.productId), index("cart_items_cart_idx").on(table.cartId)],
 );
 
 export const users = pgTable("users", {
@@ -133,6 +124,9 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("customer"),
   isActive: boolean("is_active").notNull().default(true),
   marketingOptIn: boolean("marketing_opt_in").notNull().default(true),
+  notifyEmail: boolean("notify_email").notNull().default(true),
+  notifyWhatsapp: boolean("notify_whatsapp").notNull().default(false),
+  whatsappNumber: text("whatsapp_number").notNull().default(""),
   orderUpdatesEmail: boolean("order_updates_email").notNull().default(true),
   orderUpdatesSms: boolean("order_updates_sms").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -148,7 +142,7 @@ export const sessions = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("sessions_user_idx").on(table.userId)],
+  (table) => [index("sessions_user_idx").on(table.userId), index("sessions_expires_idx").on(table.expiresAt)],
 );
 
 export const addresses = pgTable(
@@ -208,7 +202,11 @@ export const orders = pgTable(
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("orders_user_idx").on(table.userId), index("orders_email_idx").on(table.email)],
+  (table) => [
+    index("orders_user_idx").on(table.userId),
+    index("orders_email_idx").on(table.email),
+    index("orders_created_idx").on(table.createdAt),
+  ],
 );
 
 export const orderItems = pgTable(
@@ -254,6 +252,10 @@ export const storeSettings = pgTable("store_settings", {
   supportEmail: text("support_email").notNull().default("hello@fresco.demo"),
   deliveryFeeCents: integer("delivery_fee_cents").notNull().default(399),
   freeDeliveryThresholdCents: integer("free_delivery_threshold_cents").notNull().default(3500),
+  /** Shortage-alert lead time in whole days (1–3). */
+  shortageLeadDays: integer("shortage_lead_days").notNull().default(1),
+  /** Roles that receive internal shortage alerts. */
+  alertRoles: text("alert_roles").array().notNull().default(sql`'{admin,stock_manager}'::text[]`),
   demoEmail: text("demo_email").notNull().default(""),
   demoName: text("demo_name").notNull().default(""),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -274,4 +276,200 @@ export const passwordResets = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index("password_resets_user_idx").on(table.userId)],
+);
+
+/* ───────────────────────── Recurring grocery lists ─────────────────────────
+   Backend-only phase. Design notes:
+   • Only gateway tokens are stored (never card data). See payment_methods.
+   • recurring_runs has a UNIQUE (list_id, occurrence_key) constraint: that is the
+     scheduler's double-run/double-charge guard.
+   • Stock is decremented with a conditional UPDATE at reservation time, so two
+     buyers can never take the same last item.
+   • Every state change is appended to recurring_run_events (audit log).
+--------------------------------------------------------------------------- */
+
+export const paymentMethods = pgTable(
+  "payment_methods",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    // Gateway tokens only — no PAN, no CVV, no expiry beyond display metadata.
+    gateway: text("gateway").notNull().default("stripe"),
+    gatewayCustomerToken: text("gateway_customer_token").notNull(),
+    gatewayPaymentMethodToken: text("gateway_payment_method_token").notNull(),
+    brand: text("brand").notNull().default("card"),
+    last4: text("last4").notNull().default(""),
+    expMonth: integer("exp_month"),
+    expYear: integer("exp_year"),
+    isDefault: boolean("is_default").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("payment_methods_user_idx").on(table.userId),
+    unique("payment_methods_token_unique").on(table.gateway, table.gatewayPaymentMethodToken),
+  ],
+);
+
+export const recurringLists = pgTable(
+  "recurring_lists",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    name: text("name").notNull(),
+    status: text("status").notNull().default("active"), // active | paused | cancelled
+    cadence: text("cadence").notNull(), // daily | weekly | monthly
+    /** Local wall-clock time "HH:MM" in the list's own timezone. */
+    localTime: text("local_time").notNull(),
+    timezone: text("timezone").notNull().default("UTC"),
+    /** ISO date for monthly cadence anchoring (1–31, clamped per month). */
+    anchorDay: integer("anchor_day"),
+    /** 0=Sun … 6=Sat for weekly cadence. */
+    anchorWeekday: integer("anchor_weekday"),
+    shortagePolicy: text("shortage_policy").notNull().default("partial"), // skip_item | partial | hold
+    paymentMethodId: integer("payment_method_id").notNull(),
+    /** Explicit consent to automatic off-session charges. */
+    consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+    consentVersion: text("consent_version").notNull().default("2026-01"),
+    consentIp: text("consent_ip").notNull().default(""),
+    leadTimeHours: integer("lead_time_hours").notNull().default(24),
+    /** Skip exactly one upcoming occurrence. */
+    skipNextAt: timestamp("skip_next_at", { withTimezone: true }),
+    /** Postpone the next occurrence to this instant (then normal cadence resumes). */
+    delayUntil: timestamp("delay_until", { withTimezone: true }),
+    pausedReason: text("paused_reason"),
+    nextRunAt: timestamp("next_run_at", { withTimezone: true }),
+    lastRunAt: timestamp("last_run_at", { withTimezone: true }),
+    consecutiveFailures: integer("consecutive_failures").notNull().default(0),
+    completedRuns: integer("completed_runs").notNull().default(0),
+    skipCount: integer("skip_count").notNull().default(0),
+    addressLabel: text("address_label").notNull().default("Home"),
+    addressLine1: text("address_line1").notNull().default(""),
+    addressCity: text("address_city").notNull().default(""),
+    addressPostcode: text("address_postcode").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("recurring_lists_user_idx").on(table.userId),
+    index("recurring_lists_due_idx").on(table.status, table.nextRunAt),
+  ],
+);
+
+export const recurringListItems = pgTable(
+  "recurring_list_items",
+  {
+    id: serial("id").primaryKey(),
+    listId: integer("list_id").notNull(),
+    productId: integer("product_id").notNull(),
+    quantity: integer("quantity").notNull(),
+    /** Price captured when the customer built the list, for change detection. */
+    priceAtCreationCents: integer("price_at_creation_cents").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique("recurring_list_items_unique").on(table.listId, table.productId)],
+);
+
+/**
+ * One row per (list, occurrence). The UNIQUE constraint is what makes the
+ * scheduler safe to run twice or on N servers: the second claim loses cleanly.
+ */
+export const recurringRuns = pgTable(
+  "recurring_runs",
+  {
+    id: serial("id").primaryKey(),
+    listId: integer("list_id").notNull(),
+    occurrenceKey: text("occurrence_key").notNull(),
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }).notNull(),
+    state: text("state").notNull().default("scheduled"),
+    /** Stable per-run key reused for every charge attempt (idempotency). */
+    idempotencyKey: text("idempotency_key").notNull().unique(),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }),
+    amountCents: integer("amount_cents").notNull().default(0),
+    orderId: integer("order_id"),
+    orderNumber: text("order_number"),
+    chargeToken: text("charge_token"),
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+    priceChanged: boolean("price_changed").notNull().default(false),
+    priorityScore: integer("priority_score").notNull().default(0),
+    decisionReason: text("decision_reason").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("recurring_runs_list_occurrence_unique").on(table.listId, table.occurrenceKey),
+    index("recurring_runs_state_idx").on(table.state),
+  ],
+);
+
+/** Append-only audit of every state transition and allocation decision. */
+export const recurringRunEvents = pgTable(
+  "recurring_run_events",
+  {
+    id: serial("id").primaryKey(),
+    runId: integer("run_id"),
+    listId: integer("list_id").notNull(),
+    fromState: text("from_state"),
+    toState: text("to_state").notNull(),
+    reason: text("reason").notNull().default(""),
+    actor: text("actor").notNull().default("scheduler"),
+    detail: text("detail").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("recurring_run_events_list_idx").on(table.listId)],
+);
+
+/** Reserved stock. Decrements products.stock atomically; release adds it back. */
+export const stockReservations = pgTable(
+  "stock_reservations",
+  {
+    id: serial("id").primaryKey(),
+    runId: integer("run_id").notNull(),
+    status: text("status").notNull().default("active"), // active | released | consumed
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("stock_reservations_run_idx").on(table.runId)],
+);
+
+export const stockReservationItems = pgTable(
+  "stock_reservation_items",
+  {
+    id: serial("id").primaryKey(),
+    reservationId: integer("reservation_id").notNull(),
+    productId: integer("product_id").notNull(),
+    quantity: integer("quantity").notNull(),
+    /** Quantity the customer asked for; shortfall = requested - quantity. */
+    requestedQuantity: integer("requested_quantity").notNull(),
+    unitPriceCents: integer("unit_price_cents").notNull(),
+  },
+  (table) => [index("stock_reservation_items_res_idx").on(table.reservationId)],
+);
+
+/** Notification outbox. No transport is wired in this store yet, by design. */
+export const notificationEvents = pgTable(
+  "notification_events",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id"),
+    listId: integer("list_id"),
+    runId: integer("run_id"),
+    type: text("type").notNull(),
+    channel: text("channel").notNull().default("email"),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    payload: text("payload").notNull().default("{}"),
+    status: text("status").notNull().default("pending"), // pending | dispatched | failed
+    locale: text("locale").notNull().default("en"),
+    attempts: integer("attempts").notNull().default(0),
+    failureCode: text("failure_code"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    providerMessageId: text("provider_message_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("notification_events_user_idx").on(table.userId),
+    index("notification_events_status_idx").on(table.status),
+  ],
 );

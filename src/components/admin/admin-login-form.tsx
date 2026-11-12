@@ -38,7 +38,9 @@ export function AdminLoginForm() {
       }}
     >
       <label className="block">
-        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Email</span>
+        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          Email
+        </span>
         <input
           type="email"
           value={email}
@@ -49,7 +51,9 @@ export function AdminLoginForm() {
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">Password</span>
+        <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          Password
+        </span>
         <input
           type="password"
           value={password}
@@ -59,7 +63,9 @@ export function AdminLoginForm() {
           className="h-11 w-full rounded-xl border border-line bg-cream/40 px-3 text-[15px] outline-none focus:border-brand focus:bg-white sm:text-[13px]"
         />
       </label>
-      {error ? <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg bg-rose-soft px-3 py-2 text-[12px] font-semibold text-clay">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}

@@ -34,7 +34,9 @@ function SavedList() {
         <div>
           <h2 className="font-display text-[20px] font-semibold tracking-tight">Saved for later</h2>
           <p className="text-[11px] text-ink-soft">
-            {loading ? "Loading…" : `${saved.length} saved item${saved.length === 1 ? "" : "s"} · ${formatMoney(total)} if you add them all`}
+            {loading
+              ? "Loading…"
+              : `${saved.length} saved item${saved.length === 1 ? "" : "s"} · ${formatMoney(total)} if you add them all`}
           </p>
         </div>
         <button
@@ -67,7 +69,8 @@ function SavedList() {
           </div>
           <h2 className="mt-3 font-display text-xl font-semibold">No saved items yet</h2>
           <p className="mx-auto mt-1 max-w-sm text-[12px] leading-relaxed text-ink-soft">
-            Tap the heart on any product to keep it here — great for next week&apos;s shop or a price you&apos;re watching.
+            Tap the heart on any product to keep it here — great for next week&apos;s shop or a price
+            you&apos;re watching.
           </p>
           <Link
             href="/"
@@ -85,7 +88,9 @@ function SavedList() {
           </div>
           {saved.some((item) => !item.product) ? (
             <div className="rounded-2xl border border-line/80 bg-white p-4">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-soft">No longer stocked</p>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-soft">
+                No longer stocked
+              </p>
               <div className="mt-1.5 space-y-1">
                 {saved
                   .filter((item) => !item.product)

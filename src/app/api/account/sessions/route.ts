@@ -43,13 +43,14 @@ export async function DELETE(request: Request) {
 
   const current = await getSessionToken(request);
   if (current) {
-    await db.delete(sessions).where(and(eq(sessions.userId, user.id), ne(sessions.token, hashSessionToken(current))));
+    await db
+      .delete(sessions)
+      .where(and(eq(sessions.userId, user.id), ne(sessions.token, hashSessionToken(current))));
   } else {
     await db.delete(sessions).where(eq(sessions.userId, user.id));
   }
   return Response.json({ ok: true, message: "Other devices signed out" });
 }
-
 
 function describeDevice(userAgent: string) {
   const ua = userAgent || "";

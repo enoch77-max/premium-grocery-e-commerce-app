@@ -1,6 +1,6 @@
 export default function ProductLoading() {
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pb-16 pt-4 sm:px-6 sm:pt-5">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pb-16 pt-4 sm:px-6 sm:pt-5">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div>
           <div className="shimmer aspect-square w-full rounded-[26px]" />

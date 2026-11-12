@@ -6,7 +6,7 @@ import { CartProvider } from "@/components/cart-provider";
 import { DeliveryProvider } from "@/components/delivery-provider";
 import { SessionProvider } from "@/components/session-provider";
 import { SavedProvider } from "@/components/saved-provider";
-import { CartDrawer } from "@/components/cart-drawer";
+import { LazyCartDrawer } from "@/components/lazy-cart-drawer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ToastStack } from "@/components/toast-stack";
@@ -58,22 +58,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="bg-cream text-ink antialiased">
         <SessionProvider>
           <SavedProvider>
-          <CartProvider>
-            <DeliveryProvider>
-              <MobileUiProvider>
-                {/* pb-tabbar keeps the whole document (footer included) clear of
+            <CartProvider>
+              <DeliveryProvider>
+                <MobileUiProvider>
+                  {/* pb-tabbar keeps the whole document (footer included) clear of
                     the phone-only bottom navigation. */}
-                <div className="pb-tabbar flex min-h-[100dvh] flex-col">
-                  <SiteHeader />
-                  <main className="flex-1">{children}</main>
-                  <SiteFooter />
-                </div>
-                <MobileTabBar />
-                <CartDrawer />
-                <ToastStack />
-              </MobileUiProvider>
-            </DeliveryProvider>
-          </CartProvider>
+                  <div className="pb-tabbar flex min-h-[100dvh] flex-col">
+                    <SiteHeader />
+                    <main className="flex-1">{children}</main>
+                    <SiteFooter />
+                  </div>
+                  <MobileTabBar />
+                  <LazyCartDrawer />
+                  <ToastStack />
+                </MobileUiProvider>
+              </DeliveryProvider>
+            </CartProvider>
           </SavedProvider>
         </SessionProvider>
       </body>

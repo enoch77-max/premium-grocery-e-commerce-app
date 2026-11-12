@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Bundle } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
@@ -31,8 +32,8 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
             <br className="hidden sm:block" /> the better the deal.
           </h2>
           <p className="mt-2 max-w-md text-[12.5px] leading-relaxed text-cream/70">
-            Stack free delivery, coupon savings and multi-buys. No membership fee — the discounts simply appear in your
-            basket.
+            Stack free delivery, coupon savings and multi-buys. No membership fee — the discounts simply
+            appear in your basket.
           </p>
 
           <div className="mt-4 space-y-1.5 sm:mt-5 sm:space-y-2">
@@ -48,14 +49,22 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
                 >
                   <span
                     className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${
-                      unlocked ? "bg-lime text-brand-deep" : "border border-white/25 text-[10px] font-bold text-cream/70"
+                      unlocked
+                        ? "bg-lime text-brand-deep"
+                        : "border border-white/25 text-[10px] font-bold text-cream/70"
                     }`}
                   >
-                    {unlocked ? <CheckIcon className="h-3.5 w-3.5" strokeWidth={3} /> : formatMoney(tier.at, false)}
+                    {unlocked ? (
+                      <CheckIcon className="h-3.5 w-3.5" strokeWidth={3} />
+                    ) : (
+                      formatMoney(tier.at, false)
+                    )}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`min-w-0 text-[12px] font-bold ${unlocked ? "text-lime" : "text-cream"}`}>{tier.label}</p>
+                      <p className={`min-w-0 text-[12px] font-bold ${unlocked ? "text-lime" : "text-cream"}`}>
+                        {tier.label}
+                      </p>
                       <p className="shrink-0 whitespace-nowrap text-[10px] font-medium text-cream/55">
                         {unlocked ? "Unlocked" : `${formatMoney(tier.at - subtotal)} to go`}
                       </p>
@@ -72,26 +81,38 @@ export function SavingsLadder({ bundle }: { bundle?: Bundle }) {
         </div>
 
         <div className="relative min-w-0 rounded-2xl border border-white/12 bg-white/[0.06] p-4 backdrop-blur">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-cream/60">Best-seller bundle</p>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-cream/60">
+            Best-seller bundle
+          </p>
           {bundle ? (
             <>
               <div className="mt-2 flex items-center gap-2.5">
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white/20">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={bundle.imageUrl} alt={bundle.title} className="h-full w-full object-cover" />
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white/20">
+<Image
+                    src={bundle.imageUrl}
+                    alt={bundle.title}
+                    fill
+                    sizes="48px"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 break-words font-display text-[16px] font-semibold leading-tight sm:text-[17px]">
                     {bundle.title}
                   </p>
                   <p className="mt-0.5 text-[10.5px] leading-snug text-cream/60">
-                    {bundle.products?.length ?? 0} items · save {formatMoney(bundle.compareAtCents - bundle.priceCents)}
+                    {bundle.products?.length ?? 0} items · save{" "}
+                    {formatMoney(bundle.compareAtCents - bundle.priceCents)}
                   </p>
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-[22px] font-extrabold tracking-tight">{formatMoney(bundle.priceCents)}</span>
-                <span className="text-[12px] text-cream/45 line-through">{formatMoney(bundle.compareAtCents)}</span>
+                <span className="text-[22px] font-extrabold tracking-tight">
+                  {formatMoney(bundle.priceCents)}
+                </span>
+                <span className="text-[12px] text-cream/45 line-through">
+                  {formatMoney(bundle.compareAtCents)}
+                </span>
               </div>
               <button
                 type="button"

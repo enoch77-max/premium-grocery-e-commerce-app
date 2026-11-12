@@ -12,7 +12,9 @@ export default function ResetPasswordPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-10">
       <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand">Account recovery</p>
-      <h1 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight">Set a new password</h1>
+      <h1 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight">
+        Set a new password
+      </h1>
       <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">
         Choose something at least 8 characters long. Every other device will be signed out.
       </p>

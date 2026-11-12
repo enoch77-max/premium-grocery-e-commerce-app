@@ -46,7 +46,11 @@ export function OrderManager({ initialOrders }: { initialOrders: AdminOrder[] })
       if (!response.ok || !data.ok) throw new Error(data.error ?? "Update failed");
       if (data.data?.order) {
         const updated = data.data.order;
-        setOrders((prev) => prev.map((order) => (order.orderNumber === orderNumber ? { ...order, status: updated.status } : order)));
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.orderNumber === orderNumber ? { ...order, status: updated.status } : order,
+          ),
+        );
       }
       setMessage(`${orderNumber} → ${status}`);
     } catch (error) {
@@ -73,7 +77,11 @@ export function OrderManager({ initialOrders }: { initialOrders: AdminOrder[] })
         ))}
       </div>
 
-      {message ? <p className="rounded-xl bg-brand-soft/60 px-3 py-2 text-[12px] font-semibold text-brand-deep">{message}</p> : null}
+      {message ? (
+        <p className="rounded-xl bg-brand-soft/60 px-3 py-2 text-[12px] font-semibold text-brand-deep">
+          {message}
+        </p>
+      ) : null}
 
       <div className="space-y-2">
         {visible.length === 0 ? (
@@ -93,7 +101,8 @@ export function OrderManager({ initialOrders }: { initialOrders: AdminOrder[] })
                     {order.orderNumber} · {order.itemCount} items · {order.city} {order.postcode}
                   </p>
                   <p className="text-[10.5px] text-ink-soft">
-                    {new Date(order.createdAt).toLocaleString()} · {order.paymentMethod} · slot {order.deliverySlot}
+                    {new Date(order.createdAt).toLocaleString()} · {order.paymentMethod} · slot{" "}
+                    {order.deliverySlot}
                   </p>
                 </div>
                 <div className="text-right">

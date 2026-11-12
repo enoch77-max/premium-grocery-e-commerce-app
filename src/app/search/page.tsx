@@ -7,7 +7,11 @@ import { ArrowRightIcon, SearchIcon, SparkleIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
   const { q } = await searchParams;
   return { title: q ? `“${q}” — Fresco` : "Search — Fresco" };
 }
@@ -20,7 +24,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const hasResults = result.products.length > 0;
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pt-5 sm:px-6">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pt-5 sm:px-6">
       <div className="rounded-[26px] border border-line/70 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand">
           <SparkleIcon className="h-3.5 w-3.5" /> Smart search
@@ -69,7 +73,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
       {hasResults ? (
         <div className="mt-5">
-          <CatalogListing products={result.products} emptyMessage="Try a broader phrase or browse an aisle." />
+          <CatalogListing
+            products={result.products}
+            emptyMessage="Try a broader phrase or browse an aisle."
+          />
         </div>
       ) : (
         <div className="mt-5 grid gap-4 lg:grid-cols-[1.3fr_1fr]">

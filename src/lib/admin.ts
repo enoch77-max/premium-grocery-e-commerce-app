@@ -4,8 +4,49 @@ import { hashSessionToken } from "@/lib/auth";
 import { db } from "@/db";
 import { auditLogs, sessions, storeSettings, users } from "@/db/schema";
 
-export const ADMIN_ROLES = ["admin", "staff"] as const;
-export type AdminRole = (typeof ADMIN_ROLES)[number];
+import {
+  ADMIN_ROLES,
+  roleHasPermission,
+  type AdminPermission,
+  type AdminRole,
+} from "@/lib/permissions";
+
+export { ADMIN_ROLES, roleHasPermission };
+export type { AdminPermission, AdminRole };
+
+export async function requirePermission(
+  request: Request,
+  permission: AdminPermission,
+): Promise<{ admin: AdminUser | null; status: number | null }> {
+  const admin = await getAdminUser(request);
+  if (!admin) return { admin: null, status: 401 };
+  if (!roleHasPermission(admin.role, permission)) return { admin: null, status: 403 };
+  return { admin, status: null };
+}
+
+/** Like withAdmin but permission-scoped. Same error shape as the rest of the API. */
+export function withPermission<T>(
+  permission: AdminPermission,
+  handler: (admin: AdminUser, request: Request) => Promise<T>,
+) {
+  return async (request: Request): Promise<Response> => {
+    const { admin, status } = await requirePermission(request, permission);
+    if (!admin) {
+      return Response.json(
+        { error: status === 401 ? "Please sign in" : "Your role can't do that on this page." },
+        { status: status ?? 403 },
+      );
+    }
+    try {
+      const data = await handler(admin, request);
+      return Response.json({ ok: true, data }, { headers: { "Cache-Control": "no-store" } });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected error";
+      console.error("admin route failed", message);
+      return Response.json({ ok: false, error: message }, { status: 400 });
+    }
+  };
+}
 
 export type AdminUser = {
   id: number;
@@ -89,7 +130,10 @@ export function withAdmin<T>(handler: (admin: AdminUser, request: Request) => Pr
     try {
       const admin = await requireAdmin(request);
       if (request.method !== "GET" && !allowMutation(admin.id)) {
-        return Response.json({ ok: false, error: "Too many changes — slow down for a minute." }, { status: 429 });
+        return Response.json(
+          { ok: false, error: "Too many changes — slow down for a minute." },
+          { status: 429 },
+        );
       }
       const result = await handler(admin, request);
       return Response.json({ ok: true, data: result }, { headers: { "Cache-Control": "no-store" } });
@@ -134,6 +178,10 @@ export type StoreSettings = {
   freeDeliveryThresholdCents: number;
   demoEmail?: string;
   demoName?: string;
+  /** Shortage-alert lead time in whole days (1–3). */
+  shortageLeadDays: number;
+  /** Roles that receive internal shortage alerts. */
+  alertRoles: string[];
 };
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -142,6 +190,8 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   supportEmail: "hello@fresco.demo",
   deliveryFeeCents: 399,
   freeDeliveryThresholdCents: 3500,
+  shortageLeadDays: 1,
+  alertRoles: ["admin", "stock_manager"],
 };
 
 type CachedSettings = { value: StoreSettings; at: number };
@@ -172,6 +222,8 @@ export async function getStoreSettings(): Promise<StoreSettings> {
       freeDeliveryThresholdCents: row.freeDeliveryThresholdCents,
       demoEmail: row.demoEmail ?? "",
       demoName: row.demoName ?? "",
+      shortageLeadDays: row.shortageLeadDays ?? 1,
+      alertRoles: row.alertRoles ?? ["admin", "stock_manager"],
     };
     settingsCache.__frescoSettings = { value, at: Date.now() };
     return value;

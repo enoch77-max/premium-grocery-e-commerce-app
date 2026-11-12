@@ -15,9 +15,23 @@ import {
   SparkleIcon,
   TruckIcon,
 } from "@/components/icons";
+import { CartRow } from "@/components/cart-row";
 
 export function CartDrawer() {
-  const { cart, isOpen, closeCart, loading, setQuantity, remove, applyCoupon, removeCoupon, add, isPending, restoreCount, restoreBasket } = useCart();
+  const {
+    cart,
+    isOpen,
+    closeCart,
+    loading,
+    setQuantity,
+    remove,
+    applyCoupon,
+    removeCoupon,
+    add,
+    isPending,
+    restoreCount,
+    restoreBasket,
+  } = useCart();
   const [couponOpen, setCouponOpen] = useState(false);
   const [code, setCode] = useState("");
   const [couponMessage, setCouponMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -89,7 +103,8 @@ export function CartDrawer() {
               {remaining > 0 ? (
                 <span className="inline-flex items-center gap-1.5 text-ink">
                   <TruckIcon className="h-4 w-4 text-brand" />
-                  You&apos;re <strong className="text-brand">{formatMoney(remaining)}</strong> from free delivery
+                  You&apos;re <strong className="text-brand">{formatMoney(remaining)}</strong> from free
+                  delivery
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-brand-deep">
@@ -131,8 +146,8 @@ export function CartDrawer() {
                     Welcome back
                   </p>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-ink-soft">
-                    We kept your last basket of {restoreCount} item{restoreCount === 1 ? "" : "s"}. Restore it in one tap —
-                    prices update automatically.
+                    We kept your last basket of {restoreCount} item{restoreCount === 1 ? "" : "s"}. Restore it
+                    in one tap — prices update automatically.
                   </p>
                   <button
                     type="button"
@@ -143,7 +158,9 @@ export function CartDrawer() {
                   </button>
                 </div>
               ) : null}
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-soft text-3xl">🧺</div>
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-soft text-3xl">
+                🧺
+              </div>
               <h3 className="mt-3 font-display text-xl font-semibold">A basket this empty is a shame</h3>
               <p className="mx-auto mt-1.5 max-w-[260px] text-[12.5px] leading-relaxed text-ink-soft">
                 Add a few essentials and we&apos;ll get them to your door in under 30 minutes.
@@ -212,7 +229,9 @@ export function CartDrawer() {
                       <span className="inline-flex items-center gap-1.5">
                         <SparkleIcon className="h-3.5 w-3.5 text-amber" /> Have a promo code?
                       </span>
-                      <span className="text-[11px] font-medium text-brand">{couponOpen ? "Hide" : "Add code"}</span>
+                      <span className="text-[11px] font-medium text-brand">
+                        {couponOpen ? "Hide" : "Add code"}
+                      </span>
                     </button>
                     {couponOpen ? (
                       <div className="mt-2.5 flex gap-2">
@@ -258,8 +277,8 @@ export function CartDrawer() {
                       </div>
                     ) : null}
                     <p className="mt-2 text-[10.5px] text-ink-soft">
-                      Try <span className="font-bold text-ink">FRESH10</span> for $10 off $60 — the code is saved and
-                      applies automatically once your basket qualifies.
+                      Try <span className="font-bold text-ink">FRESH10</span> for $10 off $60 — the code is
+                      saved and applies automatically once your basket qualifies.
                     </p>
                   </>
                 )}
@@ -268,7 +287,9 @@ export function CartDrawer() {
               {cart.upsells.length ? (
                 <div className="mt-4 rounded-2xl border border-brand/15 bg-brand-soft/50 p-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-deep">Add a little extra</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-deep">
+                      Add a little extra
+                    </p>
                     <span className="text-[10.5px] font-semibold text-brand">Save more</span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2">
@@ -278,11 +299,19 @@ export function CartDrawer() {
                           <div className="flex items-center gap-2">
                             <span className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
+                              <img
+                                src={product.imageUrl}
+                                alt={product.name}
+                                className="h-full w-full object-cover"
+                              />
                             </span>
                             <span className="min-w-0">
-                              <span className="block truncate text-[11px] font-bold leading-tight text-ink">{product.name}</span>
-                              <span className="block text-[10px] font-semibold text-brand">{formatMoney(product.priceCents)}</span>
+                              <span className="block truncate text-[11px] font-bold leading-tight text-ink">
+                                {product.name}
+                              </span>
+                              <span className="block text-[10px] font-semibold text-brand">
+                                {formatMoney(product.priceCents)}
+                              </span>
                             </span>
                           </div>
                           <p className="mt-1 line-clamp-1 text-[9.5px] font-medium text-clay">{reason}</p>
@@ -325,7 +354,9 @@ export function CartDrawer() {
               ) : null}
               <div className="flex justify-between text-ink-soft">
                 <span>Delivery</span>
-                <span className={cart.deliveryCents === 0 ? "font-semibold text-brand" : "font-semibold text-ink"}>
+                <span
+                  className={cart.deliveryCents === 0 ? "font-semibold text-brand" : "font-semibold text-ink"}
+                >
                   {cart.deliveryCents === 0 ? "Free" : formatMoney(cart.deliveryCents)}
                 </span>
               </div>
@@ -362,88 +393,6 @@ export function CartDrawer() {
           </div>
         ) : null}
       </aside>
-    </div>
-  );
-}
-
-function CartRow({
-  line,
-  pending,
-  onIncrease,
-  onDecrease,
-  onRemove,
-  onClose,
-}: {
-  line: CartLine;
-  pending: boolean;
-  onIncrease: () => void;
-  onDecrease: () => void;
-  onRemove: () => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="rounded-2xl border border-line/70 bg-white p-2.5">
-      <div className="flex gap-3">
-        <Link
-          href={`/product/${line.slug}`}
-          onClick={onClose}
-          className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-line/60 bg-cream"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={line.imageUrl} alt={line.name} className="h-full w-full object-cover" />
-        </Link>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <Link href={`/product/${line.slug}`} onClick={onClose} className="min-w-0">
-              <p className="line-clamp-2 text-[12.5px] font-bold leading-snug text-ink">{line.name}</p>
-              <p className="mt-0.5 text-[10.5px] text-ink-soft">{line.unit}</p>
-            </Link>
-            <button
-              type="button"
-              onClick={onRemove}
-              disabled={pending}
-              className="press -mr-2 -mt-2 grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-cream-deep hover:text-clay disabled:opacity-50 sm:-mr-1 sm:-mt-1 sm:h-6 sm:w-6"
-              aria-label={`Remove ${line.name}`}
-            >
-              <CloseIcon className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="mt-1.5 flex items-center justify-between gap-2">
-            <div className="flex items-center rounded-full border border-line bg-cream/60">
-              <button
-                type="button"
-                onClick={onDecrease}
-                disabled={pending}
-                className="press grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50 sm:h-7 sm:w-7"
-                aria-label="Decrease quantity"
-              >
-                <MinusIcon className="h-3.5 w-3.5" />
-              </button>
-              <span className="w-6 text-center text-[13px] font-bold tabular-nums sm:w-5 sm:text-[12px]">
-                {line.quantity}
-              </span>
-              <button
-                type="button"
-                onClick={onIncrease}
-                disabled={pending || line.quantity >= Math.max(1, Math.min(20, line.stock))}
-                title={line.quantity >= line.stock ? `Only ${line.stock} available today` : undefined}
-                className="press grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-cream-deep disabled:opacity-50 sm:h-7 sm:w-7"
-                aria-label="Increase quantity"
-              >
-                <PlusIcon className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            <div className="text-right">
-              <p className="text-[13px] font-bold text-ink">{formatMoney(line.lineTotalCents)}</p>
-              {line.compareAtCents ? (
-                <p className="text-[10px] font-medium text-ink-soft line-through">
-                  {formatMoney(line.compareAtCents * line.quantity)}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

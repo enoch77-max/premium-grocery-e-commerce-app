@@ -37,7 +37,8 @@ function OrdersList() {
 
   const filtered = useMemo(() => {
     if (filter === "all") return orders;
-    if (filter === "active") return orders.filter((order) => !["delivered", "cancelled"].includes(order.status));
+    if (filter === "active")
+      return orders.filter((order) => !["delivered", "cancelled"].includes(order.status));
     return orders.filter((order) => order.status === filter);
   }, [filter, orders]);
 
@@ -46,9 +47,12 @@ function OrdersList() {
     setMessage(null);
     try {
       const response = await authFetch(`/api/orders/${orderNumber}/reorder`, { method: "POST" });
-      const data = (await response.json().catch(() => null)) as
-        | { cart?: unknown; error?: string; added?: number; unavailable?: string[] }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        cart?: unknown;
+        error?: string;
+        added?: number;
+        unavailable?: string[];
+      } | null;
       if (!response.ok) {
         setMessage(data?.error ?? "We couldn't reorder that basket.");
         return;
@@ -108,9 +112,13 @@ function OrdersList() {
       </div>
 
       {message ? (
-        <p className="rounded-xl bg-brand-soft/70 px-3 py-2 text-[11.5px] font-semibold text-brand-deep">{message}</p>
+        <p className="rounded-xl bg-brand-soft/70 px-3 py-2 text-[11.5px] font-semibold text-brand-deep">
+          {message}
+        </p>
       ) : null}
-      {error ? <p className="rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">{error}</p> : null}
+      {error ? (
+        <p className="rounded-xl bg-rose-soft px-3 py-2 text-[11.5px] font-semibold text-clay">{error}</p>
+      ) : null}
 
       {loading ? (
         <div className="space-y-2">
@@ -120,7 +128,9 @@ function OrdersList() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line bg-white/70 px-5 py-12 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cream-deep text-2xl">📦</div>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cream-deep text-2xl">
+            📦
+          </div>
           <h2 className="mt-3 font-display text-xl font-semibold">
             {orders.length ? "No orders in this view" : "Your first order starts here"}
           </h2>
@@ -144,7 +154,9 @@ function OrdersList() {
               <article key={order.id} className="overflow-hidden rounded-2xl border border-line/80 bg-white">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/70 bg-cream/40 px-4 py-2.5">
                   <div>
-                    <p className="text-[11.5px] font-extrabold tracking-tight text-ink">{order.orderNumber}</p>
+                    <p className="text-[11.5px] font-extrabold tracking-tight text-ink">
+                      {order.orderNumber}
+                    </p>
                     <p className="text-[10.5px] text-ink-soft">
                       {new Date(order.createdAt).toLocaleString("en-US", {
                         month: "short",
@@ -168,14 +180,19 @@ function OrdersList() {
                       {order.status === "delivered" ? <CheckIcon className="h-2.5 w-2.5" /> : null}
                       {status.label}
                     </span>
-                    <span className="text-[13px] font-extrabold text-ink">{formatMoney(order.totalCents)}</span>
+                    <span className="text-[13px] font-extrabold text-ink">
+                      {formatMoney(order.totalCents)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 px-4 py-3">
                   <div className="flex -space-x-2">
                     {order.items.slice(0, 4).map((item) => (
-                      <span key={item.id} className="h-10 w-10 overflow-hidden rounded-xl border-2 border-white bg-cream">
+                      <span
+                        key={item.id}
+                        className="h-10 w-10 overflow-hidden rounded-xl border-2 border-white bg-cream"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                       </span>

@@ -32,7 +32,12 @@ await check("readiness is ok", async () => {
 
 await check("security headers present", async () => {
   const response = await fetch(base + "/");
-  for (const header of ["x-content-type-options", "referrer-policy", "content-security-policy", "permissions-policy"]) {
+  for (const header of [
+    "x-content-type-options",
+    "referrer-policy",
+    "content-security-policy",
+    "permissions-policy",
+  ]) {
     if (!response.headers.get(header)) throw new Error(`missing ${header}`);
   }
 });
@@ -50,7 +55,8 @@ await check("home renders products", async () => {
 
 await check("admin API rejects anonymous access", async () => {
   const { response } = await json("/api/admin/overview");
-  if (response.status !== 401 && response.status !== 403) throw new Error(`expected 401/403, got ${response.status}`);
+  if (response.status !== 401 && response.status !== 403)
+    throw new Error(`expected 401/403, got ${response.status}`);
 });
 
 await check("catalogue search responds", async () => {
@@ -138,6 +144,19 @@ await check("owner credentials open the dashboard", async () => {
   if (body.user?.role !== "admin") throw new Error(`role ${body.user?.role}`);
   const overview = await json("/api/admin/overview", { headers: { "x-session-token": body.token } });
   if (!overview.body.ok) throw new Error("dashboard API rejected the owner");
+});
+
+await check("typo search stays on-topic", async () => {
+  const { response, body } = await json(`/api/search?q=${encodeURIComponent("breat")}`);
+  if (!response.ok) throw new Error(`status ${response.status}`);
+  const names = (body.products ?? []).map((product) => product.name.toLowerCase());
+  if (names.some((name) => name.includes("coffee"))) {
+    throw new Error(`typo "breat" returned coffee: ${names.join(", ")}`);
+  }
+  if (!body.intent?.corrected) throw new Error("no did-you-mean correction offered");
+  const exact = await json(`/api/search?q=${encodeURIComponent("coffee")}`);
+  const first = exact.body.products?.[0]?.name ?? "";
+  if (!/coffee/i.test(first)) throw new Error(`exact "coffee" ranked "${first}" first`);
 });
 
 await check("sitemap and robots served", async () => {

@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { previewEdgeMessage } from "@/lib/preview-edge";
 
 export type SessionUser = {
   id: number;
@@ -19,6 +20,9 @@ export type SessionUser = {
   marketingOptIn: boolean;
   orderUpdatesEmail?: boolean;
   orderUpdatesSms?: boolean;
+  notifyEmail?: boolean;
+  notifyWhatsapp?: boolean;
+  whatsappNumber?: string;
   role?: string;
   createdAt: string;
 };
@@ -143,11 +147,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = (await response.json().catch(() => null)) as
-        | { user?: SessionUser; token?: string; error?: string }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        user?: SessionUser;
+        token?: string;
+        error?: string;
+      } | null;
       if (!response.ok || !data?.user || !data.token) {
-        return { ok: false, message: data?.error ?? "We couldn't sign you in." };
+        const edge = await previewEdgeMessage(response);
+        return { ok: false, message: edge ?? data?.error ?? "We couldn't sign you in." };
       }
       epochRef.current += 1;
       saveToken(data.token);
@@ -171,11 +178,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, phone, marketingOptIn }),
       });
-      const data = (await response.json().catch(() => null)) as
-        | { user?: SessionUser; token?: string; error?: string }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        user?: SessionUser;
+        token?: string;
+        error?: string;
+      } | null;
       if (!response.ok || !data?.user || !data.token) {
-        return { ok: false, message: data?.error ?? "We couldn't create your account." };
+        const edge = await previewEdgeMessage(response);
+        return { ok: false, message: edge ?? data?.error ?? "We couldn't create your account." };
       }
       epochRef.current += 1;
       saveToken(data.token);
@@ -188,11 +198,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const loginDemo = useCallback(async (): Promise<AuthResult> => {
     const response = await fetch("/api/auth/demo", { method: "POST" });
-    const data = (await response.json().catch(() => null)) as
-      | { user?: SessionUser; token?: string; error?: string }
-      | null;
+    const data = (await response.json().catch(() => null)) as {
+      user?: SessionUser;
+      token?: string;
+      error?: string;
+    } | null;
     if (!response.ok || !data?.user || !data.token) {
-      return { ok: false, message: data?.error ?? "The demo account is unavailable right now." };
+      const edge = await previewEdgeMessage(response);
+      return { ok: false, message: edge ?? data?.error ?? "The demo account is unavailable right now." };
     }
     epochRef.current += 1;
     saveToken(data.token);

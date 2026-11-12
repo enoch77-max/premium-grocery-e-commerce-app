@@ -20,7 +20,11 @@ export async function GET(request: Request) {
   const slugs = rows.map((row) => row.productSlug);
   return Response.json({
     slugs,
-    saved: rows.map((row) => ({ id: row.id, slug: row.productSlug, product: products.find((p) => p.slug === row.productSlug) ?? null })),
+    saved: rows.map((row) => ({
+      id: row.id,
+      slug: row.productSlug,
+      product: products.find((p) => p.slug === row.productSlug) ?? null,
+    })),
   });
 }
 
@@ -28,7 +32,10 @@ export async function POST(request: Request) {
   const user = await getCurrentUser(request);
   if (!user) return Response.json({ error: "Sign in to save items", requiresAuth: true }, { status: 401 });
 
-  const body = (await request.json().catch(() => ({}))) as { slug?: string; action?: "add" | "remove" | "toggle" };
+  const body = (await request.json().catch(() => ({}))) as {
+    slug?: string;
+    action?: "add" | "remove" | "toggle";
+  };
   const slug = (body.slug ?? "").trim();
   if (!slug) return Response.json({ error: "Product slug required" }, { status: 400 });
 

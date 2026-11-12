@@ -85,7 +85,10 @@ export async function PATCH(request: Request) {
   const user = await getCurrentUser(request);
   if (!user) return Response.json({ error: "Please sign in" }, { status: 401 });
 
-  const body = (await request.json().catch(() => ({}))) as AddressPayload & { id?: number; setDefault?: boolean };
+  const body = (await request.json().catch(() => ({}))) as AddressPayload & {
+    id?: number;
+    setDefault?: boolean;
+  };
   const id = Number(body.id);
   if (!Number.isFinite(id)) return Response.json({ error: "Address id required" }, { status: 400 });
 
@@ -149,6 +152,10 @@ export async function DELETE(request: Request) {
     }
   }
 
-  const all = await db.select().from(addresses).where(eq(addresses.userId, user.id)).orderBy(asc(addresses.id));
+  const all = await db
+    .select()
+    .from(addresses)
+    .where(eq(addresses.userId, user.id))
+    .orderBy(asc(addresses.id));
   return Response.json({ addresses: all });
 }

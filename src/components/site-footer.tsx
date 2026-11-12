@@ -7,18 +7,20 @@ export async function SiteFooter() {
 
   return (
     <footer id="help" className="mt-12 border-t border-line/80 bg-brand-deep text-cream sm:mt-16">
-      <div className="safe-b mx-auto max-w-[1340px] px-4 pt-10 pb-8 sm:px-6 sm:py-12">
+      <div className="safe-b mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pt-10 pb-8 sm:px-6 sm:py-12">
         <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           <div>
             <div className="flex items-center gap-2">
               <span className="grid h-9 w-9 place-items-center rounded-[13px] bg-lime text-brand-deep">
                 <LeafIcon className="h-5 w-5" strokeWidth={2} />
               </span>
-              <span className="font-display text-[26px] font-semibold tracking-[-0.03em] text-cream">fresco</span>
+              <span className="font-display text-[26px] font-semibold tracking-[-0.03em] text-cream">
+                fresco
+              </span>
             </div>
             <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-cream/75">
-              A neighbourhood green grocer, online. Farm-fresh produce, real bread and everyday essentials delivered in
-              30 minutes — priced honestly, every day.
+              A neighbourhood green grocer, online. Farm-fresh produce, real bread and everyday essentials
+              delivered in 30 minutes — priced honestly, every day.
             </p>
             <div className="mt-5 space-y-2 text-[11.5px] text-cream/80">
               <p className="inline-flex items-center gap-2">
@@ -43,77 +45,79 @@ export async function SiteFooter() {
           {/* Two-up link columns on a phone; `lg:contents` dissolves the wrapper
               so the desktop four-column grid still owns these children. */}
           <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-8 lg:contents">
-          <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Shop aisles</h3>
-            <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
-              {categories.slice(0, 6).map((category) => (
-                <li key={category.slug}>
-                  <Link href={`/category/${category.slug}`} className="transition hover:text-lime">
-                    {category.name}
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Shop aisles</h3>
+              <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
+                {categories.slice(0, 6).map((category) => (
+                  <li key={category.slug}>
+                    <Link href={`/category/${category.slug}`} className="transition hover:text-lime">
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link href="/offers" className="font-semibold text-cream transition hover:text-lime">
+                    Offers & bundles
                   </Link>
                 </li>
-              ))}
-              <li>
-                <Link href="/offers" className="font-semibold text-cream transition hover:text-lime">
-                  Offers & bundles
-                </Link>
-              </li>
-            </ul>
-          </div>
+              </ul>
+            </div>
 
-          <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Helpful</h3>
-            <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
-              <li>
-                <Link href="/track" className="font-semibold text-cream transition hover:text-lime">
-                  Track your order
-                </Link>
-              </li>
-              <li>
-                <Link href="/account/orders" className="transition hover:text-lime">
-                  Your orders & reordering
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="transition hover:text-lime">
-                  Sign in or create account
-                </Link>
-              </li>
-              <li>
-                <Link href="/offers#delivery" className="transition hover:text-lime">
-                  Delivery slots & areas
-                </Link>
-              </li>
-              <li>
-                <Link href="/offers#coupons" className="transition hover:text-lime">
-                  Coupons & welcome gift
-                </Link>
-              </li>
-              <li>
-                <Link href="/offers#bundles" className="transition hover:text-lime">
-                  Bundles that save more
-                </Link>
-              </li>
-              <li>
-                <Link href="/search?q=organic" className="transition hover:text-lime">
-                  Organic shop
-                </Link>
-              </li>
-              <li>
-                <Link href="/search?q=breakfast+under+%2410" className="transition hover:text-lime">
-                  Breakfast under $10
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-lime">Helpful</h3>
+              <ul className="mt-3 space-y-1 text-[13px] text-cream/80 sm:space-y-2 sm:text-[12.5px] [&_a]:inline-flex [&_a]:min-h-[34px] [&_a]:items-center sm:[&_a]:min-h-0">
+                <li>
+                  <Link href="/track" className="font-semibold text-cream transition hover:text-lime">
+                    Track your order
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/account/orders" className="transition hover:text-lime">
+                    Your orders & reordering
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="transition hover:text-lime">
+                    Sign in or create account
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/offers#delivery" className="transition hover:text-lime">
+                    Delivery slots & areas
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/offers#coupons" className="transition hover:text-lime">
+                    Coupons & welcome gift
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/offers#bundles" className="transition hover:text-lime">
+                    Bundles that save more
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/search?q=organic" className="transition hover:text-lime">
+                    Organic shop
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/search?q=breakfast+under+%2410" className="transition hover:text-lime">
+                    Breakfast under $10
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-cream/15 bg-white/5 p-5">
             <h3 className="font-display text-xl font-semibold text-cream">First order? Take $10 off.</h3>
             <p className="mt-1.5 text-[12px] leading-relaxed text-cream/75">
               Join 12,000+ local households shopping smarter. Use code{" "}
-              <span className="rounded bg-lime px-1.5 py-0.5 text-[11px] font-extrabold text-brand-deep">FRESH10</span> on
-              baskets over $60.
+              <span className="rounded bg-lime px-1.5 py-0.5 text-[11px] font-extrabold text-brand-deep">
+                FRESH10
+              </span>{" "}
+              on baskets over $60.
             </p>
             <Link
               href="/offers"

@@ -37,7 +37,7 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
     .slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 pb-10 pt-5 sm:px-6">
+    <div className="mx-auto max-w-[1100px] 2xl:max-w-[1280px] px-4 pb-10 pt-5 sm:px-6">
       <section className="overflow-hidden rounded-[26px] border border-line/80 bg-white">
         <div className="relative bg-[#13261d] px-5 py-6 text-cream sm:px-7">
           <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-brand/40 blur-3xl" />
@@ -53,8 +53,8 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
                 Thanks, {order.customerName.split(" ")[0]} — we&apos;re packing it now.
               </h1>
               <p className="mt-1.5 max-w-lg text-[12.5px] leading-relaxed text-cream/70">
-                A receipt is on its way to {order.email}. Your driver will text before arriving — no need to wait by the
-                door.
+                A receipt is on its way to {order.email}. Your driver will text before arriving — no need to
+                wait by the door.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold">
                 <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1">
@@ -65,7 +65,12 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
                   <TruckIcon className="h-3.5 w-3.5 text-lime" /> {plural(order.itemCount, "item")}
                 </span>
                 <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1">
-                  <ShieldId /> {order.status === "cancelled" ? "Cancelled" : order.paymentMethod === "cash" ? "Cash on delivery" : "Paid by card"}
+                  <ShieldId />{" "}
+                  {order.status === "cancelled"
+                    ? "Cancelled"
+                    : order.paymentMethod === "cash"
+                      ? "Cash on delivery"
+                      : "Paid by card"}
                 </span>
               </div>
             </div>
@@ -74,7 +79,9 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
 
         <div className="grid gap-0 lg:grid-cols-[1.3fr_1fr]">
           <div className="border-b border-line/70 p-5 lg:border-b-0 lg:border-r">
-            <h2 className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">Your items</h2>
+            <h2 className="text-[12px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
+              Your items
+            </h2>
             <div className="mt-3 space-y-2.5">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
@@ -98,7 +105,9 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
                       </p>
                     ) : null}
                   </div>
-                  <p className="text-[12.5px] font-bold text-ink">{formatMoney(item.priceCents * item.quantity)}</p>
+                  <p className="text-[12.5px] font-bold text-ink">
+                    {formatMoney(item.priceCents * item.quantity)}
+                  </p>
                 </div>
               ))}
             </div>
@@ -116,13 +125,21 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
               ) : null}
               <div className="flex justify-between text-ink-soft">
                 <span>Delivery</span>
-                <span className={order.deliveryCents === 0 ? "font-semibold text-brand" : "font-semibold text-ink"}>
+                <span
+                  className={
+                    order.deliveryCents === 0 ? "font-semibold text-brand" : "font-semibold text-ink"
+                  }
+                >
                   {order.deliveryCents === 0 ? "Free" : formatMoney(order.deliveryCents)}
                 </span>
               </div>
               <div className="flex items-end justify-between border-t border-dashed border-line pt-2">
-                <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">Total paid</span>
-                <span className="font-display text-[24px] font-semibold leading-none">{formatMoney(order.totalCents)}</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+                  Total paid
+                </span>
+                <span className="font-display text-[24px] font-semibold leading-none">
+                  {formatMoney(order.totalCents)}
+                </span>
               </div>
               {order.savingsCents > 0 ? (
                 <p className="rounded-lg bg-brand-soft/60 px-2 py-1 text-center text-[10.5px] font-bold text-brand-deep">
@@ -153,7 +170,11 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
               {[
                 { title: "Order received", note: "Payment confirmed", done: true },
                 { title: "Packed fresh", note: "Our team picks each item by hand", done: true, active: true },
-                { title: "On the way", note: slot ? `${slot.label} · ${slot.detail}` : "Today · 6–8pm", done: false },
+                {
+                  title: "On the way",
+                  note: slot ? `${slot.label} · ${slot.detail}` : "Today · 6–8pm",
+                  done: false,
+                },
                 { title: "Delivered", note: "Contactless to your door", done: false },
               ].map((step) => (
                 <div key={step.title} className="flex items-start gap-2.5">
@@ -169,7 +190,9 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
                     {step.done ? <CheckIcon className="h-3 w-3" strokeWidth={3} /> : ""}
                   </span>
                   <div>
-                    <p className={`text-[11.5px] font-bold ${step.done || step.active ? "text-ink" : "text-ink-soft"}`}>
+                    <p
+                      className={`text-[11.5px] font-bold ${step.done || step.active ? "text-ink" : "text-ink-soft"}`}
+                    >
                       {step.title}
                     </p>
                     <p className="text-[10px] text-ink-soft">{step.note}</p>

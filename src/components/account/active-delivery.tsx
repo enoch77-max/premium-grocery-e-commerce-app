@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { AccountOrder } from "@/components/account/data";
@@ -29,7 +30,6 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
   const progress = ((index + 1) / STEPS.length) * 100;
   const remaining = Math.max(0, STEPS.length - index - 1);
 
-
   const thumbnails = useMemo(() => order.items.slice(0, 4), [order.items]);
 
   return (
@@ -44,7 +44,8 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
             {status === "delivered" ? "Delivered — enjoy it!" : meta.label}
           </h2>
           <p className="mt-0.5 text-[12px] leading-relaxed text-ink-soft">
-            {order.deliverySlot ? `Slot ${formatDeliverySlot(order.deliverySlot)}` : meta.note} · {order.city} {order.postcode}
+            {order.deliverySlot ? `Slot ${formatDeliverySlot(order.deliverySlot)}` : meta.note} · {order.city}{" "}
+            {order.postcode}
           </p>
         </div>
         <Link
@@ -61,7 +62,9 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
           {STEPS.map((step, stepIndex) => (
             <div key={step} className="flex-1">
               <div className={`h-1.5 rounded-full ${stepIndex <= index ? "bg-brand" : "bg-cream-deep"}`} />
-              <p className={`mt-1 text-[9.5px] font-semibold ${stepIndex <= index ? "text-brand-deep" : "text-ink-soft/60"}`}>
+              <p
+                className={`mt-1 text-[9.5px] font-semibold ${stepIndex <= index ? "text-brand-deep" : "text-ink-soft/60"}`}
+              >
                 {step}
               </p>
             </div>
@@ -82,9 +85,17 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex -space-x-2">
             {thumbnails.map((item) => (
-              <span key={item.id} className="h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-cream shadow-soft">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+              <span
+                key={item.id}
+                className="relative block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-cream shadow-soft"
+              >
+<Image
+                  src={item.imageUrl}
+                  alt={item.name}
+                  fill
+                  sizes="44px"
+                  className="h-full w-full object-cover"
+                />
               </span>
             ))}
             {order.items.length > thumbnails.length ? (
@@ -95,7 +106,9 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
           </div>
           <div className="text-right">
             <p className="text-[11px] font-semibold text-ink-soft">{plural(order.itemCount, "item")}</p>
-            <p className="text-[15px] font-extrabold tracking-tight text-ink">{formatMoney(order.totalCents)}</p>
+            <p className="text-[15px] font-extrabold tracking-tight text-ink">
+              {formatMoney(order.totalCents)}
+            </p>
           </div>
         </div>
 
@@ -107,10 +120,14 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
             setNote(null);
             try {
               // Server-side reorder: resolves live products, stock and slugs.
-              const response = await authFetch(`/api/orders/${order.orderNumber}/reorder`, { method: "POST" });
-              const data = (await response.json().catch(() => null)) as
-                | { error?: string; cartToken?: string; unavailable?: string[] }
-                | null;
+              const response = await authFetch(`/api/orders/${order.orderNumber}/reorder`, {
+                method: "POST",
+              });
+              const data = (await response.json().catch(() => null)) as {
+                error?: string;
+                cartToken?: string;
+                unavailable?: string[];
+              } | null;
               if (!response.ok) throw new Error(data?.error ?? "We couldn't add those items");
               if (data?.cartToken) window.localStorage.setItem("fresco:cart-token", data.cartToken);
               await refreshCart();
@@ -129,7 +146,11 @@ export function ActiveDelivery({ order }: { order: AccountOrder }) {
           }}
           className="press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-center text-[13px] font-bold text-cream hover:bg-brand-deep disabled:opacity-60"
         >
-          {done ? <CheckIcon className="h-4 w-4 text-lime" /> : <RefreshIcon className="h-4 w-4" strokeWidth={2.2} />}
+          {done ? (
+            <CheckIcon className="h-4 w-4 text-lime" />
+          ) : (
+            <RefreshIcon className="h-4 w-4" strokeWidth={2.2} />
+          )}
           {done ? "Added to your basket" : "Add these items again"}
         </button>
         {note ? <p className="mt-2 text-center text-[11px] font-semibold text-brand-deep">{note}</p> : null}

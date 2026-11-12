@@ -14,7 +14,8 @@ export async function POST(request: Request) {
   if (!rateLimit("reset-password", 10, 60_000)) {
     return Response.json({ error: "Too many attempts — please wait a minute." }, { status: 429 });
   }
-  if (!token) return Response.json({ error: "This reset link is incomplete.", field: "token" }, { status: 422 });
+  if (!token)
+    return Response.json({ error: "This reset link is incomplete.", field: "token" }, { status: 422 });
   if (password.length < 8) {
     return Response.json({ error: "Use at least 8 characters", field: "password" }, { status: 422 });
   }
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
       return Response.json({ error: "This reset link has expired. Request a new one." }, { status: 410 });
     }
 
-    await db.update(users).set({ passwordHash: hashPassword(password) }).where(eq(users.id, record.userId));
+    await db
+      .update(users)
+      .set({ passwordHash: hashPassword(password) })
+      .where(eq(users.id, record.userId));
     await db.update(passwordResets).set({ usedAt: new Date() }).where(eq(passwordResets.id, record.id));
     // Any other open reset links become invalid, and every session is revoked.
     await db

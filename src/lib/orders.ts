@@ -3,7 +3,12 @@ import { db } from "@/db";
 import { orderItems, orders } from "@/db/schema";
 import type { OrderItemRecord, OrderWithItems } from "@/lib/order-types";
 
-export type { OrderItemRecord, OrderRecord, OrderWithItems, OrderWithItems as Order } from "@/lib/order-types";
+export type {
+  OrderItemRecord,
+  OrderRecord,
+  OrderWithItems,
+  OrderWithItems as Order,
+} from "@/lib/order-types";
 export { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS, orderStatusIndex } from "@/lib/order-types";
 
 export async function getOrderByNumber(orderNumber: string): Promise<OrderWithItems | null> {
@@ -36,7 +41,10 @@ export async function getOrdersForUser(userId: number): Promise<OrderWithItems[]
           sql`, `,
         )})`,
       );
-    return rows.map((row) => ({ ...row, items: items.filter((item) => item.orderId === row.id) })) as OrderWithItems[];
+    return rows.map((row) => ({
+      ...row,
+      items: items.filter((item) => item.orderId === row.id),
+    })) as OrderWithItems[];
   } catch (error) {
     console.error("getOrdersForUser failed", error);
     return [];

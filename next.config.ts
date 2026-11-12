@@ -14,7 +14,24 @@ import type { NextConfig } from "next";
  */
 const frameAncestors =
   process.env.FRAME_ANCESTORS?.trim() ||
-  "'self' https://arena.ai https://*.arena.ai https://arena.com https://*.arena.com https://*.e2b.app https://*.e2b.dev https://*.vercel.app";
+  [
+    "'self'",
+    // Hosted preview/embed surfaces. `*.arena.site` is the domain arena hands out
+    // for shareable previews — omitting it makes the preview iframe refuse to load,
+    // which presents as "the site won't open" and "can't sign in".
+    "https://arena.ai",
+    "https://*.arena.ai",
+    "https://arena.com",
+    "https://*.arena.com",
+    "https://arena.site",
+    "https://*.arena.site",
+    "https://*.e2b.app",
+    "https://*.e2b.dev",
+    "https://*.vercel.app",
+    // Local development / preview shells (ports are arbitrary).
+    "http://localhost:*",
+    "http://127.0.0.1:*",
+  ].join(" ");
 
 // X-Frame-Options cannot express an allow-list; it is only safe while framing is
 // limited to same-origin. When extra ancestors are allowed we rely on CSP (which
@@ -52,6 +69,24 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  /**
+   * Product photography is served through Next's optimizer: AVIF/WebP, sized per
+   * viewport, long-lived immutable cache. Originals are 111 KB JPEGs shown at
+   * ~200px on a card, so this is the single biggest transfer win available.
+   */
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [96, 160, 240, 320, 420, 640, 828, 1080, 1280, 1600],
+    imageSizes: [48, 64, 96, 128, 160, 200, 256, 320],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    remotePatterns: [
+      { protocol: "https", hostname: "images.pexels.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+  },
+  experimental: {
+    optimizePackageImports: ["@/components/icons"],
+  },
   poweredByHeader: false,
   compress: true,
   async headers() {

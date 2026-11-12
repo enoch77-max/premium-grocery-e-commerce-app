@@ -35,9 +35,13 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
                 ? `${coupon.percentOff}% off`
                 : `${formatMoney(coupon.valueCents ?? 0, false)} off`}
           </p>
-          <p className="mt-1 font-display text-[19px] font-semibold leading-tight text-ink">{coupon.description}</p>
+          <p className="mt-1 font-display text-[19px] font-semibold leading-tight text-ink">
+            {coupon.description}
+          </p>
           <p className="mt-0.5 text-[10.5px] text-ink-soft">
-            {coupon.minSubtotalCents > 0 ? `Minimum spend ${formatMoney(coupon.minSubtotalCents)}` : "No minimum spend"}
+            {coupon.minSubtotalCents > 0
+              ? `Minimum spend ${formatMoney(coupon.minSubtotalCents)}`
+              : "No minimum spend"}
           </p>
         </div>
         <span className="rounded-full bg-lime px-2 py-1 text-[9.5px] font-extrabold uppercase tracking-wide text-brand-deep">

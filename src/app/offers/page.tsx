@@ -36,7 +36,10 @@ export default async function OffersPage() {
 
   const flashDeals = [...products]
     .filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents)
-    .sort((a, b) => discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents))
+    .sort(
+      (a, b) =>
+        discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents),
+    )
     .slice(0, 8);
 
   const totalSaving = flashDeals.reduce(
@@ -45,7 +48,7 @@ export default async function OffersPage() {
   );
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pt-4 sm:px-6 sm:pt-5">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5">
       <section className="overflow-hidden rounded-[26px] border border-line/70 bg-[#13261d] text-cream">
         <div className="relative grid gap-5 p-4 sm:p-7 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-brand/40 blur-3xl" />
@@ -58,8 +61,9 @@ export default async function OffersPage() {
               <br /> change your total.
             </h1>
             <p className="mt-2 max-w-md text-[12.5px] leading-relaxed text-cream/70">
-              {offers.length} live banners, {coupons.length} stackable coupons and {bundles.length} curated baskets.
-              Every saving is applied in the basket before you pay — no codes to hunt down at checkout.
+              {offers.length} live banners, {coupons.length} stackable coupons and {bundles.length} curated
+              baskets. Every saving is applied in the basket before you pay — no codes to hunt down at
+              checkout.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
@@ -79,12 +83,21 @@ export default async function OffersPage() {
           <div className="relative grid grid-cols-2 gap-2 self-center">
             {[
               { label: "Live offers", value: String(offers.length), note: "verified this morning" },
-              { label: "Total deal value", value: formatMoney(totalSaving, false), note: "across flash deals" },
+              {
+                label: "Total deal value",
+                value: formatMoney(totalSaving, false),
+                note: "across flash deals",
+              },
               { label: "Free delivery", value: "$35+", note: "no membership" },
               { label: "Delivery window", value: "30 min", note: "7 days a week" },
             ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-white/12 bg-white/[0.06] p-3 backdrop-blur">
-                <p className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-cream/55">{stat.label}</p>
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/12 bg-white/[0.06] p-3 backdrop-blur"
+              >
+                <p className="text-[9.5px] font-bold uppercase tracking-[0.12em] text-cream/55">
+                  {stat.label}
+                </p>
                 <p className="mt-0.5 font-display text-[22px] font-semibold leading-none">{stat.value}</p>
                 <p className="mt-1 text-[10px] text-cream/50">{stat.note}</p>
               </div>
@@ -107,13 +120,20 @@ export default async function OffersPage() {
           ))}
           <div className="flex min-h-[142px] flex-col justify-between rounded-[22px] border border-line/80 bg-white p-4">
             <div>
-              <p className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-brand">Stack the savings</p>
-              <p className="mt-1 font-display text-[19px] font-semibold leading-tight">Free delivery + a coupon?</p>
+              <p className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-brand">
+                Stack the savings
+              </p>
+              <p className="mt-1 font-display text-[19px] font-semibold leading-tight">
+                Free delivery + a coupon?
+              </p>
               <p className="mt-1 text-[11px] leading-snug text-ink-soft">
                 Yes. Delivery is waived at $35, and fixed or percentage coupons subtract after that.
               </p>
             </div>
-            <Link href="#coupons" className="inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:underline">
+            <Link
+              href="#coupons"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:underline"
+            >
               See how it stacks <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </div>
@@ -146,7 +166,7 @@ export default async function OffersPage() {
           href="/category/fresh-produce"
           actionLabel="Shop the aisles"
         />
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
           {bundles.map((bundle) => (
             <BundleCard key={bundle.slug} bundle={bundle} />
           ))}
@@ -175,8 +195,8 @@ export default async function OffersPage() {
             Pick the slot that fits your day.
           </h2>
           <p className="mt-1.5 max-w-lg text-[12.5px] leading-relaxed text-ink-soft">
-            Free delivery on every basket over $35. Under that, it&apos;s a flat $3.99 — or free with code FREEDEL on
-            $25+. No surge pricing, no small-order fee, no membership.
+            Free delivery on every basket over $35. Under that, it&apos;s a flat $3.99 — or free with code
+            FREEDEL on $25+. No surge pricing, no small-order fee, no membership.
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {deliverySlots.map((slot) => (
@@ -226,7 +246,8 @@ export default async function OffersPage() {
             </p>
             <p className="mt-1 font-display text-[22px] font-semibold leading-tight">$0 → $35</p>
             <p className="text-[11px] text-ink-soft">
-              A basket of milk, eggs, sourdough and bananas lands at $10.62 — add a bundle and delivery is free.
+              A basket of milk, eggs, sourdough and bananas lands at $10.62 — add a bundle and delivery is
+              free.
             </p>
           </div>
           <div className="rounded-2xl border border-line/80 bg-white p-4">
@@ -234,15 +255,17 @@ export default async function OffersPage() {
               <ShieldIcon className="h-4 w-4" /> Our promise
             </p>
             <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
-              If anything arrives less than fresh, tap the item in your order and we refund it immediately — no photos, no
-              forms.
+              If anything arrives less than fresh, tap the item in your order and we refund it immediately —
+              no photos, no forms.
             </p>
             <p className="mt-2 inline-flex items-center gap-1 text-[10.5px] font-semibold text-ink">
               <ClockIcon className="h-3.5 w-3.5" /> Refunds land in 1 working day
             </p>
           </div>
           <div className="rounded-2xl border border-line/80 bg-white p-4">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">Shopping an aisle</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-ink-soft">
+              Shopping an aisle
+            </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {categories.slice(0, 6).map((category) => (
                 <Link

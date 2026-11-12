@@ -35,5 +35,3 @@ drizzle/
 
 # leave the agent notes local
 AGENTS.md
-
-*.zip

@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/orders", label: "Orders", icon: "📦" },
   { href: "/admin/products", label: "Catalogue", icon: "🥬" },
   { href: "/admin/customers", label: "Customers", icon: "👥" },
+  { href: "/admin/recurring", label: "Recurring", icon: "🔁" },
   { href: "/admin/settings", label: "Store settings", icon: "⚙️" },
 ];
 
@@ -20,16 +21,21 @@ export function AdminShell({ admin, children }: { admin: AdminUser; children: Re
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-3 pb-10 pt-4 sm:px-6">
+    <div className="mx-auto max-w-[1240px] 2xl:max-w-[1440px] px-3 pb-10 pt-4 sm:px-6">
       <div className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-ink px-4 py-3 text-cream">
         <div className="min-w-0">
-          <p className="text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-lime">Fresco store control</p>
+          <p className="text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-lime">
+            Fresco store control
+          </p>
           <p className="truncate text-[13px] font-bold">
             {admin.name} · <span className="font-medium text-cream/60">{admin.role}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/" className="press hidden h-9 items-center rounded-full bg-white/10 px-3 text-[11.5px] font-bold hover:bg-white/20 sm:flex">
+          <Link
+            href="/"
+            className="press hidden h-9 items-center rounded-full bg-white/10 px-3 text-[11.5px] font-bold hover:bg-white/20 sm:flex"
+          >
             View shop
           </Link>
           <button

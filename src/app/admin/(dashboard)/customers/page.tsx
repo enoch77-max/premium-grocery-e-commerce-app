@@ -27,7 +27,9 @@ export default async function AdminCustomersPage() {
     <div className="space-y-3">
       <div>
         <h1 className="font-display text-[22px] font-semibold tracking-tight">Customers</h1>
-        <p className="text-[11.5px] text-ink-soft">{rows.length} accounts · lifetime value and marketing consent.</p>
+        <p className="text-[11.5px] text-ink-soft">
+          {rows.length} accounts · lifetime value and marketing consent.
+        </p>
       </div>
       <div className="overflow-hidden rounded-2xl border border-line bg-white">
         <table className="w-full text-left text-[12px]">
@@ -46,12 +48,16 @@ export default async function AdminCustomersPage() {
                   <p className="font-bold leading-tight">{row.name}</p>
                   <p className="text-[10.5px] text-ink-soft">{row.email}</p>
                   {row.role !== "customer" ? (
-                    <span className="mt-0.5 inline-flex rounded-full bg-brand-soft px-1.5 text-[9px] font-bold uppercase text-brand-deep">{row.role}</span>
+                    <span className="mt-0.5 inline-flex rounded-full bg-brand-soft px-1.5 text-[9px] font-bold uppercase text-brand-deep">
+                      {row.role}
+                    </span>
                   ) : null}
                 </td>
                 <td className="px-3 py-2 font-semibold">{row.orderCount}</td>
                 <td className="px-3 py-2 font-semibold">{formatMoney(row.lifetimeCents)}</td>
-                <td className="hidden px-3 py-2 text-ink-soft sm:table-cell">{row.marketingOptIn ? "Opted in" : "—"}</td>
+                <td className="hidden px-3 py-2 text-ink-soft sm:table-cell">
+                  {row.marketingOptIn ? "Opted in" : "—"}
+                </td>
               </tr>
             ))}
           </tbody>

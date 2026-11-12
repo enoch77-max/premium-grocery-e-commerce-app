@@ -32,21 +32,21 @@ TLS-terminated, healthchecked store with a database and backups.
 
 Deliverables (all committed to the repo root):
 
-| Path | Purpose |
-| --- | --- |
-| `Dockerfile` | Multi-stage build → Next.js standalone image, non-root user |
-| `.dockerignore` | Keeps build context small and secrets out of the image |
-| `next.config.ts` | `output: "standalone"`, security headers, compression |
-| `.env.example` | Every variable with safe defaults + generation hints |
-| `deploy/docker-compose.yml` | app + postgres + caddy + nightly backup |
-| `deploy/Caddyfile` | Automatic HTTPS, compression, security headers, proxy |
-| `deploy/nginx.conf` | Alternative edge config if you prefer Nginx |
-| `deploy/deploy.sh` | One-command pull/build/migrate/start/healthcheck |
-| `deploy/backup.sh` / `deploy/restore.sh` | Encrypted dumps, retention, restore drills |
-| `deploy/fresco.service` | systemd unit for the "no Docker" path |
-| `docs/DEPLOYMENT.md` | Step-by-step runbook, firewall, DNS, TLS, rollback |
-| `/api/health` | Liveness + DB readiness (already present, reused by compose healthcheck) |
-| `/api/ready` | Readiness probe that also verifies migrations + seed state |
+| Path                                     | Purpose                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------ |
+| `Dockerfile`                             | Multi-stage build → Next.js standalone image, non-root user              |
+| `.dockerignore`                          | Keeps build context small and secrets out of the image                   |
+| `next.config.ts`                         | `output: "standalone"`, security headers, compression                    |
+| `.env.example`                           | Every variable with safe defaults + generation hints                     |
+| `deploy/docker-compose.yml`              | app + postgres + caddy + nightly backup                                  |
+| `deploy/Caddyfile`                       | Automatic HTTPS, compression, security headers, proxy                    |
+| `deploy/nginx.conf`                      | Alternative edge config if you prefer Nginx                              |
+| `deploy/deploy.sh`                       | One-command pull/build/migrate/start/healthcheck                         |
+| `deploy/backup.sh` / `deploy/restore.sh` | Encrypted dumps, retention, restore drills                               |
+| `deploy/fresco.service`                  | systemd unit for the "no Docker" path                                    |
+| `docs/DEPLOYMENT.md`                     | Step-by-step runbook, firewall, DNS, TLS, rollback                       |
+| `/api/health`                            | Liveness + DB readiness (already present, reused by compose healthcheck) |
+| `/api/ready`                             | Readiness probe that also verifies migrations + seed state               |
 
 **Acceptance:** container health becomes `healthy`; `/api/health` returns `ok: true`
 with row counts; restarting the host brings the store back unaided; a backup file can
@@ -121,11 +121,11 @@ restore drill reproduces the shop in a clean database.
 
 # Status — all three phases implemented
 
-| Phase | State | Evidence |
-| --- | --- | --- |
-| 1 — Deploy kit | ✅ Done | `Dockerfile`, `deploy/*`, `docs/DEPLOYMENT.md`, `/api/ready` |
-| 2 — Owner dashboard | ✅ Done | `/admin` + `/api/admin/*`, audit log, live settings |
-| 3 — Hardening | ✅ Done | headers, hashed sessions, rate limits, smoke + admin verification scripts |
+| Phase               | State   | Evidence                                                                  |
+| ------------------- | ------- | ------------------------------------------------------------------------- |
+| 1 — Deploy kit      | ✅ Done | `Dockerfile`, `deploy/*`, `docs/DEPLOYMENT.md`, `/api/ready`              |
+| 2 — Owner dashboard | ✅ Done | `/admin` + `/api/admin/*`, audit log, live settings                       |
+| 3 — Hardening       | ✅ Done | headers, hashed sessions, rate limits, smoke + admin verification scripts |
 
 ## Verified end-to-end
 
@@ -170,8 +170,8 @@ showed nothing.
 refused to display it.
 
 **Fix (`next.config.ts`):** framing is now an explicit allow-list —
-`'self'` plus the hosted-preview origins (arena.ai / *.arena.com / *.e2b.app /
-*.e2b.dev / *.vercel.app). `X-Frame-Options` is only sent when framing is limited to
+`'self'` plus the hosted-preview origins (arena.ai / _.arena.com / _.e2b.app /
+_.e2b.dev / _.vercel.app). `X-Frame-Options` is only sent when framing is limited to
 same-origin, since that legacy header cannot express an allow-list. Override per
 deployment with `FRAME_ANCESTORS` (`'self'` recommended on a real domain, `'none'`
 to forbid framing entirely). `Cross-Origin-Opener-Policy` relaxed to
@@ -199,25 +199,25 @@ layout. URLs are unchanged.
 Everything a shopper needs from first visit to repeat order is now wired and
 browser-tested end to end:
 
-| Capability | Route | Status |
-| --- | --- | --- |
-| Create account (name, email, phone, marketing consent) | `/login?mode=create` → `/api/auth/register` | ✅ tested |
-| Sign in / one-click demo | `/login` → `/api/auth/login` | ✅ tested |
-| Forgot password → single-use reset link | `/forgot-password`, `/reset-password` | ✅ tested |
-| Account overview with first-run checklist | `/account` | ✅ tested |
-| Address book (auto-saved from the first order) | `/account/addresses` | ✅ tested |
-| Saved items, order history, reorder | `/account/saved`, `/account/orders` | ✅ existing |
-| Profile, password change (revokes other devices) | `/account/settings` | ✅ existing |
-| Browse → add → basket drawer → checkout → receipt | `/`, `/category/*`, `/checkout`, `/order/*` | ✅ tested |
-| Guest checkout, then claim past orders by registering | `/api/auth/register` → `claimGuestOrders` | ✅ existing |
+| Capability                                             | Route                                       | Status      |
+| ------------------------------------------------------ | ------------------------------------------- | ----------- |
+| Create account (name, email, phone, marketing consent) | `/login?mode=create` → `/api/auth/register` | ✅ tested   |
+| Sign in / one-click demo                               | `/login` → `/api/auth/login`                | ✅ tested   |
+| Forgot password → single-use reset link                | `/forgot-password`, `/reset-password`       | ✅ tested   |
+| Account overview with first-run checklist              | `/account`                                  | ✅ tested   |
+| Address book (auto-saved from the first order)         | `/account/addresses`                        | ✅ tested   |
+| Saved items, order history, reorder                    | `/account/saved`, `/account/orders`         | ✅ existing |
+| Profile, password change (revokes other devices)       | `/account/settings`                         | ✅ existing |
+| Browse → add → basket drawer → checkout → receipt      | `/`, `/category/*`, `/checkout`, `/order/*` | ✅ tested   |
+| Guest checkout, then claim past orders by registering  | `/api/auth/register` → `claimGuestOrders`   | ✅ existing |
 
 ## Built in this pass
 
-1. **Phone captured at signup** — checkout now prefills name, email *and* phone.
+1. **Phone captured at signup** — checkout now prefills name, email _and_ phone.
 2. **Password recovery** — `password_resets` table storing only SHA-256 digests,
    60-minute expiry, single use, all sessions revoked on success, and all other
    open links invalidated. `RESET_LINK_INLINE=1` (default) returns the link in the
-   response and logs it so a locked-out shopper can recover *before* transactional
+   response and logs it so a locked-out shopper can recover _before_ transactional
    email is connected; set `RESET_LINK_INLINE=0` once email is wired.
 3. **Automatic address book** — the first order from a signed-in shopper saves
    their delivery address (recipient, street, city, postcode, phone, instructions)
@@ -264,13 +264,13 @@ window reset. On a shared preview that happens almost immediately.
 
 ## New account features (all browser-tested)
 
-| Feature | Where | Notes |
-| --- | --- | --- |
-| Notification preferences (order email / SMS) | `/account/settings` | Saved instantly; SMS disabled until a phone exists |
-| Active devices + "sign out other devices" | `/account/settings` | Lists browser/platform, marks the current session |
-| Close account (GDPR erasure) | `/account/settings` | Requires password **and** typing DELETE; anonymises orders, deletes profile/addresses/saved items/sessions |
-| Closed-account confirmation | `/?closed=1` | Dismissible success notice after deletion |
-| Inactive-account login block | `/api/auth/login` | 403 with a recovery message instead of a generic mismatch |
+| Feature                                      | Where               | Notes                                                                                                      |
+| -------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Notification preferences (order email / SMS) | `/account/settings` | Saved instantly; SMS disabled until a phone exists                                                         |
+| Active devices + "sign out other devices"    | `/account/settings` | Lists browser/platform, marks the current session                                                          |
+| Close account (GDPR erasure)                 | `/account/settings` | Requires password **and** typing DELETE; anonymises orders, deletes profile/addresses/saved items/sessions |
+| Closed-account confirmation                  | `/?closed=1`        | Dismissible success notice after deletion                                                                  |
+| Inactive-account login block                 | `/api/auth/login`   | 403 with a recovery message instead of a generic mismatch                                                  |
 
 ## Browser verification log
 
@@ -344,7 +344,7 @@ so a regression fails the suite.
 
 ## The real symptom
 
-After a *successful* sign-in the account page showed "Sign in to view your account"
+After a _successful_ sign-in the account page showed "Sign in to view your account"
 for a moment and then returned to `/login` — exactly the screenshot reported. The
 API was fine; this was purely client-side state.
 
@@ -364,7 +364,7 @@ The window is invisible on a fast local machine (my earlier tests passed) but wi
 open on a slower device or inside the preview iframe, which is why it reproduced for
 the site owner and not for me. Two secondary issues amplified it:
 
-- `refresh()` wrote `tokenRef.current = stored` *before* awaiting, so an old call
+- `refresh()` wrote `tokenRef.current = stored` _before_ awaiting, so an old call
   could clear a token that login had just stored.
 - `AccountGate` treated "token exists but profile not fetched yet" as signed out.
 
@@ -385,11 +385,11 @@ the site owner and not for me. Two secondary issues amplified it:
 
 ## Browser proof (deliberate race + hostile storage)
 
-| Scenario | Result |
-| --- | --- |
-| First `/api/auth/me` delayed 6 s, answering `{user:null}`, then sign in | stays on `/account`, "Hello, Bilal", survives reload |
-| `localStorage` **and** `sessionStorage` throwing (cookie-only session) | signs in, all four account tabs load, survives reload |
-| Both scenarios against the deployed preview | pass, zero console/page errors |
+| Scenario                                                                | Result                                                |
+| ----------------------------------------------------------------------- | ----------------------------------------------------- |
+| First `/api/auth/me` delayed 6 s, answering `{user:null}`, then sign in | stays on `/account`, "Hello, Bilal", survives reload  |
+| `localStorage` **and** `sessionStorage` throwing (cookie-only session)  | signs in, all four account tabs load, survives reload |
+| Both scenarios against the deployed preview                             | pass, zero console/page errors                        |
 
 Smoke suite (13 checks against the live preview, including the configured demo and
 owner credentials) still green.
@@ -438,3 +438,198 @@ Delivery tracker renders with the correct "On the way" status, shortcuts, basket
 saved-for-later rail and reorder CTA all present; no KPI tiles. Clicking
 **Add these items again** shows confirmation and the basket count becomes
 `1 $1.65`. Zero console/page errors.
+
+---
+
+# Account UX pass 2 — one hierarchy, no duplication
+
+## What was wrong
+
+The previous version gave every element equal visual weight and offered **three**
+ways to reach the same destinations: a section tab rail, a four-tile shortcut grid,
+and a menu list — plus basket/sign-out buttons in the account header that duplicated
+the site tab bar. That is the "bloated and confusing" feeling reported: nothing told
+the eye what mattered.
+
+## Rules applied
+
+1. **One primary object per page.** On `/account` it is the current delivery.
+   Everything else is secondary.
+2. **One navigation model.** The overview lists destinations once as a plain menu
+   (that is its job); every deeper page gets a single sticky pill rail on phones /
+   one sidebar on desktop. The shortcut-tile grid is gone.
+3. **No duplication with site chrome.** Basket access and sign-out no longer appear
+   as buttons in the account header; sign-out is the last row of the menu, and the
+   basket becomes one compact strip shown only when it has items.
+4. **Progressive disclosure.** Saved-items rail and first-run checklist only render
+   when they have content.
+5. **Repeated tasks inline.** Recent orders carry a `Reorder` button directly, and
+   the active delivery has `Add these items again` — no need to open an order first.
+6. **Quieter surfaces.** The profile strip is identity only (avatar, name, email);
+   section cards are separated by a single 12px rhythm instead of mixed radii and
+   shadows.
+
+## Verified layout (live preview, 390px and 1280px)
+
+Four sections, top to bottom: delivery 301px → past orders 103px → saved 127px →
+account menu 264px. **Zero account navs on the overview** (nothing to decode), one
+nav on deeper pages, page height down to 946px. Saved items are now compact text rows
+instead of oversized image tiles. No console or page errors at either width.
+
+---
+
+# Desktop / ultrawide optimisation (measured at 2560×1440)
+
+## Measured problems
+
+- Account page capped at **900px** inside a 2560px viewport → huge empty gutters and a
+  "lost column" feel.
+- `/account` on desktop showed **no visible navigation** at all: the destinations menu
+  sat below the fold inside the content and the sidebar only existed on deeper pages.
+  This is exactly the reported "how should I navigate? I don't see options".
+- Storefront containers fixed at 1340px on ultrawide; product grids capped at 4–5 columns.
+- A stray grey pill from an earlier duplicated-nav build (gone after the restructure;
+  a browser probe of every small rounded element now finds only the intended FRESH10
+  code chip).
+
+## Fixes
+
+1. **Persistent desktop sidebar on every account page** (Overview / Orders / Saved /
+   Addresses / Settings, sticky, with icons). Phones keep the sticky pill rail on deep
+   pages only — the overview lists its destinations inline, so nothing is duplicated.
+2. Account container **900 → 1240px (1400 at 2xl)**; overview becomes two columns on
+   desktop (delivery + orders | basket, saved, menu) so the first screen is complete.
+3. **Site containers expand to 1600px at ≥1536px** (header, home, category, offers,
+   search, product, checkout, order, footer); checkout/orders/info widen proportionally.
+4. **Denser grids at 2xl**: bestsellers 6 columns, catalogue and bundles 5 columns.
+
+## Verified in a real browser at 2560×1440
+
+- Account: sidebar 192px with all five links, content 1296px centred, zero errors.
+- Header container 1600px on every key page; `scrollWidth == viewport` everywhere.
+- Mobile regression clean (overview nav 0 / menu 1 / orders nav 1, docW 390).
+- Smoke suite 14/14 against the deployed preview.
+
+---
+
+# Search relevance fix (typo handling was genuinely flawed)
+
+## The reported flaw (real, confirmed)
+
+Query `breat` (typo for _bread_) returned **House Blend Whole Bean Coffee**. Root cause,
+measured not guessed: `levenshtein("breat", "bean") == 2` and the old tolerance allowed
+**2 edits for a 5-letter word**, so "Whole **Bean**" qualified as a typo match. Typo hits
+scored 9 — the same band as weak real hits — and the popularity tie-break then promoted
+coffee to position 2.
+
+## What changed in `src/lib/search.ts`
+
+1. **Damerau-Levenshtein** (transpositions cost 1, like real typos: "braed" → "bread").
+2. **Strict, length-aware tolerance**: 1 edit for words ≤6 chars, 2 only for ≥7; the first
+   letter must match and lengths must be within 1. "breat"→"bread"/"breast" survive;
+   "breat"→"bean" (different word, distance 2) does not.
+3. **Typo hits score 7**, below every genuine textual band (13/15/16/20/26), so real
+   matches always outrank sound-alikes.
+4. **Correction-driven re-ranking**: when a query produces only typo-level hits, the
+   engine computes "did you mean …" and re-scores against the corrected terms, so
+   results come back ordered by true relevance with the suggestion chip on top.
+
+## Verified behaviour
+
+| Query                                                 | Before                          | After                                                                     |
+| ----------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| `breat`                                               | sourdough, **coffee**, chicken… | sourdough, bread selection, baguette, croissants + _did you mean "bread"_ |
+| `cofee`                                               | **milk** first                  | **House Blend Whole Bean Coffee** first + _did you mean "coffee"_         |
+| `avocadoo`, `sordough`, `chiken`                      | mixed                           | single correct hit + correction                                           |
+| `bread`, `coffee`, `vegan snacks`, `dinner under $15` | good                            | unchanged                                                                 |
+
+New smoke check `typo search stays on-topic` fails the suite if a bread typo ever
+returns coffee again, or if an exact query mis-ranks. Suite now 15/15.
+
+---
+
+# Product presentation design system ("grocery theatre")
+
+Goal: a shopper understands _fresh / healthy / recommended / baked today_ in half a
+second, from icons and two-word labels — not paragraphs. Everything is derived from
+real product data (category, organic/vegan flags, tags, badge, stock), never fiction.
+
+## New primitives
+
+- **Custom icon set** (`icons.tsx`): sprout, dew, heart-leaf, wheat, fish, jar,
+  milk-drop, snow, scale, sun-rise — single-weight strokes, readable at 12px.
+- **`lib/signals.ts`**: `productSignals()` (ordered: freshness story → diet flags →
+  social proof), `categoryStyle()` (accent + soft tint + seal word per aisle),
+  `productSpecs()` (From / Keeps / Size / Ready), `highlightIcon()` (keyword → icon).
+- **`product-signals.tsx`**: `SignalChip` (glass chip with icon medallion),
+  `SignalStack` (on-photo column, discount leads), `FreshSeal` (rotating dashed SVG
+  ring + pulsing category medallion + seal word), `AmbientLeaves` (drifting sprout /
+  leaf / sparkle behind the hero photo), `SpecStrip` (4 icon tiles),
+  `HighlightTiles` (icon + ≤4 words), `TrustRow` (promise / secure / cold-chain).
+
+## Where it landed
+
+- **Cards**: photo carries SAVE chip + up to two signal chips ("Picked fresh",
+  "Organic", "Picked at dawn", "Crowd favourite"); light-sweep (`shine`) on hover.
+- **Gallery**: category-tinted radial ambience, floating leaves, FreshSeal replaces
+  the flat "Fresh today" pill; spec strip replaces three text tiles.
+- **Buy panel**: highlight tiles with keyword-matched icons at every breakpoint;
+  trust row of three icon facts; duplicate "In stock / Organic" chips removed
+  (the seal and chips already say it).
+- **Motion**: `spin-slower`, `pulse-soft`, `floaty`, `sway`, `twinkle`, `shine` —
+  all silenced by the global `prefers-reduced-motion` rule.
+
+Verified in-browser at 390px and 1440px: no console errors, no overflow, no
+duplicated signals; smoke suite 15/15; typegen/tsc/build green.
+
+---
+
+# Design restraint pass (following review of the first "grocery theatre" cut)
+
+The first version over-decorated: the seal collided with badges, chips covered the
+photo, and info was repeated in four separate cards. Rebuilt on a single rule —
+**one fact per surface**.
+
+## Fixes, point by point
+
+1. **Photo bloat** — at most _two_ elements now sit on any product photo: a small
+   discount tag (−17%) on the left and **one** quiet icon+word chip on the right.
+   Chips lost their medallion circles, halved in padding, and the wishlist heart
+   moved to the bottom-left so nothing squeezes the chip (measured: all chip text
+   renders at full width, zero clipping).
+2. **Collision** — the rotating freshness seal, the tinted radial glow and the
+   floating leaves were removed entirely. They collided with the discount badge and
+   buried the produce. The photo is now clean; the freshness story is carried
+   by the chip and the fact bar instead.
+3. **Four oversized cards → one tile** — `SpecStrip` is a single bordered tile with
+   four compact icon/label/value cells (2×2 on phones, 1×4 on desktop), ~56px tall
+   instead of ~180px.
+4. **Section bloat** — the product page now reads: photo → thumbnails → brand →
+   name → rating → price → one fact bar → Add/Buy → trust row. `HighlightTiles`
+   became one tile with three compact rows and moved below the description.
+   Duplicate signals were deleted: the "In stock / Organic / Bestseller" chip row,
+   the repeated fact bar in the gallery, and the "· Bunch · approx. 1kg" tail that
+   the fact bar already states.
+5. **Category page** — the hero collapsed from a two-panel block (badge, headline,
+   paragraph, three chips, best-deal card, average-price card, bundle link) into a
+   **single 80px band**: thumbnail, title, one meta line, best-deal pill, bundles
+   link. The filter bar is the only other chrome above the grid.
+
+Verified at 1440px and 390px: no overlaps, no clipped text, no duplicated facts;
+smoke 15/15; typegen/tsc/build green.
+
+---
+
+# Admin console + customer messaging phase
+
+Delivered: role-gated recurring console (demand forecast, alert settings, allocation
+with reasons + audited overrides, searchable audit log), WhatsApp+email messaging
+with template registry, per-customer channel preference, WhatsApp→email fallback,
+and honest `no_transport` failures when no provider is configured.
+
+Bugs found and fixed while building:
+1. `getCurrentUser` did not select `role`, so client pages saw `role: undefined`
+   and admins were told "your role can't change these settings". Fixed.
+2. Client admin pages imported `@/lib/admin` (server-only graph) causing Turbopack
+   build failures; pure permission map moved to `src/lib/permissions.ts`.
+3. Test imports referenced helpers from the wrong relative path; fixed.

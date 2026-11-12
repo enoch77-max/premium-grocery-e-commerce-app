@@ -16,6 +16,9 @@ export async function PATCH(request: Request) {
     marketingOptIn?: boolean;
     orderUpdatesEmail?: boolean;
     orderUpdatesSms?: boolean;
+    notifyEmail?: boolean;
+    notifyWhatsapp?: boolean;
+    whatsappNumber?: string;
   };
 
   const name = (body.name ?? user.name).trim();
@@ -26,6 +29,10 @@ export async function PATCH(request: Request) {
   if (name.length < 2) errors.name = "Tell us your name";
   if (!validateEmail(email)) errors.email = "Enter a valid email address";
   if (phone && !/^[0-9+()\-.\s]{6,20}$/.test(phone)) errors.phone = "Use a valid phone number";
+  const whatsappNumber = (body.whatsappNumber ?? user.whatsappNumber).trim();
+  if (body.notifyWhatsapp === true && whatsappNumber && !/^\+?[0-9()\-\s]{6,20}$/.test(whatsappNumber)) {
+    errors.whatsappNumber = "Use a full number with country code";
+  }
   if (Object.keys(errors).length) {
     return Response.json({ error: "Please check the highlighted fields", errors }, { status: 422 });
   }
@@ -47,6 +54,9 @@ export async function PATCH(request: Request) {
         marketingOptIn: body.marketingOptIn ?? user.marketingOptIn,
         orderUpdatesEmail: body.orderUpdatesEmail ?? user.orderUpdatesEmail,
         orderUpdatesSms: body.orderUpdatesSms ?? user.orderUpdatesSms,
+        notifyEmail: body.notifyEmail ?? user.notifyEmail,
+        notifyWhatsapp: body.notifyWhatsapp ?? user.notifyWhatsapp,
+        whatsappNumber: whatsappNumber.slice(0, 20),
       })
       .where(eq(users.id, user.id))
       .returning({

@@ -9,11 +9,12 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-function respond(cart: Awaited<ReturnType<typeof resolveCart>>, token: string | null, extra?: Record<string, unknown>) {
-  return Response.json(
-    { cart, cartToken: token, ...extra },
-    { headers: { "Cache-Control": "no-store" } },
-  );
+function respond(
+  cart: Awaited<ReturnType<typeof resolveCart>>,
+  token: string | null,
+  extra?: Record<string, unknown>,
+) {
+  return Response.json({ cart, cartToken: token, ...extra }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function GET(request: Request) {
@@ -36,12 +37,14 @@ export async function POST(request: Request) {
     for (const item of body.items as Array<{ productId?: unknown; quantity?: unknown }>) {
       const productId = Number(item?.productId);
       const quantity = Number(item?.quantity ?? 1);
-      if (Number.isFinite(productId)) entries.push({ productId, quantity: Number.isFinite(quantity) ? quantity : 1 });
+      if (Number.isFinite(productId))
+        entries.push({ productId, quantity: Number.isFinite(quantity) ? quantity : 1 });
     }
   } else {
     const productId = Number(body.productId);
     const quantity = Number(body.quantity ?? 1);
-    if (!Number.isFinite(productId)) return Response.json({ error: "productId is required" }, { status: 400 });
+    if (!Number.isFinite(productId))
+      return Response.json({ error: "productId is required" }, { status: 400 });
     entries.push({ productId, quantity: Number.isFinite(quantity) ? quantity : 1 });
   }
 

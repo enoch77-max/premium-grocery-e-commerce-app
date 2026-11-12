@@ -1,6 +1,6 @@
 export default function CategoryLoading() {
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pt-4 sm:px-6 sm:pt-5">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5">
       <div className="shimmer h-3 w-32 rounded" />
       <div className="shimmer mt-3 h-[190px] w-full rounded-[26px]" />
       <div className="mt-4 grid gap-5 lg:grid-cols-[220px_1fr]">

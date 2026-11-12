@@ -19,7 +19,11 @@ export function SettingsForm({ initialSettings }: { initialSettings: StoreSettin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
       });
-      const data = (await response.json()) as { ok?: boolean; error?: string; data?: { settings: StoreSettings } };
+      const data = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        data?: { settings: StoreSettings };
+      };
       if (!response.ok || !data.ok) throw new Error(data.error ?? "Save failed");
       if (data.data?.settings) setSettings(data.data.settings);
       setMessage("Settings saved");
@@ -36,7 +40,9 @@ export function SettingsForm({ initialSettings }: { initialSettings: StoreSettin
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-bold">Store availability</h2>
-            <p className="text-[11px] text-ink-soft">Pausing blocks new checkouts while keeping the shop browsable.</p>
+            <p className="text-[11px] text-ink-soft">
+              Pausing blocks new checkouts while keeping the shop browsable.
+            </p>
           </div>
           <button
             type="button"
@@ -67,12 +73,26 @@ export function SettingsForm({ initialSettings }: { initialSettings: StoreSettin
         <h2 className="text-[13px] font-bold">Delivery pricing</h2>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-ink-soft">Delivery fee ($)</span>
-            <input value={deliveryFee} onChange={(event) => setDeliveryFee(event.target.value)} inputMode="decimal" className="h-11 w-full rounded-xl border border-line bg-cream/40 px-3 text-[15px] sm:text-[13px]" />
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+              Delivery fee ($)
+            </span>
+            <input
+              value={deliveryFee}
+              onChange={(event) => setDeliveryFee(event.target.value)}
+              inputMode="decimal"
+              className="h-11 w-full rounded-xl border border-line bg-cream/40 px-3 text-[15px] sm:text-[13px]"
+            />
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-ink-soft">Free over ($)</span>
-            <input value={threshold} onChange={(event) => setThreshold(event.target.value)} inputMode="decimal" className="h-11 w-full rounded-xl border border-line bg-cream/40 px-3 text-[15px] sm:text-[13px]" />
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+              Free over ($)
+            </span>
+            <input
+              value={threshold}
+              onChange={(event) => setThreshold(event.target.value)}
+              inputMode="decimal"
+              className="h-11 w-full rounded-xl border border-line bg-cream/40 px-3 text-[15px] sm:text-[13px]"
+            />
           </label>
         </div>
         <p className="mt-1 text-[10.5px] text-ink-soft">
@@ -90,7 +110,11 @@ export function SettingsForm({ initialSettings }: { initialSettings: StoreSettin
         />
       </section>
 
-      {message ? <p className="rounded-xl bg-brand-soft/60 px-3 py-2 text-[12px] font-semibold text-brand-deep">{message}</p> : null}
+      {message ? (
+        <p className="rounded-xl bg-brand-soft/60 px-3 py-2 text-[12px] font-semibold text-brand-deep">
+          {message}
+        </p>
+      ) : null}
 
       <button
         type="button"

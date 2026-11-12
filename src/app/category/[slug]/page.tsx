@@ -27,12 +27,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const items = products.filter((product) => product.categorySlug === slug);
   const deals = items.filter((product) => product.compareAtCents);
   const bestDeal = [...items].sort(
-    (a, b) => discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents),
+    (a, b) =>
+      discountPercent(b.priceCents, b.compareAtCents) - discountPercent(a.priceCents, a.compareAtCents),
   )[0];
-  const avgPrice = items.length ? Math.round(items.reduce((sum, product) => sum + product.priceCents, 0) / items.length) : 0;
+  const avgPrice = items.length
+    ? Math.round(items.reduce((sum, product) => sum + product.priceCents, 0) / items.length)
+    : 0;
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 pt-4 sm:px-6 sm:pt-5">
+    <div className="mx-auto max-w-[1340px] 2xl:max-w-[1600px] px-4 pt-4 sm:px-6 sm:pt-5">
       <nav className="flex items-center gap-1 text-[11px] font-medium text-ink-soft">
         <Link href="/" className="hover:text-brand">
           Home
@@ -41,59 +44,36 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         <span className="font-semibold text-ink">{category.name}</span>
       </nav>
 
-      <section className="mt-3 overflow-hidden rounded-[26px] border border-line/70 bg-white">
-        <div className="grid gap-0 lg:grid-cols-[1.55fr_1fr]">
-          <div className="p-4 sm:p-7">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
-              <span className="text-[12px]">{category.emoji}</span> Aisle
-            </span>
-            <h1 className="mt-2 font-display text-[26px] font-semibold leading-[1.04] tracking-[-0.03em] sm:mt-2.5 sm:text-[38px] sm:leading-[1.02]">
-              {category.name}
-            </h1>
-            <p className="mt-1.5 max-w-md text-[12.5px] leading-relaxed text-ink-soft">
-              {category.tagline}. {items.length} carefully chosen products, with same-day delivery from 30 minutes.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {deals.length ? (
-                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-rose-soft px-2.5 py-1 text-[11px] font-bold text-clay">
-                  <SparkleIcon className="h-3 w-3" /> {deals.length} on offer today
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
-                <TruckIcon className="h-3.5 w-3.5 text-brand" /> Free delivery over $35
-              </span>
-              <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">
-                <BoltIcon className="h-3 w-3 text-amber" /> 30-min slots
-              </span>
-            </div>
-          </div>
-          <div className="relative flex items-center gap-3 border-t border-line/70 bg-cream/60 p-3 sm:p-4 lg:border-l lg:border-t-0">
-            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line bg-white sm:h-24 sm:w-24">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={category.imageUrl} alt={category.name} className="h-full w-full object-cover" />
-            </div>
-            <div className="min-w-0 space-y-1.5 text-[11px]">
-              {bestDeal?.compareAtCents ? (
-                <Link href={`/product/${bestDeal.slug}`} className="block rounded-xl bg-white px-2.5 py-1.5 hover:shadow-card">
-                  <p className="font-bold text-clay">
-                    Save {discountPercent(bestDeal.priceCents, bestDeal.compareAtCents)}% today
-                  </p>
-                  <p className="truncate text-[10.5px] text-ink-soft">{bestDeal.name}</p>
-                </Link>
-              ) : null}
-              <div className="rounded-xl bg-white px-2.5 py-1.5">
-                <p className="font-bold text-ink">Avg. {formatMoney(avgPrice)} per item</p>
-                <p className="text-[10.5px] text-ink-soft">No hidden fees, ever</p>
-              </div>
-              <Link
-                href="/offers#bundles"
-                className="inline-flex items-center gap-1 font-bold text-brand hover:underline"
-              >
-                Bundle this aisle <ArrowRightIcon className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
+      {/* Compact aisle header: identity on the left, the two numbers that matter
+          on the right. The old version stacked a badge, headline, paragraph, three
+          chips and a second info panel for the same facts. */}
+      <section className="mt-2.5 flex items-center gap-3 rounded-2xl border border-line/70 bg-white px-3 py-2.5 sm:gap-4 sm:px-4">
+        <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line/60 bg-cream sm:h-14 sm:w-14">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={category.imageUrl} alt="" className="h-full w-full object-cover" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-display text-[20px] font-semibold leading-tight tracking-[-0.02em] sm:text-[24px]">
+            {category.name}
+          </h1>
+          <p className="truncate text-[11px] text-ink-soft">
+            {items.length} products · same-day from 30 min · {formatMoney(avgPrice)} avg
+          </p>
         </div>
+        {bestDeal?.compareAtCents ? (
+          <Link
+            href={`/product/${bestDeal.slug}`}
+            className="press hidden shrink-0 rounded-full bg-rose-soft px-3 py-1.5 text-[11px] font-bold text-clay sm:block"
+          >
+            Save {discountPercent(bestDeal.priceCents, bestDeal.compareAtCents)}% today
+          </Link>
+        ) : null}
+        <Link
+          href="/offers#bundles"
+          className="press hidden shrink-0 items-center gap-1 text-[11px] font-bold text-brand hover:underline lg:flex"
+        >
+          Bundles <ArrowRightIcon className="h-3 w-3" />
+        </Link>
       </section>
 
       <div className="mt-3 grid gap-5 sm:mt-4 lg:grid-cols-[220px_1fr]">
@@ -115,7 +95,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                     <span className="grid h-7 w-7 place-items-center rounded-lg bg-cream-deep/70 text-[14px]">
                       {item.emoji}
                     </span>
-                    <span className={`flex-1 truncate text-[12px] ${item.slug === category.slug ? "font-extrabold text-brand-deep" : "font-semibold text-ink"}`}>
+                    <span
+                      className={`flex-1 truncate text-[12px] ${item.slug === category.slug ? "font-extrabold text-brand-deep" : "font-semibold text-ink"}`}
+                    >
                       {item.name}
                     </span>
                     <span className="text-[10px] font-medium text-ink-soft">
@@ -126,7 +108,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               </div>
             </nav>
             <div className="rounded-2xl border border-brand/20 bg-brand-soft/60 p-3.5">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">Fresh week</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-deep">
+                Fresh week
+              </p>
               <p className="mt-1 font-display text-[17px] font-semibold leading-tight text-ink">
                 Up to 40% off produce
               </p>

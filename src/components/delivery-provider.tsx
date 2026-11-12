@@ -1,20 +1,7 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  DEFAULT_DELIVERY_AREA,
-  SERVICE_AREAS,
-  findDeliveryArea,
-  type DeliveryArea,
-} from "@/lib/delivery";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { DEFAULT_DELIVERY_AREA, SERVICE_AREAS, findDeliveryArea, type DeliveryArea } from "@/lib/delivery";
 import { CheckIcon, CloseIcon, PinIcon, TruckIcon } from "@/components/icons";
 
 const STORAGE_KEY = "fresco:delivery-area";
@@ -115,7 +102,15 @@ export function DeliveryProvider({ children }: { children: ReactNode }) {
   return (
     <DeliveryContext.Provider value={value}>
       {children}
-      {isPickerOpen ? <DeliveryPicker error={error} setError={setError} onSelect={selectArea} onClose={closePicker} current={area} /> : null}
+      {isPickerOpen ? (
+        <DeliveryPicker
+          error={error}
+          setError={setError}
+          onSelect={selectArea}
+          onClose={closePicker}
+          current={area}
+        />
+      ) : null}
     </DeliveryContext.Provider>
   );
 }
@@ -158,12 +153,17 @@ function DeliveryPicker({
           neighbourhood list both sit inside thumb reach. */}
       <div className="animate-sheet-up relative max-h-[92dvh] w-full overflow-hidden rounded-t-[26px] border border-line bg-cream shadow-lift sm:animate-scale-in sm:max-h-none sm:max-w-md sm:rounded-[24px]">
         <div className="flex items-start justify-between gap-3 border-b border-line/70 bg-white px-4 pb-3 pt-2.5 sm:px-5 sm:pt-4">
-          <span className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-line sm:hidden" aria-hidden />
+          <span
+            className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-line sm:hidden"
+            aria-hidden
+          />
           <div className="min-w-0 pt-1.5 sm:pt-0">
             <h2 className="font-display text-[19px] font-semibold leading-tight tracking-tight sm:text-[22px] sm:leading-none">
               Choose your delivery area
             </h2>
-            <p className="mt-1 text-[11px] text-ink-soft">Availability and slots update with your postcode.</p>
+            <p className="mt-1 text-[11px] text-ink-soft">
+              Availability and slots update with your postcode.
+            </p>
           </div>
           <button
             type="button"
@@ -245,7 +245,8 @@ function DeliveryPicker({
             })}
           </div>
           <p className="mt-3 rounded-xl bg-cream-deep/60 px-3 py-2 text-[10.5px] leading-relaxed text-ink-soft">
-            Delivery is free over $35 in every area. Postcode changes apply to new orders and prefill your checkout.
+            Delivery is free over $35 in every area. Postcode changes apply to new orders and prefill your
+            checkout.
           </p>
         </div>
       </div>

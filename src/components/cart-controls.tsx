@@ -68,7 +68,9 @@ export function CartControls({
       >
         <MinusIcon className="h-3.5 w-3.5" strokeWidth={2.4} />
       </button>
-      <span className={`flex items-center gap-1 text-[12.5px] font-extrabold text-brand-deep sm:text-[12px] ${pending ? "opacity-60" : ""}`}>
+      <span
+        className={`flex items-center gap-1 text-[12.5px] font-extrabold text-brand-deep sm:text-[12px] ${pending ? "opacity-60" : ""}`}
+      >
         {pending ? <CheckIcon className="h-3.5 w-3.5" /> : null}
         {quantity} in basket
       </span>
